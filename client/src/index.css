@@ -1,0 +1,73 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #ffffff;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+@import "tailwindcss";
+
+@theme {
+  /* Colors - Clean naming based on your design */
+  --color-sea-green: #2ba6a4;
+  --color-sea-green-50: #eaf6f6;
+  --color-sea-green-100: #bee3e3;
+  --color-sea-green-500: #2ca6a4;
+  --color-sea-green-600: #289795;
+  --color-sea-green-700: #1f7674;
+  --color-sea-green-900: #124645;
+  --color-danim: #3f62ae;
+  --color-danim-700: #2d467c;
+  --color-danim-800: #233660;
+  --color-rose-black-300: #555a64;
+  --color-rose-black-400: #343946;
+  --color-rose-black-500: #010818;
+
+  --color-isabelline: #f3f3ee;
+
+  --color-blue-900: #1a2949;
+  --color-blue-800: #233660;
+
+  --color-gray-50: #f9f9f7;
+  --color-gray-100: #f3f3ee;
+  --color-white-secondary: #fefefd;
+  --color-white-secondary2: #dde7e9;
+
+  /* Font Family */
+  --font-family-primary: "Roboto", sans-serif;
+  --font-family-display: "Bebas Neue", sans-serif;
+  --font-family-isabelline: "Isabelline", sans-serif;
+  --font-great-vibes: "Great Vibes", cursive;
+  --font-plus-jakarta: "Plus Jakarta Sans", sans-serif;
+  --font-tai-heritage: "Tai Heritage Pro", sans-serif;
+  --font-zen-kaku: "Zen Kaku Gothic Antique", sans-serif;
+
+  /* Shadows */
+  --shadow-soft: 0px 2px 12px 0px rgba(20, 20, 43, 0.08);
+  --shadow-medium: 0px 8px 28px 0px rgba(20, 20, 43, 0.1);
+
+  /* Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+}
+
+@media (max-width: 768px) {
+  .tripadvisor-svg path:last-child {
+    display: none;
+  }
+}

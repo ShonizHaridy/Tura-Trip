@@ -1,0 +1,289 @@
+{
+  "nav": {
+    "explore": "Esplora",
+    "about": "Chi siamo",
+    "payment": "Pagamento",
+    "contact": "Contattaci",
+    "security": "Sicurezza",
+    "bookNow": "Prenota ora"
+  },
+  "footer": {
+    "contact": {
+      "title": "Contattaci",
+      "call": "Chiama",
+      "description": "Praesent nulla massa, hendrerit vestibulum gravida in, feugiat auctor felis.",
+      "email": "Email: example@mail.com",
+      "bookNow": "Prenota ora"
+    },
+    "quickLinks": {
+      "title": "Link rapidi",
+      "home": "Home",
+      "about": "Chi siamo",
+      "payment": "Pagamento",
+      "contact": "Contattaci"
+    },
+    "destinations": {
+      "title": "Esplora destinazioni",
+      "hurghada": "Hurghada",
+      "sharmElsheikh": "Sharm El-Sheikh",
+      "marsaAlam": "Marsa Alam"
+    },
+    "legal": {
+      "title": "Termini e politiche",
+      "termsOfService": "Termini di servizio",
+      "privacyPolicy": "Politica sulla privacy",
+      "security": "Sicurezza"
+    },
+    "copyright": "© 2024 Tura Trip. Tutti i diritti riservati."
+  },
+  "common": {
+    "loading": "Caricamento...",
+    "about": "Chi siamo",
+    "allTrips": "Tutti i viaggi",
+    "cityNotFound": "Città non trovata",
+    "noTripsFound": "Nessun viaggio trovato per questa categoria.",
+    "viewMore": "Vedi di più",
+    "seeAll": "Vedi tutto",
+    "perPerson": "a persona",
+    "reviews": "recensioni",
+    "loadingDots": "Caricamento...",
+    "popular": "Popolare",
+    "greatValue": "Ottimo valore",
+    "new": "Nuovo"
+  },
+  "homepage": {
+    "hero": {
+      "subtitle": "Paradiso per gli amanti del brivido",
+      "title1": "Scoprire la",
+      "title2": "Bellezza dell'Egitto",
+      "description": "Dalle sabbie dorate del Sahara alle meraviglie senza tempo dei templi antichi, l'Egitto offre un viaggio attraverso la storia, la natura e la cultura. Ogni passo rivela storie nascoste, paesaggi maestosi e momenti indimenticabili che aspettano di essere esplorati.",
+      "searchDestination": "Inserisci destinazione..",
+      "searchExcursions": "Inserisci escursioni.."
+    },
+    "explore": {
+      "title": "Esplora l'Egitto",
+      "description": "Entra in una terra dove meraviglie antiche incontrano una cultura vibrante. Dalle maestose Piramidi di Giza al tranquillo fiume Nilo, l'Egitto offre avventure per ogni viaggiatore. Immergiti nella ricca storia, assapora sapori autentici e crea ricordi indimenticabili in una delle destinazioni più iconiche del mondo."
+    },
+    "bestDeals": {
+      "title": "Le nostre migliori offerte",
+      "subtitle": "Viaggi indimenticabili, esperienze eccezionali"
+    },
+    "payment": {
+      "title": "Accettiamo pagamenti in rubli, tenge o grivnie tramite bonifico su carta:",
+      "rates": "$1 = tasso della Banca Centrale + 7 ₽ ; o 10 ₸ ; o 3 ₴ ; anche trasferimento USD T su wallet critico",
+      "converterButton": "Apri il convertitore di valuta online"
+    },
+    "priceList": {
+      "title": "Prezzi di tutte le escursioni oggi",
+      "hurghadaPrices": "Prezzi attuali al 11/05/2025 a Hurghada",
+      "sharmPrices": "Prezzi attuali al 11/05/2025 a Sharm El-Sheikh",
+      "marsaPrices": "Prezzi attuali al 11/05/2025 a Marsa Alam"
+    },
+    "testimonials": {
+      "title": "Recensioni reali",
+      "subtitle": "Già 2400 recensioni, tutte con conferma screenshot"
+    }
+  },
+  "about": {
+    "hero": {
+      "title": "Chi siamo",
+      "subtitle": "Scopri la nostra passione per creare avventure egiziane indimenticabili dal 2010"
+    },
+    "planTrip": {
+      "subtitle": "Andiamo insieme",
+      "title": "Pianifica il tuo viaggio con noi",
+      "description": "Scopri i tesori dell'Egitto con guide esperte e supporto personalizzato. Dalle piramidi alle avventure nel Mar Rosso, rendiamo i viaggi indimenticabili facilmente accessibili."
+    },
+    "features": {
+      "noPrepayment": "Nessun pagamento anticipato",
+      "insuranceValid": "Assicurazione valida",
+      "personalManager": "Manager personale",
+      "englishGuides": "Guide che parlano inglese",
+      "quickReservation": "Prenotazione in 3 minuti",
+      "happyCustomers": "2400 clienti soddisfatti",
+      "realPhotos": "Foto reali delle escursioni",
+      "noHiddenExtra": "Nessun costo nascosto"
+    },
+    "images": {
+      "resortPool": "Piscina del resort",
+      "desertBuggy": "Buggy nel deserto",
+      "boatTour": "Tour in barca"
+    },
+    "services": {
+      "title": "Servizi Tura Trip",
+      "subtitle": "Viaggi indimenticabili, esperienze eccezionali",
+      "historicalCities": "Città storiche",
+      "seaExcursions": "Escursioni marine",
+      "safariAdventure": "Safari e avventura",
+      "entertainmentSpa": "Intrattenimento e SPA",
+      "transportation": "Trasporti",
+      "individualTours": "Tour individuali"
+    },
+    "company": {
+      "title": "Su Tura Trip",
+      "description": "<strong>Esplora l'Egitto a modo tuo: dalla storia all'avventura</strong><br/>Turatrip offre un'ampia gamma di escursioni personalizzate nelle principali destinazioni dell'Egitto come <strong>Hurghada</strong>, <strong>Sharm El-Sheikh</strong> e <strong>Marsa Alam</strong>. Scopri i <strong>monumenti del Cairo</strong>, i <strong>templi di Luxor</strong> e le <strong>Grandi Piramidi</strong>, o goditi lo <strong>snorkeling nel Mar Rosso</strong>, il <strong>diving</strong>, emozionanti <strong>safari</strong> e visite divertenti ad <strong>acquapark</strong> e spettacoli di <strong>delfini</strong>, tutti adattati al tuo stile di viaggio.",
+      "officeAlt": "Ufficio Tura Trip"
+    },
+    "team": {
+      "title": "Incontra il nostro team",
+      "founderCeo": "Fondatore e CEO",
+      "founderDescription": "Con oltre 15 anni di esperienza nel turismo, la passione di Ahmed per la cultura egiziana guida la nostra azienda",
+      "tourOperationsManager": "Manager delle operazioni turistiche",
+      "tourManagerDescription": "garantisce che ogni escursione si svolga senza intoppi, con un occhio attento ai dettagli e alla soddisfazione del cliente.",
+      "russianRelationsDirector": "Direttore delle relazioni con i clienti russi",
+      "russianDirectorDescription": "si specializza nell'assistenza ai clienti russofoni, garantendo una comunicazione fluida.",
+      "customerExperienceLead": "Responsabile dell'esperienza del cliente",
+      "customerLeadDescription": "guida il nostro team di supporto clienti, dedicato a fornire assistenza personalizzata ai viaggiatori."
+    },
+    "whyChoose": {
+      "title": "Perché sceglierci",
+      "diverseOptions": {
+        "title": "Opzioni di escursione diversificate",
+        "description": "Da tour storici ad avventure marine, esperienze di safari e luoghi di intrattenimento in tutto l'Egitto."
+     
+      },
+      "multilingualSupport": {
+        "title": "Supporto multilingue",
+        "description": "Assistenza per i viaggiatori russofoni con contenuti e guide disponibili in russo."
+      },
+      "flexiblePayment": {
+        "title": "Pagamento flessibile",
+        "description": "Paga in varie valute, inclusi rubli, tenge e grivnie, con tassi di cambio equi."
+      },
+      "safetyFirst": {
+        "title": "Sicurezza prima di tutto",
+        "description": "Forte attenzione alla sicurezza con copertura assicurativa valida durante tutte le escursioni."
+      }
+    },
+    "cta": {
+      "title": "Pronto per la tua avventura egiziana con Tura Trip?",
+      "description": "Esplora la nostra vasta gamma di escursioni e prenota oggi la tua esperienza indimenticabile!",
+      "button": "Sfoglia i tour"
+    }
+  },
+  "contact": {
+    "info": {
+      "title": "Vuoi saperne di più!",
+      "subtitle": "Contattaci.",
+      "description": "Compila e invia il modulo. Ti contatteremo immediatamente.",
+      "email": {
+        "label": "Email:"
+      },
+      "phone": {
+        "label": "Numero di telefono:"
+      },
+      "location": {
+        "label": "Località",
+        "address": "Praesent nulla massa, hendrerit vestibulum gravida in, feugiat auctor."
+      }
+    },
+    "form": {
+      "title": "Contattaci",
+      "description": "Le nostre esper added guide egiziane sono qui per assisterti con qualsiasi domanda o richiesta di prenotazione. Non esitare a contattarci tramite email, WhatsApp o telefono — siamo pronti ad aiutarti a pianificare la tua perfetta avventura egiziana!",
+      "firstName": "Nome",
+      "firstNamePlaceholder": "Inserisci il tuo nome",
+      "lastName": "Cognome",
+      "lastNamePlaceholder": "Inserisci il tuo cognome",
+      "email": "Email",
+      "emailPlaceholder": "Example@email.com",
+      "phone": "Telefono",
+      "phonePlaceholder": "+33 6 00 00 00 00",
+      "subject": "Oggetto",
+      "subjectPlaceholder": "Inserisci il tuo oggetto",
+      "message": "Come possiamo aiutarti?",
+      "messagePlaceholder": "Inserisci la tua descrizione",
+      "send": "Invia"
+    }
+  },
+  "payment": {
+    "hero": {
+      "title": "Politiche di pagamento",
+      "subtitle": "Scopri la nostra passione per creare avventure egiziane indimenticabili dal 2010"
+    },
+    "methods": {
+      "title": "Metodi di pagamento",
+      "subtitle": "Accettiamo i seguenti metodi di pagamento:",
+      "transfer": "Bonifico su conto solo per russi (RUB)",
+      "cash": "Contanti"
+    },
+    "features": {
+      "title": "Caratteristiche del pagamento per le escursioni",
+      "noPrepayment": "<span class=\"font-bold\">✓ Nessun pagamento anticipato</span><span class=\"font-normal\">. Lavoriamo senza pagamenti anticipati per le escursioni di gruppo. Paghi il programma sull'autobus o durante il tour. Il pagamento anticipato può essere richiesto solo quando si ordina un programma da 5 persone ($5 a persona, per alcuni programmi) e escursioni individuali o programmi per i quali è necessario acquistare biglietti aerei o redigere documenti. Altre escursioni possono essere pagate direttamente durante il trasferimento o sul posto;</span>",
+      "convenientMethods": "<span class=\"font-bold\">✓ Metodi di pagamento convenienti.</span><span class=\"font-normal\"> Non devi cercare qualcuno per pagare il tour. Un rappresentante dell'organizzatore sul posto ti informerà sulla necessità di pagamento. Puoi pagare il programma in contanti in dollari (banconote non precedenti al 2000), euro o sterline egiziane. Il pagamento anticipato per escursioni individuali e programmi per i quali è necessario acquistare biglietti aerei può essere effettuato anche in contanti al rappresentante dell'organizzatore. Per contattarci, rivolgiti al nostro dipartimento di prenotazione tramite qualsiasi messenger conveniente,</span>",
+      "nonCashPayment": "<span class=\"font-normal\">✓ Possibilità di pagamento senza contanti.</span><span class=\"font-normal\"> Per tua comodità, abbiamo previsto la possibilità di effettuare un trasferimento di un anticipo o del costo totale del programma sulle carte bancarie degli organizzatori in rubli, tenge, grivnie o euro, con una piccola commissione indicata sulla pagina principale del nostro sito. Puoi anche trasferire pagamenti in USDT su un portafoglio crittografico </span><span class=\"font-normal\">senza commissioni</span><span class=\"font-normal\">. Per chiarire i dettagli, contatta il dipartimento di prenotazione.</span>"
+    },
+    "refund": {
+      "title": "Rimborso del pagamento anticipato per i programmi di escursione",
+      "conditions": "L'organizzatore rimborserà completamente il tuo pagamento anticipato se: Lo hai pagato in contanti o tramite bonifico su carta bancaria, e il tour non si è svolto per colpa dell'organizzatore; Hai annullato il programma più di un giorno prima della data del tour.",
+      "exception": "L'eccezione sono i programmi che richiedono l'acquisto di biglietti aerei. In tali casi, l'organizzatore non potrà restituire il pagamento anticipato dopo l'acquisto dei biglietti.",
+      "process": "Il pagamento anticipato può essere restituito in contanti o su una carta bancaria in rubli al tasso di cambio del giorno del rimborso, o al tasso stabilito il giorno in cui il pagamento anticipato è stato trasferito sulla carta bancaria. I rimborsi vengono effettuati entro 3 giorni di calendario."
+    },
+    "obligations": {
+      "title": "Cosa fare se gli organizzatori non adempiono adeguatamente ai loro obblighi",
+      "intro": "Se il programma non corrisponde alla descrizione sul sito o l'organizzatore ha fornito un servizio di qualità inadeguata, devi:",
+      "step1": "<span class=\"font-bold\">1- Assicurati di fare un video e una foto</span><span class=\"font-normal\"> per confermare la situazione controversa;</span>",
+      "step2": "<span class=\"font-bold\">2- Sul luogo del tour</span><span class=\"font-normal\">, chiedi alla guida o all'accompagnatore di contattare la sua direzione,</span>",
+      "step3": "<span class=\"font-bold\">3- Chiedi</span><span class=\"font-normal\">/pretendi </span><span class=\"font-bold\">di correggere la situazione</span><span class=\"font-normal\"> o un rimborso totale/parziale del prezzo del tour;</span>",
+      "step4": "<span class=\"font-bold\">4- Immediatamente sul posto, scrivi al Dipartimento di Prenotazione e Accompagnamento Turistico di Albatross Travel Egypt</span><span class=\"font-normal\">, racconta i dettagli di ciò che sta accadendo, invia file multimediali che confermano le informazioni fornite.</span>",
+      "resolution": "<span class=\"font-bold\">Questo è l'unico modo</span><span class=\"font-normal\"> in cui possiamo aiutare a risolvere il conflitto e influenzare l'organizzatore del programma immediatamente durante il tour, attraverso la guida degli organizzatori. Di regola, fanno tutto il possibile per risolvere le controversie il più rapidamente possibile e risolvere tutte le questioni sul posto.</span>",
+      "recommendation": "Pertanto, raccomandiamo sempre di avere con sé uno smartphone con Internet attivo durante le escursioni per minimizzare eventuali carenze da parte dei dipendenti degli organizzatori a tuo favore, siamo interessati a questo.",
+      "alternatives": "<span class=\"font-bold\">• Sono possibili modi alternativi per risolvere la situazione:</span><br/>Sconto sulla prossima escursione; Regalo;<br/>• Escursione guidata gratuita.",
+      "caseByCase": "In ogni caso, il risarcimento viene discusso caso per caso.",
+      "afterTour": "<span class=\"font-bold\">Se hai scritto</span><span class=\"font-normal\"> al nostro dipartimento di prenotazione dopo la fine del </span><span class=\"font-bold\">tour e desideri richiedere</span><span class=\"font-normal\"> uno sconto, un rimborso totale o parziale </span><span class=\"font-bold\">dell'importo pagato</span><span class=\"font-normal\"> all'organizzatore</span><span class=\"font-bold\">, devi soddisfare </span><span class=\"font-normal\">i punti seguenti:</span>",
+      "requirement1": "<span class=\"font-normal\">▲ </span><span class=\"font-bold\">Scrivi al nostro dipartimento di prenotazione</span><span class=\"font-normal\"> e segnala la discrepanza tra il programma completato e quello descritto sul nostro sito; assicurati di allegare una conferma video del reclamo, dove sarà visibile la non conformità del programma completato;</span>",
+      "requirement2": "<span class=\"font-normal\">▲ </span><span class=\"font-bold\">Se non ci sono file video</span><span class=\"font-normal\"> e non è possibile soddisfare il punto sopra, </span><span class=\"font-bold\">devi: Scrivere una richiesta di rimborso</span><span class=\"font-normal\"> in forma libera, con una dichiarazione dettagliata della non conformità del programma (stampare); </span><span class=\"font-bold\">inviare una foto della richiesta </span><span class=\"font-normal\">con la tua firma e la data; </span><span class=\"font-bold\">allegare dichiarazioni simili</span><span class=\"font-normal\"> da altri due turisti che erano con te nel tour, che hanno effettuato la prenotazione del programma separatamente da te (due prenotazioni separate), con i loro numeri di telefono nel messenger WhatsApp e informazioni su quale compagnia hanno prenotato il tour;</span>",
+      "requirement3": "<span class=\"font-normal\">▲</span><span class=\"font-bold\"> Attendi la valutazione della richiesta</span><span class=\"font-normal\"> da parte della direzione dell'organizzatore e la conferma del rimborso (fino a 7 giorni di calendario); ricevi il rimborso in contanti in dollari o su una carta bancaria in rubli, grivnie, tenge o euro al tasso di cambio del giorno del rimborso, o al tasso stabilito il giorno in cui il pagamento è stato trasferito sulla carta bancaria dell'organizzatore.</span>",
+      "disclaimer": "<span class=\"font-bold\">Il nostro servizio online non è una persona autorizzata per i rimborsi per le escursioni.</span><span class=\"font-normal\"> Paghi i programmi direttamente agli organizzatori delle escursioni durante il trasferimento sul posto o tramite bonifico su carta bancaria; non hai con noi rapporti commerciali e monetari. Forniamo supporto informativo gratuito e assistenza necessaria, rimanendo in contatto ogni giorno dalle 07:30 alle 23:00 ora del Cairo. </span><span class=\"font-bold\">Per risolvere la situazione a tuo favore, abbiamo bisogno di materiali multimediali di supporto (video</span><span class=\"font-normal\">/foto) per fornirli alla direzione degli organizzatori. Albatross Travel Egypt è interessata a risolvere tutte le situazioni di conflitto tra turisti e organizzatori di tour il più rapidamente possibile. Facciamo del nostro meglio per garantire che le vacanze in Egitto portino solo emozioni positive e ricordi vividi.</span>"
+    }
+  },
+  "security": {
+    "hero": {
+      "title": "Sicurezza e protezione dei viaggi",
+      "subtitle": "La tua sicurezza e protezione sono importanti per noi durante tutti i viaggi e le escursioni."
+    },
+    "approach": {
+      "title": "Il nostro approccio alla sicurezza",
+      "subtitle": "Diamo priorità alla sicurezza e alla protezione dei viaggiatori in tutti i nostri tour"
+    },
+    "features": {
+      "travelInsurance": {
+        "title": "Assicurazione di viaggio",
+        "description": "Tutti i nostri tour includono un'assicurazione di viaggio per la tua tranquillità durante le escursioni."
+      },
+      "licensedOperators": {
+        "title": "Operatori autorizzati",
+        "description": "Collaboriamo con operatori turistici autorizzati e guide certificate."
+      },
+      "safetyProtocols": {
+        "title": "Protocolli di sicurezza",
+        "description": "Le nostre guide sono formate su procedure di sicurezza e risposta alle emergenze."
+      },
+      "emergencySupport": {
+        "title": "Supporto di emergenza",
+        "description": "Supporto disponibile durante i tuoi viaggi per qualsiasi assistenza necessaria."
+      }
+    },
+    "tips": {
+      "title": "Consigli per la sicurezza in viaggio",
+      "beforeTrip": {
+        "title": "Prima del tuo viaggio",
+        "checkRequirements": "Verifica i requisiti di viaggio e la documentazione",
+        "reviewItinerary": "Rivedi il tuo itinerario e i punti di incontro",
+        "keepContacts": "Tieni a portata di mano le informazioni di contatto di emergenza",
+        "followRecommendations": "Segui le raccomandazioni per la salute e la sicurezza"
+      },
+      "duringTrip": {
+        "title": "Durante il tuo viaggio",
+        "stayWithGroup": "Rimani con il tuo gruppo e segui le istruzioni della guida",
+        "beAware": "Sii consapevole di ciò che ti circonda",
+        "keepBelongings": "Tieni al sicuro i tuoi effetti personali",
+        "reportConcerns": "Segnala immediatamente qualsiasi preoccupazione alla tua guida"
+      }
+    },
+    "contact": {
+      "title": "Domande sulla sicurezza?",
+      "description": "Contattaci per maggiori informazioni sulle nostre misure di sicurezza e sui protocolli di protezione dei viaggi.",
+      "button": "Contattaci"
+    }
+  }
+}

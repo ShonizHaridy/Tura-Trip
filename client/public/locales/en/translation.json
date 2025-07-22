@@ -1,0 +1,288 @@
+{
+  "nav": {
+    "explore": "Explore",
+    "about": "About us", 
+    "payment": "Payment",
+    "contact": "Contact us",
+    "security": "Security",
+    "bookNow": "Book Now"
+  },
+  "footer": {
+    "contact": {
+      "title": "Contact Us",
+      "call": "Call",
+      "description": "Praesent nulla massa, hendrerit vestibulum gravida in, feugiat auctor felis.",
+      "email": "Email: example@mail.com",
+      "bookNow": "Book Now"
+    },
+    "quickLinks": {
+      "title": "Quick Links",
+      "home": "Home",
+      "about": "About Us",
+      "payment": "Payment",
+      "contact": "Contact Us"
+    },
+    "destinations": {
+      "title": "Explore Destinations",
+      "hurghada": "Hurghada",
+      "sharmElsheikh": "Sharm Elsheikh",
+      "marsaAlam": "Marsa Alam"
+    },
+    "legal": {
+      "title": "Terms and policies",
+      "termsOfService": "Terms of Services",
+      "privacyPolicy": "Privacy Policy",
+      "security": "Security"
+    },
+    "copyright": "© 2024 Tura Trip. All rights reserved."
+  },
+  "common": {
+    "loading": "Loading...",
+    "about": "About",
+    "allTrips": "All Trips",
+    "cityNotFound": "City not found",
+    "noTripsFound": "No trips found for this category.",
+    "viewMore": "View More",
+    "seeAll": "See All",
+    "perPerson": "per person",
+    "reviews": "reviews",
+    "loadingDots": "Loading...",
+    "popular": "Popular",
+    "greatValue": "Great Value",
+    "new": "New"
+  },
+  "homepage": {
+    "hero": {
+      "subtitle": "Thrill-Seeker's Paradise",
+      "title1": "Discovering the",
+      "title2": "Beauty of Egypt",
+      "description": "From the golden sands of the Sahara to the timeless wonders of ancient temples, Egypt offers a journey through history, nature, and culture. Every step reveals hidden stories, majestic landscapes, and unforgettable moments waiting to be explored.",
+      "searchDestination": "Enter Destination..",
+      "searchExcursions": "Enter Excursions.."
+    },
+    "explore": {
+      "title": "Explore Egypt",
+      "description": "Step into a land where ancient wonders meet vibrant culture. From the majestic Pyramids of Giza to the serene Nile River, Egypt offers adventures for every traveler. Dive into rich history, taste authentic flavors, and create unforgettable memories in one of the world's most iconic destinations."
+    },
+    "bestDeals": {
+      "title": "Our Best Deals",
+      "subtitle": "Unforgettable Journeys, Exceptional Experiences"
+    },
+    "payment": {
+      "title": "We can accept payment in rubles, tenge or hryvnia by transfer to a card:",
+      "rates": "$1 = Central Bank exchange rate + 7 ₽ ; or 10 ₸ ; or 3 ₴ ; also transfer USD T to a crypto wallet",
+      "converterButton": "Open Online Currency Converter"
+    },
+    "priceList": {
+      "title": "All Excursions Prices Today",
+      "hurghadaPrices": "Current prices on 11/05/2025 in Hurghada",
+      "sharmPrices": "Current prices on 11/05/2025 in Sharm El-Sheikh", 
+      "marsaPrices": "Current prices on 11/05/2025 in Marsa Alam"
+    },
+    "testimonials": {
+      "title": "Real Reviews",
+      "subtitle": "Already 2400 review, All have a screen shot-confirmation"
+    }
+  },
+  "about": {
+    "hero": {
+      "title": "About Us",
+      "subtitle": "Learn about our passion for creating unforgettable Egyptian adventures since 2010"
+    },
+    "planTrip": {
+      "subtitle": "Lets Go together",
+      "title": "Plan Your Trip With us",
+      "description": "Discover Egypt's treasures with expert guides and personalized support. From pyramids to Red Sea adventures, we make unforgettable journeys effortlessly accessible."
+    },
+    "features": {
+      "noPrepayment": "No Prepayment",
+      "insuranceValid": "Insurance is Valid",
+      "personalManager": "Personal Manager",
+      "englishGuides": "English Speaking Guides",
+      "quickReservation": "Reservation in 3 minutes",
+      "happyCustomers": "2400 Happy Customers",
+      "realPhotos": "Real Photos excursions",
+      "noHiddenExtra": "No Hidden Extra"
+    },
+    "images": {
+      "resortPool": "Resort Pool",
+      "desertBuggy": "Desert Buggy",
+      "boatTour": "Boat Tour"
+    },
+    "services": {
+      "title": "Tura Trip Services",
+      "subtitle": "Unforgettable Journeys, Exceptional Experiences",
+      "historicalCities": "Historical Cities",
+      "seaExcursions": "Sea Excursions",
+      "safariAdventure": "Safari and Adventure",
+      "entertainmentSpa": "Entertainment and SPA",
+      "transportation": "Transportation",
+      "individualTours": "Individual Tours"
+    },
+    "company": {
+      "title": "About Tura Trip",
+      "description": "<strong>Explore Egypt Your Way From History to Adventure</strong><br/>Turatrip offers a wide range of custom excursions across Egypt's top destinations like <strong>Hurghada</strong>, <strong>Sharm El-Sheikh</strong>, and <strong>Marsa Alam</strong>. Discover <strong>Cairo's landmarks</strong>, the <strong>Luxor temples</strong>, and the <strong>Great Pyramids</strong>, or enjoy <strong>Red Sea snorkeling</strong>, <strong>diving</strong>, thrilling <strong>safari rides</strong>, and fun-packed visits to <strong>aquaparks</strong> and <strong>dolphin</strong> shows all tailored to your travel style.",
+      "officeAlt": "Tura Trip Office"
+    },
+    "team": {
+      "title": "Meet Our Team",
+      "founderCeo": "Founder & CEO",
+      "founderDescription": "With over 15 years of experience in tourism, Ahmed's passion for Egyptian culture drives our company",
+      "tourOperationsManager": "Tour Operations Manager",
+      "tourManagerDescription": "ensures that every excursion runs smoothly, with a keen eye for detail and customer satisfaction.",
+      "russianRelationsDirector": "Russian Relations Director",
+      "russianDirectorDescription": "specializes in catering to our Russian-speaking clients, ensuring seamless communication.",
+      "customerExperienceLead": "Customer Experience Lead",
+      "customerLeadDescription": "heads our customer support team, dedicated to providing personalized assistance to travelers."
+    },
+    "whyChoose": {
+      "title": "Why Choose Us",
+      "diverseOptions": {
+        "title": "Diverse Excursion Options",
+        "description": "From historical tours to marine adventures, safari experiences, and entertainment venues across Egypt."
+      },
+      "multilingualSupport": {
+        "title": "Multilingual Support",
+        "description": "Catering to Russian-speaking travelers with content and guides available in Russian."
+      },
+      "flexiblePayment": {
+        "title": "Flexible Payment",
+        "description": "Pay in various currencies including rubles, tenge, and hryvnias with fair exchange rates."
+      },
+      "safetyFirst": {
+        "title": "Safety First",
+        "description": "Strong emphasis on safety with valid insurance coverage during all excursions."
+      }
+    },
+    "cta": {
+      "title": "Ready for Your Egyptian Adventure With Tura Trip?",
+      "description": "Explore our diverse range of excursions and book your unforgettable experience today!",
+      "button": "Browse Tours"
+    }
+  },
+  "contact": {
+    "info": {
+      "title": "Want to Know More!",
+      "subtitle": "Please Contact Us.",
+      "description": "Just fill in and send it off. We will contact you immediately.",
+      "email": {
+        "label": "Email:"
+      },
+      "phone": {
+        "label": "Phone Number:"
+      },
+      "location": {
+        "label": "Location",
+        "address": "Praesent nulla massa, hendrerit vestibulum gravida in, feugiat auctor."
+      }
+    },
+    "form": {
+      "title": "Contact Us",
+      "description": "Our experienced Egyptian tour guides are here to assist you with any questions or booking requests. Feel free to contact us via email, WhatsApp, or phone — we're ready to help you plan your perfect Egyptian adventure!",
+      "firstName": "First Name",
+      "firstNamePlaceholder": "Enter your first name",
+      "lastName": "Last Name", 
+      "lastNamePlaceholder": "Enter your last name",
+      "email": "Email",
+      "emailPlaceholder": "Example@email.com",
+      "phone": "Phone",
+      "phonePlaceholder": "+33 6 00 00 00 00",
+      "subject": "Subject",
+      "subjectPlaceholder": "Enter your subject",
+      "message": "How Can We Help?",
+      "messagePlaceholder": "Enter your description",
+      "send": "Send"
+    }
+  },
+  "payment": {
+    "hero": {
+      "title": "Payment Policies",
+      "subtitle": "Learn about our passion for creating unforgettable Egyptian adventures since 2010"
+    },
+    "methods": {
+      "title": "Payment Methods",
+      "subtitle": "We accept the following payment methods:",
+      "transfer": "Transfer to account for only Russians (RUB)",
+      "cash": "Cash"
+    },
+    "features": {
+      "title": "Features of payment for excursions",
+      "noPrepayment": "<span class=\"font-bold\">✓ No prepayments</span><span class=\"font-normal\">. We work without prepayment for group excursions. You pay for the program on the bus or during the tour. Prepayment may be required only when ordering a program from 5 people ($5 per person, on some programs) and individual excursions or programs for which you need to buy plane tickets or draw up documents. Other excursions can be paid directly during the transfer or at the venue;</span>",
+      "convenientMethods": "<span class=\"font-bold\">✓ Convenient payment methods.</span><span class=\"font-normal\"> You do not have to look for someone to pay for the tour. A representative of the organizer on site will inform you about the need to pay. You can pay for the program in cash-in dollars (banknotes not earlier than 2000), euros or Egyptian pounds. Prepayment for individual excursions and programs for which you need to buy plane tickets can also be made in cash to the organizer's representative. To make it come to you, contact our booking department in any convenient messenger,</span>",
+      "nonCashPayment": "<span class=\"font-normal\">✓ Possibility of non-cash payment.</span><span class=\"font-normal\"> For your convenience, we have provided the opportunity to make a transfer of an advance payment or the full cost of the program to the bank cards of the organizers in rubles, tenge, hryvnia or euros, with a small commission indicated on the main page of our website. You can also transfer payments in USDT to a crypto wallet </span><span class=\"font-normal\">with no fees</span><span class=\"font-normal\">. To clarify the details, please contact the reservation department.</span>"
+    },
+    "refund": {
+      "title": "Refund of prepayment for excursion programs",
+      "conditions": "The organizer will fully refund your prepayment if: You paid it in cash or by transfer to a bank card, and the tour did not take place through the fault of the organizer; You canceled the program more than a day before the date of the tour.",
+      "exception": "The exception is programs that require plane tickets. In such cases, the organizer will not be able to return the prepayment after the purchase of air tickets.",
+      "process": "The prepayment can be returned in cash or to a bank card in rubles at the exchange rate on the day of the refund, or at the rate that was set on the day when the prepayment was transferred to the bank card. Refunds are made within 3 calendar days."
+    },
+    "obligations": {
+      "title": "What to do if the organizers do not properly fulfill their obligations",
+      "intro": "If the program does not correspond to the description on the website or the organizer has provided a service of inadequate quality, you must:",
+      "step1": "<span class=\"font-bold\">1- Be sure to take a video and photo </span><span class=\"font-normal\">confirmation of the controversial situation;</span>",
+      "step2": "<span class=\"font-bold\">2- At the place of the tour</span><span class=\"font-normal\">, ask the guide or accompanying person to contact his management,</span>",
+      "step3": "<span class=\"font-bold\">3- Ask</span><span class=\"font-normal\">/demand </span><span class=\"font-bold\">to correct the situation</span><span class=\"font-normal\"> or a full/partial refund of the tour price;</span>",
+      "step4": "<span class=\"font-bold\">4- Immediately on the spot, write to the Albatross Travel Egypt Tourist Reservation</span><span class=\"font-normal\"> and Escort Department, tell about the details of what is happening, send media files confirming the information provided.</span>",
+      "resolution": "<span class=\"font-bold\">This is the only way </span><span class=\"font-normal\">we can help in resolving the conflict and influence the organizer of the program immediately in the process of the tour, through the guidance of the organizers. As a rule, they do everything to resolve disputes as soon as possible and settle all issues on the spot.</span>",
+      "recommendation": "Therefore, we always recommend that you have a smartphone with active Internet with you on excursions in order to minimize possible shortcomings on the part of the organizers' employees in your favor, we are interested in this.",
+      "alternatives": "<span class=\"font-bold\">• Alternative ways to resolve the situation are possible:</span><br/>Discount on the next excursion; Gift;<br/>• Free guided tour.",
+      "caseByCase": "In each case, compensation is discussed on a case-by-case basis.",
+      "afterTour": "<span class=\"font-bold\">If you have written</span><span class=\"font-normal\"> to our reservation department after the end of the </span><span class=\"font-bold\">tour and want to request</span><span class=\"font-normal\"> a discount, full or partial </span><span class=\"font-bold\">refund of the amount paid t</span><span class=\"font-normal\">o the organizer</span><span class=\"font-bold\">, you must fulfill </span><span class=\"font-normal\">the points below:</span>",
+      "requirement1": "<span class=\"font-normal\">▲ </span><span class=\"font-bold\">Write to our reservation department</span><span class=\"font-normal\"> and report the discrepancy between the completed program and the one described on our website; be sure to attach a video confirmation of the claim, where the non-compliance of the completed program will be visible;</span>",
+      "requirement2": "<span class=\"font-normal\">▲ </span><span class=\"font-bold\">If there are no video files</span><span class=\"font-normal\"> and it is not possible to fulfill the point above, </span><span class=\"font-bold\">you need: Write an application for a refund</span><span class=\"font-normal\"> in free form, with a detailed statement of the non-compliance of the program (print); </span><span class=\"font-bold\">send a photo of the application </span><span class=\"font-normal\">with your signature and date; </span><span class=\"font-bold\">attach similar statements</span><span class=\"font-normal\"> from two other tourists who are with you on the tour, who made the booking of the program separately from you (two separate bookings), with their phone numbers in the WhatsApp messenger and information in which company they booked the tour;</span>",
+      "requirement3": "<span class=\"font-normal\">▲</span><span class=\"font-bold\"> Wait for the application to be considered</span><span class=\"font-normal\"> by the organizer's management and confirmation of the refund (up to 7 calendar days); receive a refund in cash in dollars or to a bank card in rubles, hryvnias, tenge or euros at the exchange rate on the day of the refund, or at the rate that was set on the day when the payment was transferred to the organizer's bank card.</span>",
+      "disclaimer": "<span class=\"font-bold\">Our online service is not an authorized person for refunds for excursions.</span><span class=\"font-normal\"> You pay for the programs directly to the organizers of the excursions during the transfer at the venue or by transfer to a bank card; You do not have any trade and monetary relations with us. We provide free information support and necessary assistance, staying in touch every day from 07:30 to 23:00 Cairo time. </span><span class=\"font-bold\">In order to resolve the situation in your favor, we need supporting media materials (video</span><span class=\"font-normal\">/photos) to provide them to the management of the organizers. Albatross Travel Egypt is interested in resolving all conflict situations between tourists and tour organizers as soon as possible. We do our best to ensure that holidays in Egypt bring only positive emotions and vivid memories.</span>"
+    }
+  },
+  "security": {
+    "hero": {
+      "title": "Travel Security & Safety",
+      "subtitle": "Your safety and security are important to us during all trips and excursions."
+    },
+    "approach": {
+      "title": "Our Safety Approach",
+      "subtitle": "We prioritize traveler safety and security in all our tours"
+    },
+    "features": {
+      "travelInsurance": {
+        "title": "Travel Insurance",
+        "description": "All our tours include travel insurance for your peace of mind during excursions."
+      },
+      "licensedOperators": {
+        "title": "Licensed Operators",
+        "description": "We work with licensed tour operators and certified guides."
+      },
+      "safetyProtocols": {
+        "title": "Safety Protocols",
+        "description": "Our guides are trained in safety procedures and emergency response."
+      },
+      "emergencySupport": {
+        "title": "Emergency Support",
+        "description": "Support available during your trips for any assistance needed."
+      }
+    },
+    "tips": {
+      "title": "Travel Safety Tips",
+      "beforeTrip": {
+        "title": "Before Your Trip",
+        "checkRequirements": "Check travel requirements and documentation",
+        "reviewItinerary": "Review your itinerary and meeting points",
+        "keepContacts": "Keep emergency contact information accessible",
+        "followRecommendations": "Follow health and safety recommendations"
+      },
+      "duringTrip": {
+        "title": "During Your Trip",
+        "stayWithGroup": "Stay with your group and follow guide instructions",
+        "beAware": "Be aware of your surroundings",
+        "keepBelongings": "Keep personal belongings secure",
+        "reportConcerns": "Report any concerns to your guide immediately"
+      }
+    },
+    "contact": {
+      "title": "Questions About Safety?",
+      "description": "Contact us for more information about our safety measures and travel security protocols.",
+      "button": "Contact Us"
+    }
+  }
+}
