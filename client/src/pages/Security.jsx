@@ -128,7 +128,7 @@ const Security = () => {
       </section>
 
       {/* Contact Section */}
-      <section className="py-20 bg-gradient-to-br from-danim-800 to-danim">
+      {/* <section className="py-20 bg-gradient-to-br from-danim-800 to-danim">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-4xl lg:text-5xl font-bebas text-white mb-6">
             {t("security.contact.title")}
@@ -140,7 +140,7 @@ const Security = () => {
             {t("security.contact.button")}
           </button>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 };

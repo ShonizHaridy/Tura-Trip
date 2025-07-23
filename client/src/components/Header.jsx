@@ -6,6 +6,12 @@ import { SearchNormal1 } from 'iconsax-react';
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import TripAdvisor from "../assets/trip_advisor.svg?react";
 import Logo from "../assets/logo-icon.svg?react";
+
+import enFlag from "../assets/flags/en.png";
+import ruFlag from "../assets/flags/ru.png";
+import itFlag from "../assets/flags/it.png";
+import deFlag from "../assets/flags/de.png";
+
 import { useLocalizedText } from "../utils/helpers";
 import publicService from "../services/publicService";
 import "./Header.css";
@@ -54,10 +60,10 @@ const Header = () => {
   ];
 
   const languages = [
-    { code: "en", name: "English", flag: "/src/assets/flags/en.png" },
-    { code: "ru", name: "Russian", flag: "/src/assets/flags/ru.png" },
-    { code: "it", name: "Italian", flag: "/src/assets/flags/it.png" },
-    { code: "de", name: "German", flag: "/src/assets/flags/de.png" },
+    { code: "en", name: "English", flag: enFlag },
+    { code: "ru", name: "Russian", flag: ruFlag },
+    { code: "it", name: "Italian", flag: itFlag },
+    { code: "de", name: "German", flag: deFlag },
   ];
 
   const currentLanguage =
@@ -299,8 +305,8 @@ const getDropdownButtonClasses = () => {
     {/* TripAdvisor Logo */}
     <div className="p-1 xl:p-2 flex-shrink-0">
       <TripAdvisor
-        className="w-8 h-6 lg:w-10 lg:h-8 xl:w-14 xl:h-12 fill-white transition-all duration-300"
-        style={{ fill: tripAdvisorFill }}
+        className="w-8 h-6 lg:w-10 lg:h-8 xl:w-14 xl:h-12 transition-all duration-300"
+  style={{ color: tripAdvisorFill }}
       />
     </div>
 
@@ -601,7 +607,7 @@ const getDropdownButtonClasses = () => {
                   <div className="flex items-center justify-center">
                     <TripAdvisor
                       className="w-14 h-12 flex-shrink-0"
-                      style={{ fill: "#000000" }}
+                      style={{ color: "#000000" }}
                     />
                   </div>
                 </div>

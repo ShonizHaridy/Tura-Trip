@@ -30,12 +30,12 @@ const About = () => {
   ];
 
   const services = [
-    { name: "historicalCities", bgUrl: "https://cdn.builder.io/api/v1/image/assets/TEMP/c5976d2eb1be4ead941dcd5efa41c25b533939b4?width=340" },
-    { name: "seaExcursions", bgUrl: "https://cdn.builder.io/api/v1/image/assets/TEMP/2f2e9110f0dc7be631ad1dd82ace7f75a3374e3f?width=340" },
-    { name: "safariAdventure", bgUrl: "https://cdn.builder.io/api/v1/image/assets/TEMP/deffebbff8bdac3353e5d8baeb897c72e7396cd6?width=340" },
-    { name: "entertainmentSpa", bgUrl: "https://cdn.builder.io/api/v1/image/assets/TEMP/c5976d2eb1be4ead941dcd5efa41c25b533939b4?width=340" },
-    { name: "transportation", bgUrl: "https://cdn.builder.io/api/v1/image/assets/TEMP/6deb9728f816cb68fb46b106832a2bac201cae52?width=340" },
-    { name: "individualTours", bgUrl: "https://cdn.builder.io/api/v1/image/assets/TEMP/c5976d2eb1be4ead941dcd5efa41c25b533939b4?width=340" }
+    { name: "historicalCities", bgUrl: "/images/services1.png" },
+    { name: "seaExcursions", bgUrl: "/images/services2.png" },
+    { name: "safariAdventure", bgUrl: "/images/services3.png" },
+    { name: "entertainmentSpa", bgUrl: "/images/services4.png" },
+    { name: "transportation", bgUrl: "/images/services5.png" },
+    { name: "individualTours", bgUrl: "/images/services6.png" }
   ];
 
   const teamMembers = [
@@ -78,7 +78,7 @@ const About = () => {
       <section
         className="relative h-[483px] bg-cover bg-center flex items-center justify-center"
         style={{
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('/src/assets/Aboutus.jpg')`,
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('/images/Aboutus.jpg')`,
         }}
       >
         <div className="text-center text-white px-4">
@@ -221,7 +221,7 @@ const About = () => {
               <div dangerouslySetInnerHTML={{ __html: t("about.company.description") }} />
             </div>
             <img
-              src="https://cdn.builder.io/api/v1/image/assets%2F18ed9e795a594d2e8a734bedc16dd837%2F8e319e79cf5e41ad8428b06b29cb0829?format=webp&width=800"
+              src="/images/aboutturatrip.png"
               alt={t("about.company.officeAlt")}
               className="w-[458px] h-[491px] rounded-[32px] shadow-[0px_14px_42px_rgba(20,20,43,0.14)] object-cover"
             />
@@ -230,7 +230,7 @@ const About = () => {
       </section>
 
       {/* Team Section */}
-      <section className="relative w-full h-[625px] bg-gradient-to-b from-transparent to-black/40">
+      {/* <section className="relative w-full h-[625px] bg-gradient-to-b from-transparent to-black/40">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40"></div>
         <div className="flex flex-col justify-center items-center gap-8 absolute left-[72px] top-[80px] w-[1296px] h-[465px]">
           <h2 className="text-center text-[#233660] font-bebas text-[56px] font-normal leading-[120%] drop-shadow-[0px_8px_28px_rgba(20,20,43,0.10)]">
@@ -272,7 +272,7 @@ const About = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Why Choose Us Section */}
       <section className="py-[60px] px-[72px] bg-white">
@@ -347,7 +347,7 @@ const About = () => {
       <section
         className="relative py-20 bg-cover"
         style={{
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('/src/assets/aboutbrowse.jpg')`,
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('/images/aboutbrowse.jpg')`,
         }}
       >
         <div className="container mx-auto px-4 text-center">

@@ -8,7 +8,7 @@ const Payment = () => {
   return (
     <div className="bg-white">
       {/* Hero Banner Section */}
-      <section className="relative h-[483px] flex items-center justify-center bg-gradient-to-r from-black/30 to-black/30 bg-[url('src/assets/payment-hero.jpg')] bg-cover bg-center">
+      <section className="relative h-[483px] flex items-center justify-center bg-gradient-to-r from-black/30 to-black/30 bg-[url('/images/payment-hero.jpg')] bg-cover bg-center">
         <div className="flex w-full max-w-[889px] flex-col justify-center items-center gap-2 px-4">
           <h1 className="text-center text-gray-100 font-family-primary text-4xl md:text-5xl lg:text-[56px] font-bold leading-normal drop-shadow-[0_14px_42px_rgba(20,20,43,0.14)]">
             {t("payment.hero.title")}

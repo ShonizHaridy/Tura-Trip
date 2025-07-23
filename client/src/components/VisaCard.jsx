@@ -1,5 +1,6 @@
 // VisaCard.jsx
 import VisaLogo from '../assets/visa.svg?react';
+import cardIcon from '../assets/cardicon.png';
 
 const VisaCard = ({ 
   holderName = "Ismoilov Sanjarbek",
@@ -37,7 +38,7 @@ const VisaCard = ({
             {holderName}
           </span>
           <img 
-            src="src/assets/cardicon.png" 
+            src={cardIcon} 
             alt="Card Icon"
             className="w-2.5 h-2.5 lg:w-5 lg:h-5"
           />
