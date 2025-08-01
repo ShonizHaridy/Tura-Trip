@@ -61,9 +61,9 @@ const Header = () => {
 
   const languages = [
     { code: "en", name: "English", flag: enFlag },
-    { code: "ru", name: "Russian", flag: ruFlag },
-    { code: "it", name: "Italian", flag: itFlag },
-    { code: "de", name: "German", flag: deFlag },
+    { code: "ru", name: "Русский", flag: ruFlag },  // Russian in Russian
+    { code: "it", name: "Italiano", flag: itFlag }, // Italian in Italian  
+    { code: "de", name: "Deutsch", flag: deFlag },  // German in German
   ];
 
   const currentLanguage =
@@ -311,7 +311,9 @@ const getDropdownButtonClasses = () => {
     </div>
 
     {/* Book Now Button - More compact */}
-    <button className="bg-[#2ba6a4] hover:bg-[#289795] text-white px-2 lg:px-3 xl:px-6 py-2 xl:py-3 rounded-lg font-medium transition-colors flex items-center space-x-1 xl:space-x-2 whitespace-nowrap flex-shrink-0 text-xs lg:text-sm xl:text-base">
+    <button 
+     onClick={() => window.open("https://wa.me/2001055957451", "_blank")}
+     className="bg-[#2ba6a4] hover:bg-[#289795] text-white px-2 lg:px-3 xl:px-6 py-2 xl:py-3 rounded-lg font-medium transition-colors flex items-center space-x-1 xl:space-x-2 whitespace-nowrap flex-shrink-0 text-xs lg:text-sm xl:text-base cursor-pointer">
       <IoLogoWhatsapp className="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5" />
       <span className="hidden lg:inline">{t("nav.bookNow")}</span>
     </button>
@@ -415,7 +417,14 @@ const getDropdownButtonClasses = () => {
             {/* Header Section */}
             <div className="flex justify-between items-center px-5 pt-5 pb-6 flex-shrink-0">
               <div className="p-1">
-                <Logo className="h-12 w-auto" style={{ fill: "#0B101A" }} />
+                <div className="p-1">
+                  <Link 
+                    to="/"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Logo className="h-12 w-auto" style={{ fill: "#0B101A" }} />
+                  </Link>
+                </div>
               </div>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -549,10 +558,13 @@ const getDropdownButtonClasses = () => {
                 {/* Language selector and TripAdvisor */}
                 <div className="flex justify-between items-center">
                   {/* Language Menu */}
-                  <div className="relative">
+                  <div className="relative" ref={languageRef}>
                     <button
                       className="flex items-center gap-2 px-2 py-2"
-                      onClick={() => setIsLanguageOpen(!isLanguageOpen)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsLanguageOpen(!isLanguageOpen);
+                      }}
                     >
                       <img
                         src={currentLanguage.flag}
@@ -575,18 +587,20 @@ const getDropdownButtonClasses = () => {
                         />
                       </svg>
                     </button>
-
                     {/* Language Dropdown */}
                     {isLanguageOpen && (
-                      <div className="absolute bottom-full mb-1 left-0 bg-white rounded-lg shadow-lg overflow-hidden z-50 min-w-[140px]">
+                      <div className="absolute bottom-full mb-2 left-0 bg-white rounded-lg shadow-lg overflow-hidden z-50 min-w-[140px] border border-gray-200">
                         <div className="py-2">
                           {languages.map((language, index) => (
                             <button
                               key={language.code}
-                              onClick={() => handleLanguageChange(language.code)}
-                              className={`flex items-center gap-3 px-4 py-3 w-full hover:bg-gray-50 transition-colors ${
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleLanguageChange(language.code);
+                              }}
+                              className={`flex items-center gap-3 px-4 py-3 w-full hover:bg-gray-50 transition-colors text-left ${
                                 index !== languages.length - 1 ? 'border-b border-[#E6E6E8]' : ''
-                              }`}
+                              } ${currentLanguage.code === language.code ? 'bg-gray-50' : ''}`}
                             >
                               <img
                                 src={language.flag}
@@ -602,7 +616,6 @@ const getDropdownButtonClasses = () => {
                       </div>
                     )}
                   </div>
-
                   {/* TripAdvisor */}
                   <div className="flex items-center justify-center">
                     <TripAdvisor
@@ -613,12 +626,16 @@ const getDropdownButtonClasses = () => {
                 </div>
 
                 {/* Book Now Button */}
-                <button className="flex px-6 py-3 justify-center items-center gap-2 w-full rounded-lg bg-[#1F7674] hover:bg-[#1a6564] transition-colors min-h-[48px]">
+                <button
+                  onClick={() => window.open("https://wa.me/2001055957451", "_blank")}
+                  className="flex px-6 py-3 justify-center items-center gap-2 w-full rounded-lg bg-[#1F7674] hover:bg-[#1a6564] transition-colors min-h-[48px] cursor-pointer"
+                >
                   <IoLogoWhatsapp className="w-5 h-5 text-white flex-shrink-0" />
                   <span className="text-white font-roboto text-lg font-semibold leading-tight">
                     {t("nav.bookNow")}
                   </span>
                 </button>
+
               </div>
             </div>
           </div>

@@ -1,7 +1,8 @@
 // src/pages/Contact.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from 'react-i18next';
 import Logo from '../assets/logo-icon.svg?react';
+import publicService from '../services/publicService';
 
 const Contact = () => {
   const { t } = useTranslation();
@@ -14,6 +15,80 @@ const Contact = () => {
     message: "",
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState({ 
+    code: 'RU', 
+    name: 'Russia', 
+    dialCode: '+7',
+    flag: '🇷🇺' 
+  });
+  const [allCountries, setAllCountries] = useState([]);
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+
+  // Auto-detect country on component mount
+  useEffect(() => {
+    const detectCountry = async () => {
+      try {
+        console.log('🔄 Detecting country...');
+        const result = await publicService.getClientCountry();
+        console.log('🌍 Country detection result:', result);
+        
+        if (result.success) {
+          // Add flag emoji to detected country if not present
+          const detectedCountry = {
+            ...result.data.detectedCountry,
+            // flag: getCountryFlag(result.data.detectedCountry.code)
+          };
+          
+          // Add flag emoji to all countries
+          // const countriesWithFlags = result.data.allCountries.map(country => ({
+          //   ...country,
+          //   // flag: getCountryFlag(country.code)
+          // }));
+          // REMOVE the getCountryFlag function completely and just use:
+const countriesWithFlags = result.data.allCountries.map(country => ({
+  ...country,
+  // No flag property needed for CDN method
+}));
+//   const countriesWithFlags = result.data.allCountries.map(country => ({
+//   ...country,
+//   // No flag property needed for CDN method
+// }));
+          
+          setSelectedCountry(detectedCountry);
+          setAllCountries(countriesWithFlags);
+          console.log('✅ Country set to:', detectedCountry);
+        }
+      } catch (error) {
+        console.error('❌ Country detection failed:', error);
+        // Set default countries with flags
+        setAllCountries([
+          { code: 'RU', name: 'Russia', dialCode: '+7', flag: '🇷🇺' },
+          { code: 'US', name: 'United States', dialCode: '+1', flag: '🇺🇸' },
+          { code: 'GB', name: 'United Kingdom', dialCode: '+44', flag: '🇬🇧' },
+          { code: 'SA', name: 'Saudi Arabia', dialCode: '+966', flag: '🇸🇦' },
+          { code: 'AE', name: 'UAE', dialCode: '+971', flag: '🇦🇪' },
+        ]);
+      }
+    };
+
+    detectCountry();
+  }, []);
+
+  // Helper function to get flag emoji
+  // const getCountryFlag = (countryCode) => {
+  //   const flags = {
+  //     'EG': '🇪🇬', 'US': '🇺🇸', 'GB': '🇬🇧', 'FR': '🇫🇷', 'DE': '🇩🇪',
+  //     'IT': '🇮🇹', 'ES': '🇪🇸', 'SA': '🇸🇦', 'AE': '🇦🇪', 'KW': '🇰🇼',
+  //     'QA': '🇶🇦', 'BH': '🇧🇭', 'OM': '🇴🇲', 'JO': '🇯🇴', 'LB': '🇱🇧',
+  //     'CA': '🇨🇦', 'AU': '🇦🇺', 'IN': '🇮🇳', 'CN': '🇨🇳', 'JP': '🇯🇵',
+  //     'BR': '🇧🇷', 'RU': '🇷🇺', 'TR': '🇹🇷'
+  //   };
+  //   return flags[countryCode] || '🌍';
+  // };
+
+
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -21,24 +96,61 @@ const Contact = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    try {
+      const result = await publicService.submitContactForm(formData);
+      if (result.success) {
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+          subject: "",
+          message: "",
+        });
+        alert("Thank you! Your message has been sent successfully.");
+      }
+    } catch (error) {
+      alert("Sorry, there was an error. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  const handleCountrySelect = (country) => {
+    console.log('🏳️ Country selected:', country);
+    setSelectedCountry(country);
+    setShowCountryDropdown(false);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showCountryDropdown && !event.target.closest('.country-selector')) {
+        setShowCountryDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showCountryDropdown]);
 
   return (
     <div className="bg-white">
       {/* Main Contact Section */}
       <div className="flex flex-col lg:flex-row lg:items-start gap-4 md:gap-6 px-4 md:px-8 lg:px-20 pt-[120px] md:pt-[130px] pb-[60px] max-w-[1440px] mx-auto">
-        {/* Left Contact Info Section */}
+        
+        {/* Left Contact Info Section - UNCHANGED */}
         <div className="w-full lg:w-[416px] min-h-[600px] lg:h-[1100px] p-4 md:p-8 lg:p-[72px_16px] flex justify-between items-center rounded-2xl bg-gradient-to-b from-[rgba(114,195,194,0.9)] to-[rgba(99,147,210,0.9)] shadow-[0px_8px_28px_0px_rgba(20,20,43,0.10)]">
           <div className="flex flex-col justify-between items-center flex-1 self-stretch gap-6 lg:gap-0">
-            {/* Logo Section */}
             <div className="flex flex-col items-center gap-6 lg:gap-10">
               <Logo className="w-47 h-36 lg:w-85 lg:h-65"></Logo>
             </div>
 
-            {/* Contact Info */}
             <div className="flex-1 lg:h-[658px] p-4 md:p-6 lg:p-[24px_16px] flex flex-col items-start gap-6 lg:gap-9 self-stretch rounded-xl">
               <div className="flex flex-col items-start gap-2 self-stretch">
                 <h2 className="text-[#F3F3EE] font-['Tai_Heritage_Pro'] text-2xl md:text-3xl lg:text-[32px] xl:text-[36px] font-normal leading-normal self-stretch">
@@ -115,6 +227,7 @@ const Contact = () => {
         {/* Right Contact Form Section */}
         <div className="flex min-h-[600px] lg:h-[1100px] p-6 md:p-12 lg:p-[72px] flex-col justify-between items-center flex-1 rounded-2xl bg-gradient-to-b from-[rgba(114,195,194,0.9)] to-[rgba(99,147,210,0.9)] shadow-[0px_8px_28px_0px_rgba(20,20,43,0.10)]">
           <div className="flex flex-col justify-between items-center flex-1 self-stretch gap-6 lg:gap-0">
+            
             {/* Header Section */}
             <div className="flex flex-col items-start gap-2 self-stretch">
               <div className="flex flex-col items-center gap-4 self-stretch">
@@ -130,6 +243,7 @@ const Contact = () => {
             {/* Contact Form */}
             <div className="flex w-full max-w-none lg:max-w-[626px] p-6 md:p-8 lg:p-[40px_32px] flex-col items-center gap-2 rounded-xl bg-[#F9F9F7] shadow-[0px_14px_42px_0px_rgba(20,20,43,0.14)]">
               <form onSubmit={handleSubmit} className="flex flex-col items-start gap-6 lg:gap-8 self-stretch">
+                
                 {/* First Name & Last Name Row */}
                 <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 self-stretch">
                   <div className="flex flex-col items-end gap-1 flex-1 w-full md:w-auto">
@@ -144,6 +258,7 @@ const Contact = () => {
                       placeholder={t("contact.form.firstNamePlaceholder")}
                       className="flex h-10 lg:h-[38px] p-3 justify-end items-center gap-2 self-stretch rounded-lg border border-[#E8E7EA] bg-white text-[#8A8D95] font-family-primary text-sm lg:text-base font-normal leading-normal focus:outline-none focus:border-sea-green-500"
                       required
+                      disabled={isSubmitting}
                     />
                   </div>
                   <div className="flex flex-col items-end gap-1 flex-1 w-full md:w-auto">
@@ -158,6 +273,7 @@ const Contact = () => {
                       placeholder={t("contact.form.lastNamePlaceholder")}
                       className="flex h-10 lg:h-[38px] p-3 justify-end items-center gap-2 self-stretch rounded-lg border border-[#E8E7EA] bg-white text-[#8A8D95] font-family-primary text-sm lg:text-base font-normal leading-normal focus:outline-none focus:border-sea-green-500"
                       required
+                      disabled={isSubmitting}
                     />
                   </div>
                 </div>
@@ -177,6 +293,7 @@ const Contact = () => {
                         placeholder={t("contact.form.emailPlaceholder")}
                         className="flex h-10 lg:h-[38px] p-3 justify-end items-center gap-2 self-stretch rounded-lg border border-[#E8E7EA] bg-white text-[#8A8D95] font-family-primary text-sm lg:text-base font-normal leading-normal focus:outline-none focus:border-sea-green-500"
                         required
+                        disabled={isSubmitting}
                       />
                     </div>
                   </div>
@@ -184,19 +301,58 @@ const Contact = () => {
                     <label className="text-[#222E50] font-['Tai_Heritage_Pro'] text-lg lg:text-[22px] font-normal leading-[1.2] self-stretch">
                       {t("contact.form.phone")}
                     </label>
-                    <div className="flex h-10 lg:h-[38px] items-center self-stretch rounded-lg border border-[#E6E6E6] bg-white overflow-hidden">
-                      <div className="flex items-center gap-2 px-3 border-r border-[#E6E6E6] bg-white">
-                        <div className="flex items-center gap-2">
-                          <svg className="w-4 h-3 lg:w-5 lg:h-[15px] rounded-sm border-[0.5px] border-black/5 flex-shrink-0" viewBox="0 0 20 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="20" height="15" fill="white" />
-                            <path fillRule="evenodd" clipRule="evenodd" d="M14 0H20V15H14V0Z" fill="#F50100" />
-                            <path fillRule="evenodd" clipRule="evenodd" d="M0 0H7V15H0V0Z" fill="#2E42A5" />
-                            <path fillRule="evenodd" clipRule="evenodd" d="M6 0H14V15H6V0Z" fill="#F7FCFF" />
-                          </svg>
-                          <svg width="12" height="12" className="lg:w-4 lg:h-4" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M13.2787 5.96655L8.93208 10.3132C8.41875 10.8266 7.57875 10.8266 7.06542 10.3132L2.71875 5.96655" stroke="#B3B3B3" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
+                    <div className="flex h-10 lg:h-[38px] items-center self-stretch rounded-lg border border-[#E6E6E6] bg-white" style={{ overflow: 'visible' }}>
+                      {/* FIXED: Country selector with proper flag display */}
+                      <div className="relative country-selector" style={{ zIndex: 1000 }}>
+                        <div 
+                          className="flex items-center gap-2 px-3 border-r border-[#E6E6E6] bg-white cursor-pointer hover:bg-gray-50 transition-colors"
+                          onClick={() => {
+                            console.log('Dropdown clicked, current state:', showCountryDropdown);
+                            setShowCountryDropdown(!showCountryDropdown);
+                          }
+                          }
+                        >
+                          <div className="flex items-center gap-2">
+                            {/* Display current country flag and dial code */}
+                          <img 
+                            src={`https://flagcdn.com/16x12/${selectedCountry.code.toLowerCase()}.png`}
+                            alt={selectedCountry.name}
+                            className="w-4 h-3"
+                          /> 
+                          <span className="text-sm text-gray-700 font-medium">{selectedCountry.dialCode}</span>
+                            <svg width="12" height="12" className="lg:w-4 lg:h-4" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M13.2787 5.96655L8.93208 10.3132C8.41875 10.8266 7.57875 10.8266 7.06542 10.3132L2.71875 5.96655" stroke="#B3B3B3" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </div>
                         </div>
+                        
+                        {/* Country Dropdown */}
+                        {showCountryDropdown && (
+                          <div className="absolute top-full left-0 z-50 bg-white border border-gray-200 rounded-lg text-black shadow-xl max-h-48 overflow-y-auto w-50 mt-1"> 
+                            {/* style={{
+                              top: '100%',
+                              left: '0',
+                              zIndex: 9999,
+                              marginTop: '4px'
+                            }}
+                          > */}
+                            {allCountries.map((country) => (
+                              <div
+                                key={country.code}
+                                className="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 cursor-pointer transition-colors"
+                                onClick={() => handleCountrySelect(country)}
+                              >
+                                <img 
+                                  src={`https://flagcdn.com/16x12/${country.code.toLowerCase()}.png`}
+                                  alt={country.name}
+                                  className="w-4 h-3"
+                                />                                
+                                <span className="flex-1 text-sm font-medium">{country.name}</span>
+                                <span className="text-sm text-gray-500">{country.dialCode}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <input
                         type="tel"
@@ -204,8 +360,9 @@ const Contact = () => {
                         value={formData.phone}
                         onChange={handleChange}
                         placeholder={t("contact.form.phonePlaceholder")}
-                        className="text-[#B3B3B3] font-family-primary text-sm lg:text-base font-normal leading-normal flex-1 outline-none px-3 min-w-0"
+                        className="text-[#8A8D95] font-family-primary text-sm lg:text-base font-normal leading-normal flex-1 outline-none px-3 min-w-0 focus:text-gray-700"
                         required
+                        disabled={isSubmitting}
                       />
                     </div>
                   </div>
@@ -225,6 +382,7 @@ const Contact = () => {
                       placeholder={t("contact.form.subjectPlaceholder")}
                       className="flex h-10 lg:h-[38px] p-3 justify-end items-center gap-2 self-stretch rounded-lg border border-[#E8E7EA] bg-white text-[#8A8D95] font-family-primary text-sm lg:text-base font-normal leading-normal focus:outline-none focus:border-sea-green-500"
                       required
+                      disabled={isSubmitting}
                     />
                   </div>
                 </div>
@@ -241,16 +399,22 @@ const Contact = () => {
                     placeholder={t("contact.form.messagePlaceholder")}
                     className="flex p-3 justify-end items-start gap-2 self-stretch h-32 lg:h-[218px] rounded-lg border border-[#E8E7EA] bg-white text-[#8A8D95] font-family-primary text-sm lg:text-base font-normal leading-normal resize-none focus:outline-none focus:border-sea-green-500"
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
 
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="flex p-3 justify-center items-center gap-3 self-stretch rounded-md bg-[#1F7674] hover:bg-[#124645] transition-colors"
+                  disabled={isSubmitting}
+                  className={`flex p-3 justify-center items-center gap-3 self-stretch rounded-md transition-colors ${
+                    isSubmitting 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-[#1F7674] hover:bg-[#124645]'
+                  }`}
                 >
                   <span className="text-[#EAF6F6] font-family-primary text-xl lg:text-2xl font-semibold leading-normal">
-                    {t("contact.form.send")}
+                    {isSubmitting ? "Sending..." : t("contact.form.send")}
                   </span>
                 </button>
               </form>
@@ -258,6 +422,11 @@ const Contact = () => {
           </div>
         </div>
       </div>
+
+      {/* Debug info - Remove in production */}
+      {/* <div className="fixed bottom-4 right-4 bg-black text-white p-2 rounded text-xs">
+        Selected: {selectedCountry.flag} {selectedCountry.name} ({selectedCountry.dialCode})
+      </div> */}
     </div>
   );
 };

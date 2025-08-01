@@ -90,9 +90,9 @@ const About = () => {
       </section>
 
       {/* Plan Your Trip Section */}
-      <section className="flex py-20 px-[72px] justify-between items-center w-full h-[917px] bg-white">
+      <section className="flex flex-col gap-10 lg:flex-row py-20 px-[72px] justify-between items-center w-full  bg-white">
         <div className="flex flex-col items-start gap-[60px]">
-          <div className="flex h-[243px] flex-col justify-center items-start gap-[46px] w-full">
+          <div className="flex flex-col justify-center items-start gap-[46px] w-full">
             <h2 className="text-danim-700 font-great-vibes text-[48px] font-normal leading-[40px]">
               {t("about.planTrip.subtitle")}
             </h2>
@@ -174,9 +174,10 @@ const About = () => {
       </section>
 
       {/* Services Section */}
+      {/* Services Section */}
       <section className="flex py-24 px-[72px] flex-col items-center gap-10 bg-[rgba(17,32,51,0.18)]">
         <div className="flex flex-col items-start gap-12 w-full">
-          <div className="flex w-[768px] flex-col items-start gap-6">
+          <div className="flex flex-col items-start gap-6">
             <div className="flex flex-col items-start gap-3 w-full">
               <h2 className="text-[#1A2949] font-bebas text-[56px] font-normal leading-[44px] tracking-[-1.12px]">
                 {t("about.services.title")}
@@ -188,14 +189,14 @@ const About = () => {
           </div>
         </div>
 
-        <div className="flex p-8 items-start gap-10 rounded-[24px] bg-[#FEFEFD] shadow-[0px_4px_4px_rgba(0,0,0,0.25)]">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:flex lg:p-8 lg:items-start lg:gap-10 gap-6 p-4 rounded-[24px] bg-[#FEFEFD] shadow-[0px_4px_4px_rgba(0,0,0,0.25)]">
           {services.map((service, index) => (
             <div
               key={index}
               className="flex flex-col justify-center items-start gap-3"
             >
               <div
-                className="flex w-[170px] h-[116px] justify-center items-center gap-2 rounded-[16px]"
+      className="flex w-full lg:w-[170px] h-[116px] justify-center items-center gap-2 rounded-[16px]"
                 style={{
                   background: `url('${service.bgUrl}') lightgray 50% / cover no-repeat`,
                 }}
@@ -212,12 +213,12 @@ const About = () => {
 
       {/* About Tura Trip Section */}
       <section className="flex py-20 px-[72px] flex-col justify-center items-center gap-10 bg-white">
-        <div className="flex w-[1296px] flex-col justify-center items-center gap-8">
+        <div className="flex  flex-col justify-center items-center gap-8">
           <h2 className="text-center text-[#233660] font-bebas text-[56px] font-normal leading-[120%]">
             {t("about.company.title")}
           </h2>
-          <div className="flex items-center gap-10">
-            <div className="w-[636px] text-[#1A2949] font-family-primary text-[27px] font-normal leading-[180%]">
+          <div className="flex flex-col-reverse lg:flex-row items-center gap-10">
+            <div className=" text-[#1A2949] font-family-primary text-[27px] font-normal leading-[180%]">
               <div dangerouslySetInnerHTML={{ __html: t("about.company.description") }} />
             </div>
             <img
@@ -275,73 +276,42 @@ const About = () => {
       </section> */}
 
       {/* Why Choose Us Section */}
-      <section className="py-[60px] px-[72px] bg-white">
-        <div className="flex flex-col justify-center items-center gap-10 max-w-[1296px] mx-auto">
-          <h2 className="text-center text-[#233660] font-bebas text-[56px] font-normal leading-[120%]">
-            {t("about.whyChoose.title")}
-          </h2>
+{/* Why Choose Us Section */}
+<section className="py-[60px] px-[72px] bg-white">
+  <div className="flex flex-col justify-center items-center gap-10 max-w-[1296px] mx-auto">
+    <h2 className="text-center text-[#233660] font-bebas text-[56px] font-normal leading-[120%]">
+      {t("about.whyChoose.title")}
+    </h2>
 
-          <div className="flex flex-col justify-center items-center gap-8 w-full">
-            {/* First Row */}
-            <div className="flex justify-center items-start gap-8 w-full">
-              {whyChooseFeatures.slice(0, 2).map((feature, index) => {
-                const IconComponent = feature.icon;
-                return (
-                  <div key={index} className="flex p-6 items-start gap-4 rounded-[20px] bg-[#ECEFF7] flex-1 max-w-[632px]">
-                    <div className="relative w-16 h-16">
-                      <div className="w-16 h-16 rounded-[12px] bg-[#C3CEE6]"></div>
-                      <div className="absolute top-4 left-4">
-                        <IconComponent
-                          variant="bulk"
-                          color="#3F62AE"
-                          className="w-8 h-8"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-start gap-2 flex-1">
-                      <h3 className="text-[#272727] font-roboto text-[24px] font-bold">
-                        {t(`about.whyChoose.${feature.key}.title`)}
-                      </h3>
-                      <p className="text-[#272727] font-roboto text-[20px] font-normal opacity-70 leading-normal">
-                        {t(`about.whyChoose.${feature.key}.description`)}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+      {whyChooseFeatures.map((feature, index) => {
+        const IconComponent = feature.icon;
+        return (
+          <div key={index} className="flex p-6 items-start gap-4 rounded-[20px] bg-[#ECEFF7] flex-1 max-w-[632px]">
+            <div className="relative w-16 h-16">
+              <div className="w-16 h-16 rounded-[12px] bg-[#C3CEE6]"></div>
+              <div className="absolute top-4 left-4">
+                <IconComponent
+                  variant="bulk"
+                  color="#3F62AE"
+                  className="w-8 h-8"
+                />
+              </div>
             </div>
-
-            {/* Second Row */}
-            <div className="flex justify-center items-center gap-8 w-full">
-              {whyChooseFeatures.slice(2, 4).map((feature, index) => {
-                const IconComponent = feature.icon;
-                return (
-                  <div key={index} className="flex p-6 items-start gap-4 rounded-[20px] bg-[#ECEFF7] flex-1 max-w-[632px]">
-                    <div className="relative w-16 h-16">
-                      <div className="w-16 h-16 rounded-[12px] bg-[#C3CEE6]"></div>
-                      <div className="absolute top-4 left-4">
-                        <IconComponent
-                          variant="bulk"
-                          color="#3F62AE"
-                          className="w-8 h-8"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-start gap-2 flex-1">
-                      <h3 className="text-[#272727] font-roboto text-[24px] font-bold">
-                        {t(`about.whyChoose.${feature.key}.title`)}
-                      </h3>
-                      <p className="text-[#272727] font-roboto text-[20px] font-normal opacity-70 leading-normal">
-                        {t(`about.whyChoose.${feature.key}.description`)}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="flex flex-col items-start gap-2 flex-1">
+              <h3 className="text-[#272727] font-roboto text-[24px] font-bold">
+                {t(`about.whyChoose.${feature.key}.title`)}
+              </h3>
+              <p className="text-[#272727] font-roboto text-[20px] font-normal opacity-70 leading-normal">
+                {t(`about.whyChoose.${feature.key}.description`)}
+              </p>
             </div>
           </div>
-        </div>
-      </section>
+        );
+      })}
+    </div>
+  </div>
+</section>
 
       {/* CTA Section */}
       <section

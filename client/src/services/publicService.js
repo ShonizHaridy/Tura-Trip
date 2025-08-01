@@ -13,6 +13,17 @@ class PublicService {
     }
   }
 
+  // Get more featured tours for homepage
+  async getMoreFeaturedTours(language = 'en', offset = 6, limit = 6) {
+    try {
+      const response = await api.get(`/public/homepage/more-tours?language=${language}&offset=${offset}&limit=${limit}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching more featured tours:', error);
+      throw error;
+    }
+  }
+
   // Get all cities for header navigation
   async getCitiesForHeader(language = 'en') {
     try {
@@ -25,12 +36,25 @@ class PublicService {
   }
 
   // Get city page data with tours
-  async getCityData(cityName, language = 'en') {
+   async getCityData(cityName, params = {}) {
     try {
-      const response = await api.get(`/public/city/${cityName}?language=${language}`);
+      const queryString = new URLSearchParams(params).toString();
+      const response = await api.get(`/public/city/${cityName}?${queryString}`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching city data:', error);
+      console.error('Error fetching city page data:', error);
+      throw error;
+    }
+  };
+
+  // Get more tours for city page
+  async getMoreCityTours(cityName, params = {}) {
+    try {
+      const queryString = new URLSearchParams(params).toString();
+      const response = await api.get(`/public/city/${cityName}?${queryString}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching more city tours:', error);
       throw error;
     }
   }
@@ -42,6 +66,18 @@ class PublicService {
       return response.data;
     } catch (error) {
       console.error('Error fetching tour details:', error);
+      throw error;
+    }
+  }
+
+  // Get more like this tours
+  async getMoreLikeThisTours(tourId, params = {}) {
+    try {
+      const queryString = new URLSearchParams(params).toString();
+      const response = await api.get(`/public/tours/${tourId}/more-like-this?${queryString}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching more like this tours:', error);
       throw error;
     }
   }
@@ -90,6 +126,60 @@ class PublicService {
       throw error;
     }
   }
+
+  async submitReview(tourId, reviewData) {
+    try {
+      // Create FormData for handling file uploads
+      const formData = new FormData();
+      
+      // Add text fields
+      formData.append('client_name', reviewData.client_name);
+      formData.append('comment', reviewData.comment);
+      formData.append('language', reviewData.language || 'en');
+      
+      // Add images if provided
+      if (reviewData.client_image) {
+        formData.append('client_image', reviewData.client_image);
+      }
+      
+      if (reviewData.profile_image) {
+        formData.append('profile_image', reviewData.profile_image);
+      }
+      
+      const response = await api.post(`/public/tours/${tourId}/reviews`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      throw error;
+    }
+  }
+
+  // Get client country for auto-detection
+  async getClientCountry() {
+    try {
+      const response = await api.get('/public/client-country');
+      return response.data;
+    } catch (error) {
+      console.error('Error detecting client country:', error);
+      throw error;
+    }
+  }
+
+  // Submit contact form
+  async submitContactForm(formData) {
+    try {
+      const response = await api.post('/public/contact', formData);
+      return response.data;
+    } catch (error) {
+      console.error('Error submitting contact form:', error);
+      throw error;
+    }
+  }
+
 }
 
 export default new PublicService();

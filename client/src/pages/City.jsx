@@ -1,73 +1,177 @@
-// src/pages/CityPage.jsx
-import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+// src/pages/City.jsx
+import { useState, useEffect, useRef } from "react";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import ExcursionCard from "../components/ExcursionCard";
-import { useLocalizedText } from "../utils/helpers";
+import PriceList from "../components/PriceList";
+import publicService from "../services/publicService";
+import useClickOutside from "../hooks/useClickOutside";
 import {
-  Home2,
   ArrowDown2,
   WalletRemove,
   Shield,
   EyeSlash,
-  Category,
-  Timer,
 } from "iconsax-react";
-
-// Import mock data
-import { mockCityData, mockTrips, mockCategories } from "../data/mockData";
 
 const City = () => {
   const { cityName } = useParams();
-  const { t } = useTranslation();
-  const { getLocalizedText, currentLanguage } = useLocalizedText();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { t, i18n } = useTranslation();
+  
+  // State management
   const [cityData, setCityData] = useState(null);
-  const [trips, setTrips] = useState([]);
+  const [tours, setTours] = useState([]);
+  const [allTours, setAllTours] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All Trips");
   const [loading, setLoading] = useState(true);
-  const [showPricing, setShowPricing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [isPriceListOpen, setIsPriceListOpen] = useState(false);
+  const [pagination, setPagination] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
+  // Ref for cleanup
+  const abortControllerRef = useRef(null);
+
+  // Price list modal ref for click outside
+  const priceListRef = useClickOutside(() => {
+    setIsPriceListOpen(false);
+  });
+
+  // Check for category parameter from URL
   useEffect(() => {
-    fetchCityDataMock();
-  }, [cityName, currentLanguage]); // Re-fetch when language changes
+    const categoryParam = searchParams.get('category');
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [searchParams]);
 
-  const fetchCityDataMock = async () => {
+  // Fetch city data on mount and language change
+  useEffect(() => {
+    fetchCityData();
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [cityName, i18n.language]);
+
+  // Reset page when category changes
+  useEffect(() => {
+    if (selectedCategory && cityData) {
+      setCurrentPage(1);
+      fetchCityData(1, getSelectedCategoryId());
+    }
+  }, [selectedCategory]);
+
+  const fetchCityData = async (page = 1, categoryId = null, loadAll = false) => {
     try {
-      setLoading(true);
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const cityInfo = mockCityData[cityName];
-      if (cityInfo) {
-        setCityData(cityInfo);
-        setTrips(mockTrips[cityName] || []);
-
-        // Get localized categories
-        const localizedCategories = mockCategories[cityName];
-        if (localizedCategories) {
-          const categoriesInCurrentLang = getLocalizedText(localizedCategories);
-          setCategories([
-            t("common.allTrips") || "All Trips",
-            ...categoriesInCurrentLang,
-          ]);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      
+      abortControllerRef.current = new AbortController();
+      
+      if (page === 1) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
+      
+      const params = {
+        language: i18n.language,
+        page: loadAll ? 1 : page,
+        limit: loadAll ? 100 : 6,
+      };
+      
+      if (categoryId) {
+        params.category_id = categoryId;
+      }
+      
+      const response = await publicService.getCityData(cityName, params);
+      
+      if (response.success) {
+        const { city, tours: newTours, categories: apiCategories, pagination: paginationData } = response.data;
+        
+        setCityData(city);
+        setPagination(paginationData);
+        console.log('City data:', city);
+        
+        if (page === 1) {
+          setTours(newTours || []);
+          
+          if (!categoryId && !loadAll) {
+            setAllTours(newTours || []);
+          }
+          
+          const allTripsCategory = { 
+            id: null, 
+            name: t('common.allTrips') || "All Trips", 
+            tours_count: paginationData.totalItems 
+          };
+          setCategories([allTripsCategory, ...(apiCategories || [])]);
+        } else {
+          setTours(prev => [...prev, ...(newTours || [])]);
         }
+        
+        if (loadAll) {
+          setAllTours(newTours || []);
+        }
+        
+        setCurrentPage(page);
+        console.log('✅ City data loaded:', response.data);
       }
     } catch (error) {
-      console.error("Error with mock data:", error);
+      if (error.name !== 'AbortError') {
+        console.error('Error fetching city data:', error);
+      }
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
-  const filteredTrips =
-    selectedCategory === (t("common.allTrips") || "All Trips")
-      ? trips
-      : trips.filter(
-          (trip) => getLocalizedText(trip.category) === selectedCategory,
-        );
+  const getSelectedCategoryId = () => {
+    if (selectedCategory === (t('common.allTrips') || "All Trips")) return null;
+    const category = categories.find(cat => cat.name === selectedCategory);
+    return category ? category.id : null;
+  };
 
-  if (loading) {
+  const handleCategoryChange = (categoryName) => {
+    setSelectedCategory(categoryName);
+    
+    // Update URL params
+    if (categoryName === (t('common.allTrips') || "All Trips")) {
+      searchParams.delete('category');
+    } else {
+      searchParams.set('category', categoryName);
+    }
+    setSearchParams(searchParams);
+  };
+
+  const handleViewMore = () => {
+    if (pagination && pagination.hasMore) {
+      const nextPage = currentPage + 1;
+      fetchCityData(nextPage, getSelectedCategoryId());
+    }
+  };
+
+  const handleShowPricing = async () => {
+    if (allTours.length === 0) {
+      await fetchCityData(1, null, true);
+    }
+    setIsPriceListOpen(true);
+  };
+
+  const formatPrice = (price) => {
+    return parseFloat(price).toFixed(2);
+  };
+
+  const getCitySlug = () => {
+    return cityName.toLowerCase().replace(/\s+/g, '-');
+  };
+
+  if (loading && !tours.length) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-xl">{t("common.loading") || "Loading..."}</div>
@@ -85,40 +189,31 @@ const City = () => {
     );
   }
 
-  const categoryTabs = [
-    "All Trips",
-    "Historical Cities",
-    "Sea Excursions",
-    "Safari and Adventure",
-    "Transfer",
-    "Individual Tours",
-  ];
-
   return (
     <div className="min-h-screen pt-[100px]">
       {/* Category Tabs - Fixed position */}
       <div className="w-full flex flex-col items-start border-b-2 border-[#E6E6E8] shadow-[0px_2px_12px_0px_rgba(20,20,43,0.08)] bg-white fixed top-[100px] left-0 right-0 z-40">
         <div className="w-full px-[70px] h-12">
-          <div className="flex h-12 items-center">
-            {categoryTabs.map((tab, index) => (
+          <div className="flex h-12 items-center overflow-x-auto">
+            {categories.map((category) => (
               <div
-                key={tab}
-                className={`flex-1 flex items-center justify-center px-6 h-12 cursor-pointer transition-all duration-200 ${
-                  selectedCategory === tab
+                key={category.id || 'all'}
+                className={`flex-shrink-0 flex items-center justify-center px-6 h-12 cursor-pointer transition-all duration-200 ${
+                  selectedCategory === category.name
                     ? "bg-[rgba(234,246,246,0.60)] border-b-2 border-[#2BA6A4]"
                     : "hover:bg-gray-50"
                 }`}
-                onClick={() => setSelectedCategory(tab)}
+                onClick={() => handleCategoryChange(category.name)}
               >
-                <div className="flex flex-col justify-center items-start gap-1 h-[27px]">
+                <div className="flex flex-col justify-center items-center gap-1 h-[27px]">
                   <span
-                    className={`text-base font-bold text-center ${
-                      selectedCategory === tab
+                    className={`text-base font-bold text-center whitespace-nowrap ${
+                      selectedCategory === category.name
                         ? "text-[#1F7674]"
                         : "text-[#8A8D95]"
                     }`}
                   >
-                    {tab}
+                    {category.name}
                   </span>
                 </div>
               </div>
@@ -128,10 +223,13 @@ const City = () => {
       </div>
 
       {/* Main Content */}
-      <div className="px-[70px] pt-16">
+      <div className="px-4 md:px-[70px] pt-16">
         {/* Breadcrumb */}
         <div className="inline-flex items-center gap-4 py-6 rounded-md">
-          <div className="flex w-5 h-5 justify-center items-center">
+          <div 
+            className="flex w-5 h-5 justify-center items-center cursor-pointer hover:opacity-70"
+            onClick={() => window.location.href = '/'}
+          >
             <svg
               width="20"
               height="20"
@@ -161,7 +259,7 @@ const City = () => {
           </svg>
           <div className="flex justify-center items-center">
             <span className="text-sm font-bold text-[#555A64] font-roboto">
-              Hurghada
+              {cityData.name}
             </span>
           </div>
           <svg
@@ -180,78 +278,77 @@ const City = () => {
           </svg>
           <div className="flex justify-center items-center">
             <span className="text-sm font-bold text-[#555A64] font-roboto">
-              All Trips
+              {selectedCategory}
             </span>
           </div>
         </div>
 
         {/* Hero Banner */}
-        <div className="relative w-[1296px] h-[349px] rounded-[32px] overflow-hidden mb-8">
+        <div className="relative w-full h-[349px] rounded-[32px] overflow-hidden mb-8">
           <div
             className="w-full h-full bg-cover bg-center relative"
             style={{
-              background: `linear-gradient(0deg, rgba(0, 0, 0, 0.30) 0%, rgba(0, 0, 0, 0.30) 100%), url('${cityData.heroImage}') lightgray 50% / cover no-repeat`,
+              background: `linear-gradient(0deg, rgba(0, 0, 0, 0.30) 0%, rgba(0, 0, 0, 0.30) 100%), url('${cityData.image_url || cityData.image}') lightgray 50% / cover no-repeat`,
             }}
           >
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-              <h1 className="text-[56px] font-bold text-[#F3F3EE] mb-2 leading-normal">
-                {getLocalizedText(cityData.name)}
+              <h1 className="text-4xl md:text-[56px] font-bold text-[#F3F3EE] mb-2 leading-normal">
+                {cityData.name}
               </h1>
-              <p className="text-2xl font-medium text-[#F7F7F4] max-w-lg">
-                {getLocalizedText(cityData.description)}
-              </p>
+              {cityData.tagline && (
+                <p className="text-lg md:text-2xl font-medium text-[#F7F7F4] max-w-lg">
+                  {cityData.tagline}
+                </p>
+              )}
             </div>
           </div>
         </div>
 
         {/* Content Section */}
-        <div className="w-[1296px] flex flex-col gap-10 mb-20">
+        <div className="w-full flex flex-col gap-10 mb-20">
           {/* About Section */}
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center">
-              <h2 className="text-[32px] font-semibold text-[#2D467C]">
-                About
+              <h2 className="text-2xl md:text-[32px] font-semibold text-[#2D467C]">
+                {t('city.about') || 'About'}
               </h2>
             </div>
-
             <div className="flex flex-col gap-4">
-              <p className="text-xl font-normal text-[#555A64] leading-[25.4px]">
-                {getLocalizedText(cityData.longDescription)}
+              <p className="text-lg md:text-xl font-normal text-[#555A64] leading-[25.4px]">
+                {cityData.description}
               </p>
             </div>
           </div>
 
           {/* Features */}
-          <div className="flex items-start gap-6">
+          <div className="flex flex-wrap items-start gap-6">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-full flex items-center justify-center">
                 <WalletRemove size={32} color="#3F62AE" variant="Bulk" />
               </div>
               <div className="flex flex-col gap-2">
                 <span className="text-lg font-semibold text-[#2D467C]">
-                  No Prepayment
+                  {t('features.noPrepayment') || 'No Prepayment'}
                 </span>
               </div>
             </div>
-
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-full flex items-center justify-center">
                 <Shield size={32} color="#3F62AE" variant="Bulk" />
               </div>
               <div className="flex flex-col gap-2">
                 <span className="text-lg font-semibold text-[#2D467C]">
-                  Insurance is Valid
+                  {t('features.insuranceValid') || 'Insurance is Valid'}
                 </span>
               </div>
             </div>
-
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center">
                 <EyeSlash size={32} color="#3F62AE" variant="Bulk" />
               </div>
               <div className="flex flex-col gap-2">
                 <span className="text-lg font-semibold text-[#2D467C]">
-                  No Hidden Extra
+                  {t('features.noHiddenExtra') || 'No Hidden Extra'}
                 </span>
               </div>
             </div>
@@ -261,7 +358,7 @@ const City = () => {
           <div className="flex flex-col gap-6">
             <div
               className="flex items-center justify-between w-full p-6 rounded-md bg-[#EAF6F6] cursor-pointer"
-              onClick={() => setShowPricing(!showPricing)}
+              onClick={handleShowPricing}
             >
               <div className="flex items-center gap-4">
                 <svg width="24" height="25" viewBox="0 0 24 25" fill="none">
@@ -274,7 +371,7 @@ const City = () => {
                   />
                 </svg>
                 <span className="text-xl font-medium text-[#2D467C]">
-                  Current prices Today in Hurghada
+                  {t('city.currentPrices') || 'Current prices Today in'} {cityData.name}
                 </span>
               </div>
               <div className="flex items-center gap-6">
@@ -282,7 +379,6 @@ const City = () => {
                 <ArrowDown2
                   size={32}
                   color="#3F62AE"
-                  className={`transition-transform ${showPricing ? "rotate-180" : ""}`}
                 />
               </div>
             </div>
@@ -291,167 +387,82 @@ const City = () => {
 
         {/* All Trips Section */}
         <div className="flex flex-col gap-5 mb-20">
-          <div className="w-[768px]">
-            <h2 className="text-[60px] font-normal text-[#3F62AE] leading-[44px] tracking-[-1.2px] font-['Bebas_Neue']">
-              ALL TRIPS
+          <div className="w-full">
+            <h2 className="text-4xl md:text-[60px] font-normal text-[#3F62AE] leading-[44px] tracking-[-1.2px] font-['Bebas_Neue']">
+              {selectedCategory.toUpperCase()}
             </h2>
           </div>
-          <div className="w-[1283px] h-px bg-[#B3B3B3]"></div>
+          <div className="w-full h-px bg-[#B3B3B3]"></div>
         </div>
 
         {/* Trip Cards Grid */}
-        <div className="flex justify-center gap-10 mb-20">
-          {filteredTrips.slice(0, 4).map((trip) => (
-            <Link key={trip.id} to={`/destination/${cityName}/${trip.id}`}>
-              <div className="w-[270px] h-[405px] bg-white rounded-lg shadow-lg overflow-hidden">
-                <div className="w-[250px] h-[180px] mx-auto mt-2.5 rounded-lg overflow-hidden">
-                  <img
-                    src={trip.image}
-                    alt={getLocalizedText(trip.title)}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                <div className="p-2.5 pt-3">
-                  <h3 className="text-base font-semibold text-[#1C2B38] mb-4 text-center min-h-[38px] flex items-center justify-center">
-                    {getLocalizedText(trip.title)}
-                  </h3>
-
-                  <div className="flex flex-col gap-3 mb-4">
-                    <div className="flex items-center gap-2">
-                      <Timer size={16} color="#495560" />
-                      <span className="text-sm font-medium text-[#495560]">
-                        Duration 2 hours
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <svg
-                        width="16"
-                        height="12"
-                        viewBox="0 0 16 12"
-                        fill="none"
-                      >
-                        <path
-                          d="M12.3143 4.28516L12.1611 4.2303L10.864 1.7983C10.6204 1.34126 10.2571 0.959041 9.81302 0.692515C9.36894 0.42599 8.86077 0.285184 8.34286 0.285156H5.07657C4.47677 0.285132 3.89217 0.473872 3.40562 0.824631C2.91907 1.17539 2.55525 1.67037 2.36571 2.23944L1.74743 4.0943C1.22943 4.31263 0.78735 4.67891 0.476523 5.14728C0.165697 5.61566 -6.13215e-05 6.16531 1.70175e-08 6.72744V7.99944C1.70175e-08 8.81087 0.483429 9.50801 1.17714 9.8223C1.26698 10.337 1.53045 10.8054 1.92367 11.1495C2.31689 11.4936 2.81612 11.6925 3.33821 11.7132C3.8603 11.7339 4.37372 11.5751 4.79296 11.2633C5.21221 10.9515 5.51196 10.5054 5.64229 9.99944H10.3577C10.488 10.5054 10.7878 10.9515 11.207 11.2633C11.6263 11.5751 12.1397 11.7339 12.6618 11.7132C13.1839 11.6925 13.6831 11.4936 14.0763 11.1495C14.4696 10.8054 14.733 10.337 14.8229 9.8223C15.1737 9.66394 15.4713 9.40772 15.6801 9.08439C15.8889 8.76105 16 8.38434 16 7.99944V7.61201C15.9999 7.02221 15.8173 6.44689 15.4772 5.965C15.1371 5.48312 14.6563 5.11829 14.1006 4.92058L12.3749 4.30687V4.28516H12.3143ZM5.07657 1.42801H6.28571V4.28516H2.888L3.44914 2.60058C3.56291 2.259 3.78135 1.9619 4.07346 1.75143C4.36557 1.54096 4.71653 1.42781 5.07657 1.42801ZM7.42857 1.42801H8.34286C8.65364 1.4279 8.9586 1.51228 9.22513 1.67212C9.49166 1.83195 9.70973 2.06124 9.856 2.33544L10.896 4.28516H7.42857V1.42801ZM12.1177 5.42801L13.7177 5.99716C14.0511 6.11582 14.3396 6.33473 14.5436 6.62386C14.7476 6.91298 14.8571 7.25816 14.8571 7.61201V7.99944C14.8571 8.19944 14.7886 8.38344 14.6743 8.52973C14.4871 8.09033 14.1669 7.72061 13.7588 7.47251C13.3507 7.2244 12.8751 7.11037 12.3989 7.14643C11.9226 7.1825 11.4696 7.36684 11.1035 7.67357C10.7374 7.9803 10.4766 8.39401 10.3577 8.85658H5.64229C5.52338 8.39401 5.26256 7.9803 4.89646 7.67357C4.53036 7.36684 4.07737 7.1825 3.60112 7.14643C3.12487 7.11037 2.64929 7.2244 2.24117 7.47251C1.83306 7.72061 1.51292 8.09033 1.32571 8.52973C1.20677 8.37861 1.14234 8.19175 1.14286 7.99944V6.72744C1.14286 6.21316 1.37143 5.74458 1.73714 5.42801H12.1177ZM2.28571 9.42801C2.28571 9.12491 2.40612 8.83422 2.62045 8.61989C2.83478 8.40556 3.12547 8.28516 3.42857 8.28516C3.73168 8.28516 4.02237 8.40556 4.23669 8.61989C4.45102 8.83422 4.57143 9.12491 4.57143 9.42801C4.57143 9.73112 4.45102 10.0218 4.23669 10.2361C4.02237 10.4505 3.73168 10.5709 3.42857 10.5709C3.12547 10.5709 2.83478 10.4505 2.62045 10.2361C2.40612 10.0218 2.28571 9.73112 2.28571 9.42801ZM12.5714 8.28516C12.8745 8.28516 13.1652 8.40556 13.3796 8.61989C13.5939 8.83422 13.7143 9.12491 13.7143 9.42801C13.7143 9.73112 13.5939 10.0218 13.3796 10.2361C13.1652 10.4505 12.8745 10.5709 12.5714 10.5709C12.2683 10.5709 11.9776 10.4505 11.7633 10.2361C11.549 10.0218 11.4286 9.73112 11.4286 9.42801C11.4286 9.12491 11.549 8.83422 11.7633 8.61989C11.9776 8.40556 12.2683 8.28516 12.5714 8.28516Z"
-                          fill="#495560"
-                        />
-                      </svg>
-                      <span className="text-sm font-medium text-[#495560]">
-                        {getLocalizedText(trip.transportation)}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Category size={16} color="#555A64" />
-                      <span className="text-sm font-medium text-[#495560]">
-                        {getLocalizedText(trip.category)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="h-px w-full bg-[#E8EAEB] mb-3"></div>
-
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs font-semibold text-[#778088]">
-                      {trip.reviews} reviews
-                    </span>
-                    <div className="text-right">
-                      <div className="text-xl font-bold text-[#2CA6A4]">
-                        ${trip.price}
-                      </div>
-                      <div className="text-xs font-semibold text-[#778088]">
-                        per person
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* Second Row of Cards */}
-        <div className="flex justify-center gap-10 mb-20">
-          {filteredTrips.slice(4, 8).map((trip) => (
-            <Link key={trip.id} to={`/destination/${cityName}/${trip.id}`}>
-              <div className="w-[270px] h-[405px] bg-white rounded-lg shadow-lg overflow-hidden">
-                <div className="w-[250px] h-[180px] mx-auto mt-2.5 rounded-lg overflow-hidden">
-                  <img
-                    src={trip.image}
-                    alt={getLocalizedText(trip.title)}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                <div className="p-2.5 pt-3">
-                  <h3 className="text-base font-semibold text-[#1C2B38] mb-4 text-center min-h-[38px] flex items-center justify-center">
-                    {getLocalizedText(trip.title)}
-                  </h3>
-
-                  <div className="flex flex-col gap-3 mb-4">
-                    <div className="flex items-center gap-2">
-                      <Timer size={16} color="#495560" />
-                      <span className="text-sm font-medium text-[#495560]">
-                        Duration 2 hours
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <svg
-                        width="16"
-                        height="12"
-                        viewBox="0 0 16 12"
-                        fill="none"
-                      >
-                        <path
-                          d="M12.3143 4.28516L12.1611 4.2303L10.864 1.7983C10.6204 1.34126 10.2571 0.959041 9.81302 0.692515C9.36894 0.42599 8.86077 0.285184 8.34286 0.285156H5.07657C4.47677 0.285132 3.89217 0.473872 3.40562 0.824631C2.91907 1.17539 2.55525 1.67037 2.36571 2.23944L1.74743 4.0943C1.22943 4.31263 0.78735 4.67891 0.476523 5.14728C0.165697 5.61566 -6.13215e-05 6.16531 1.70175e-08 6.72744V7.99944C1.70175e-08 8.81087 0.483429 9.50801 1.17714 9.8223C1.26698 10.337 1.53045 10.8054 1.92367 11.1495C2.31689 11.4936 2.81612 11.6925 3.33821 11.7132C3.8603 11.7339 4.37372 11.5751 4.79296 11.2633C5.21221 10.9515 5.51196 10.5054 5.64229 9.99944H10.3577C10.488 10.5054 10.7878 10.9515 11.207 11.2633C11.6263 11.5751 12.1397 11.7339 12.6618 11.7132C13.1839 11.6925 13.6831 11.4936 14.0763 11.1495C14.4696 10.8054 14.733 10.337 14.8229 9.8223C15.1737 9.66394 15.4713 9.40772 15.6801 9.08439C15.8889 8.76105 16 8.38434 16 7.99944V7.61201C15.9999 7.02221 15.8173 6.44689 15.4772 5.965C15.1371 5.48312 14.6563 5.11829 14.1006 4.92058L12.3749 4.30687V4.28516H12.3143ZM5.07657 1.42801H6.28571V4.28516H2.888L3.44914 2.60058C3.56291 2.259 3.78135 1.9619 4.07346 1.75143C4.36557 1.54096 4.71653 1.42781 5.07657 1.42801ZM7.42857 1.42801H8.34286C8.65364 1.4279 8.9586 1.51228 9.22513 1.67212C9.49166 1.83195 9.70973 2.06124 9.856 2.33544L10.896 4.28516H7.42857V1.42801ZM12.1177 5.42801L13.7177 5.99716C14.0511 6.11582 14.3396 6.33473 14.5436 6.62386C14.7476 6.91298 14.8571 7.25816 14.8571 7.61201V7.99944C14.8571 8.19944 14.7886 8.38344 14.6743 8.52973C14.4871 8.09033 14.1669 7.72061 13.7588 7.47251C13.3507 7.2244 12.8751 7.11037 12.3989 7.14643C11.9226 7.1825 11.4696 7.36684 11.1035 7.67357C10.7374 7.9803 10.4766 8.39401 10.3577 8.85658H5.64229C5.52338 8.39401 5.26256 7.9803 4.89646 7.67357C4.53036 7.36684 4.07737 7.1825 3.60112 7.14643C3.12487 7.11037 2.64929 7.2244 2.24117 7.47251C1.83306 7.72061 1.51292 8.09033 1.32571 8.52973C1.20677 8.37861 1.14234 8.19175 1.14286 7.99944V6.72744C1.14286 6.21316 1.37143 5.74458 1.73714 5.42801H12.1177ZM2.28571 9.42801C2.28571 9.12491 2.40612 8.83422 2.62045 8.61989C2.83478 8.40556 3.12547 8.28516 3.42857 8.28516C3.73168 8.28516 4.02237 8.40556 4.23669 8.61989C4.45102 8.83422 4.57143 9.12491 4.57143 9.42801C4.57143 9.73112 4.45102 10.0218 4.23669 10.2361C4.02237 10.4505 3.73168 10.5709 3.42857 10.5709C3.12547 10.5709 2.83478 10.4505 2.62045 10.2361C2.40612 10.0218 2.28571 9.73112 2.28571 9.42801ZM12.5714 8.28516C12.8745 8.28516 13.1652 8.40556 13.3796 8.61989C13.5939 8.83422 13.7143 9.12491 13.7143 9.42801C13.7143 9.73112 13.5939 10.0218 13.3796 10.2361C13.1652 10.4505 12.8745 10.5709 12.5714 10.5709C12.2683 10.5709 11.9776 10.4505 11.7633 10.2361C11.549 10.0218 11.4286 9.73112 11.4286 9.42801C11.4286 9.12491 11.549 8.83422 11.7633 8.61989C11.9776 8.40556 12.2683 8.28516 12.5714 8.28516Z"
-                          fill="#495560"
-                        />
-                      </svg>
-                      <span className="text-sm font-medium text-[#495560]">
-                        {getLocalizedText(trip.transportation)}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Category size={16} color="#555A64" />
-                      <span className="text-sm font-medium text-[#495560]">
-                        {getLocalizedText(trip.category)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="h-px w-full bg-[#E8EAEB] mb-3"></div>
-
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs font-semibold text-[#778088]">
-                      {trip.reviews} reviews
-                    </span>
-                    <div className="text-right">
-                      <div className="text-xl font-bold text-[#2CA6A4]">
-                        ${trip.price}
-                      </div>
-                      <div className="text-xs font-semibold text-[#778088]">
-                        per person
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+        {tours.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-10">
+            {tours.map((tour) => (
+              <Link key={tour.id} to={`/destination/${getCitySlug()}/${tour.id}`}>
+                <ExcursionCard
+                  id={tour.id}
+                  title={tour.title || t('common.tourTitle') || 'Tour Title Not Available'}
+                  image={tour.cover_image_url || "/src/assets/luxor.png"}
+                  category={tour.category || tour.category_type}
+                  duration={tour.duration || t('common.fullDay') || "Full Day"}
+                  durationUnit=""
+                  daysOfWeek={tour.availability || t('common.daily') || "Daily"}
+                  reviews={tour.reviews_count || 0}
+                  price={parseFloat(tour.price_adult)}
+                  originalPrice={tour.discount_percentage > 0 ? Math.round(parseFloat(tour.price_adult) / (1 - tour.discount_percentage / 100)) : null}
+                  priceUnit={t('common.perPerson') || "per person"}
+                  isFeatured={tour.featured_tag || false}
+                />
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-10 text-gray-500">
+            <p className="text-xl mb-4">{t('common.noToursFound') || 'No tours found for the selected category.'}</p>
+            <p className="text-gray-400">{t('common.tryDifferentCategory') || 'Try selecting a different category or check back later.'}</p>
+          </div>
+        )}
 
         {/* View More Button */}
-        <div className="flex flex-col items-center gap-2.5 w-full mb-20">
-          <button className="flex w-[266px] px-4 py-2 justify-center items-center gap-3 rounded-md border border-[#1F7674] bg-[#F3F3EE]">
-            <span className="text-xl font-semibold text-[#1F7674] font-roboto">
-              View More
+        {pagination && pagination.hasMore && (
+          <div className="flex flex-col items-center gap-2.5 w-full mb-20">
+          <button 
+            onClick={handleViewMore}
+            disabled={loadingMore}
+            className="flex w-[266px] px-4 py-2 justify-center items-center gap-3 rounded-md border border-[#1F7674] bg-[#F3F3EE] hover:bg-[#B0B2B7] hover:border-[#868683] disabled:opacity-50 disabled:cursor-not-allowed transition-colors group"
+          >
+            <span className="text-xl font-semibold text-[#1F7674] font-roboto group-hover:text-[#343946] transition-colors">
+              {loadingMore ? (t('common.loading') || "Loading...") : (t('common.viewMore') || "View More")}
             </span>
           </button>
-        </div>
+            <div className="text-sm text-gray-500 text-center">
+              {t('city.showing')} {tours.length} {t('city.of')} {pagination.totalItems} {t('city.tours')}
+              {pagination.totalPages > 1 && (
+                <span className="block mt-1">
+                  {t('city.page')} {pagination.currentPage} {t('city.of')} {pagination.totalPages}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Price List Modal with click outside functionality */}
+      {isPriceListOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div ref={priceListRef}>
+            <PriceList
+              isOpen={isPriceListOpen}
+              onClose={() => setIsPriceListOpen(false)}
+              pricesData={cityData?.todaysPrices ? [{
+                city_name: cityData.name,
+                tours: cityData.todaysPrices.tours || []
+              }] : []}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

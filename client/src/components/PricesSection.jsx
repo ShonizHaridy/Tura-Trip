@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { LuDollarSign } from "react-icons/lu";
 import { ArrowDown2 } from "iconsax-react";
 
-const FAQSection = ({ onOpenPriceList, todaysPrices = [] }) => {
+const PricesSection = ({ onOpenPriceList, todaysPrices = [] }) => {
   const { t } = useTranslation();
   const [openItems, setOpenItems] = useState([]);
 
@@ -19,9 +19,17 @@ const FAQSection = ({ onOpenPriceList, todaysPrices = [] }) => {
   // Generate FAQ items from real API data
   const faqItems = todaysPrices.length > 0 
     ? todaysPrices.map((cityData, index) => ({
-        title: `Current prices on ${new Date().toLocaleDateString()} in ${cityData.city_name}`,
-        content: `${cityData.total_tours} tours available. Prices from $${cityData.min_price} to $${cityData.max_price}. Average price: $${cityData.avg_price}`,
-        onClick: index === 0 ? onOpenPriceList : null, // Only first item (Hurghada) opens modal
+      title: t("homepage.pricesSection.currentPricesOn", {
+        date: new Date().toLocaleDateString(),
+        cityName: cityData.city_name,
+      }),
+      content: t("homepage.pricesSection.citySummary", {
+        total: cityData.total_tours,
+        min: cityData.min_price,
+        max: cityData.max_price,
+        avg: cityData.avg_price,
+      }),
+      onClick: () => onOpenPriceList(cityData.city_id), // Pass city ID
       }))
     : [
         {
@@ -46,7 +54,7 @@ const FAQSection = ({ onOpenPriceList, todaysPrices = [] }) => {
           {/* Title */}
           <div className="text-center">
             <h2 className="text-[#233660] font-great-vibes text-3xl md:text-4xl leading-[120%]">
-              {t("homepage.priceList.title")}
+              {t("homepage.pricesSection.title")}
             </h2>
           </div>
 
@@ -79,7 +87,7 @@ const FAQSection = ({ onOpenPriceList, todaysPrices = [] }) => {
                       size={24}
                       color="#3F62AE"
                       className={`transition-transform w-6 h-6 md:w-8 md:h-8 ${
-                        openItems.includes(index) || item.onClick ? "rotate-180" : ""
+                        openItems.includes(index) ? "rotate-180" : ""
                       }`}
                     />
                   </div>
@@ -100,4 +108,4 @@ const FAQSection = ({ onOpenPriceList, todaysPrices = [] }) => {
   );
 };
 
-export default FAQSection;
+export default PricesSection;

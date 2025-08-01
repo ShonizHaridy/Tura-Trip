@@ -30,13 +30,13 @@ const Footer = () => {
               <p className="text-gray-400 text-sm mb-2 leading-relaxed">
                 {t("footer.contact.description")}
               </p>
-              <p className="text-gray-400 text-sm mb-6">{t("footer.contact.email")}</p>
+              <p className="text-gray-400 text-sm mb-6">{t("footer.contact.email")} : infot@turatrip.com</p>
               
               <a 
                 href="https://wa.me/2001055957451" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-6 py-3 bg-white text-teal-600 font-medium rounded-lg hover:bg-gray-100 transition-colors"
+                className="w-fit flex items-center justify-center gap-2 px-8 py-2 bg-white text-teal-600 font-semibold rounded-md hover:bg-[#B0B2B7] hover:border-[#868683] hover:text-[#343946] transition-colors"
               >
                 <IoLogoWhatsapp className="w-5 h-5" />
                 {t("nav.bookNow")}
@@ -68,9 +68,9 @@ const Footer = () => {
             <div>
               <h3 className="font-semibold text-lg mb-6">{t("footer.legal.title")}</h3>
               <ul className="space-y-3">
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">{t("footer.legal.termsOfService")}</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">{t("footer.legal.privacyPolicy")}</a></li>
-                <li><Link to="/security" className="text-gray-400 hover:text-white transition-colors">
+                {/* <li><a href="#" className="text-gray-300 hover:text-white transition-colors">{t("footer.legal.termsOfService")}</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">{t("footer.legal.privacyPolicy")}</a></li> */}
+                <li><Link to="/security" className="text-gray-300 hover:text-white transition-colors">
                   {t("footer.legal.security")}
                 </Link>   
                 </li>
@@ -200,11 +200,11 @@ const Footer = () => {
 
           {/* Bottom Links and TripAdvisor */}
           <div className="flex items-center justify-between space-y-4">
-            <div className="text-xs text-gray-400 text-center">
-              <a href="#" className="hover:text-white">{t("footer.legal.termsOfService")}</a>
+            <div className="text-xs text-gray-300 text-center">
+              {/* <a href="#" className="hover:text-white">{t("footer.legal.termsOfService")}</a>
               <span className="mx-2">|</span>
               <a href="#" className="hover:text-white">{t("footer.legal.privacyPolicy")}</a>
-              <span className="mx-2">|</span>
+              <span className="mx-2">|</span> */}
               <Link to="/security" className="hover:text-white">{t("footer.legal.security")}</Link>
             </div>
             

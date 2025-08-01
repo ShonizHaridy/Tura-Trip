@@ -12,7 +12,7 @@
       "title": "Contact Us",
       "call": "Call",
       "description": "Praesent nulla massa, hendrerit vestibulum gravida in, feugiat auctor felis.",
-      "email": "Email: example@mail.com",
+      "email": "Email",
       "bookNow": "Book Now"
     },
     "quickLinks": {
@@ -29,7 +29,7 @@
       "marsaAlam": "Marsa Alam"
     },
     "legal": {
-      "title": "Terms and policies",
+      "title": "Security",
       "termsOfService": "Terms of Services",
       "privacyPolicy": "Privacy Policy",
       "security": "Security"
@@ -49,7 +49,49 @@
     "loadingDots": "Loading...",
     "popular": "Popular",
     "greatValue": "Great Value",
-    "new": "New"
+    "new": "New",
+    "noToursFound": "No tours found for this category",
+    "readMore": "Read More",
+    "readLess": "Read Less",
+    "viewLess": "view less",
+    "fullDay": "Full Day",
+    "daily": "Daily",
+    "tourTitle": "Tour Title Not Available",
+    "tryDifferentCategory": "Try selecting a different category or check back later."
+  },
+    "features": {
+    "noPrepayment": "No Prepayment",
+    "reservation3Min": "Reservation in 3 minutes",
+    "englishGuides": "English Speaking Guides",
+    "personalManager": "Personal Manager",
+    "insuranceValid": "Insurance is Valid",
+    "happyCustomers": "2400 Happy Customers",
+    "realPhotos": "Real Photos excursions",
+    "noHiddenExtra": "No Hidden Extra"
+  },
+  "currencyConverter": {
+    "title": "Currency Converter",
+    "usdAmount": "USD Amount",
+    "currentRate": "Current Rate",
+    "organizerCommission": "Organizer's commission",
+    "totalAmount": "Total Amount",
+    "commissionNote": "Commission added to exchange rate per dollar",
+    "roundingNote": "Amount rounded up by multiple of 10",
+    "liveRates": "Using live exchange rates",
+    "calculate": "Calculate",
+    "calculating": "Calculating...",
+    "fetchError": "Failed to fetch current exchange rates. Please try again.",
+    "ratesNotLoaded": "Exchange rates not loaded. Please wait or refresh.",
+    "retry": "Retry"
+  },
+  "priceList": {
+    "titleWithCity": "{{city}} Excursions Prices Today",
+    "historical": "Historical",
+    "excursion": "EXCURSION",
+    "priceAdults": "PRICE (adults)",
+    "priceChildren": "PRICE (children)",
+    "adults": "ADULTS",
+    "children": "CHILDREN"
   },
   "homepage": {
     "hero": {
@@ -70,19 +112,101 @@
     },
     "payment": {
       "title": "We can accept payment in rubles, tenge or hryvnia by transfer to a card:",
-      "rates": "$1 = Central Bank exchange rate + 7 ₽ ; or 10 ₸ ; or 3 ₴ ; also transfer USD T to a crypto wallet",
+      "rates": "$1 = Central Bank exchange rate + {{rub}} <0>₽</0> ; or {{tenge}} <1>₸</1> ; or {{uah}} <2>₴</2> ; also transfer USD T to a crypto wallet",
       "converterButton": "Open Online Currency Converter"
     },
-    "priceList": {
+    "pricesSection": {
       "title": "All Excursions Prices Today",
-      "hurghadaPrices": "Current prices on 11/05/2025 in Hurghada",
-      "sharmPrices": "Current prices on 11/05/2025 in Sharm El-Sheikh", 
-      "marsaPrices": "Current prices on 11/05/2025 in Marsa Alam"
+      "currentPricesOn": "Current prices on {{date}} in {{cityName}}",
+      "citySummary": "{{total}} tours available. Prices from ${{min}} to ${{max}}. Average price: ${{avg}}"
     },
     "testimonials": {
       "title": "Real Reviews",
       "subtitle": "Already 2400 review, All have a screen shot-confirmation"
+    },
+    "faq":{
+      "title": "Frequently Asked Questions"
     }
+  },
+    "city": {
+    "about": "About",
+    "currentPrices": "Current prices Today in",
+    "allTrips": "ALL TRIPS",
+    "showing": "Showing",
+    "of": "of", 
+    "tours": "tours",
+    "page": "Page"
+  },
+  "tripDetail": {
+    "notFound": "Trip not found",
+    "duration": "Duration",
+    "daysOfWeek": "Days of Week",
+    "tripProgram": "Trip Program",
+    "tripProgramSoon": "Trip program information will be available soon.",
+    "whatsIncluded": "What's included",
+    "whatsNotIncluded": "What's Not included", 
+    "takeWithYou": "Take with you",
+    "details": "Details",
+    "customerReviews": "Customer Reviews",
+    "moreLikeThis": "More Like This Trip",
+    "noSimilarTours": "No similar tours found",
+    "pricing": {
+      "adult": "Adult (above 12)",
+      "child": "Child (5-11 years)"
+    },
+    "features": {
+      "booking3Min": "Booking in 3 Min.",
+      "hotelPickup": "Hotel Pickup",
+      "multilingualGuide": "Russian Speaking Guide",
+      "personalManager": "Personal Manager",
+      "realPhotos": "Real Photos and Reviews",
+      "noPrepayment": "No Prepayment",
+      "insuranceValid": "Insurance is valid",
+      "noHiddenCharges": "No Hidden Charges"
+    },
+    "detailItems": {
+      "pickupDetails": {
+        "title": "Pickup details",
+        "description": "Once you book with us, our agent will reach out confirming your room number"
+      },
+      "hotelPickupOffered": {
+        "title": "Hotel pickup offered",
+        "description": "During checkout you will be able to select from the list of included hotels."
+      },
+      "additionalPickup": {
+        "title": "Additional pickup options",
+        "description": "During checkout you will be able to select from the list of Hurghada, Red Sea, Egypt"
+      },
+      "cancellationPolicy": {
+        "title": "Cancellation policy",
+        "description": "For a full refund, you must cancel at least 24 hours before the experience's start time."
+      }
+    },
+    "review": {
+      "fillAllFields": "Please fill all fields",
+      "success": "Review submitted successfully!",
+      "error": "Error submitting review. Please try again.",
+      "namePlaceholder": "Name*",
+      "writeReview": "Write Your Review",
+      "commentPlaceholder": "Share your experience...",
+      "send": "Send",
+      "customer": "Customer",
+      "sampleTitle": "Great experience!",
+      "sampleComment": "Amazing tour with wonderful guide and beautiful locations. Highly recommended!",
+      "defaultTitle": "Great Experience!",
+      "selectProfileImage": "Select profile image",
+      "selectImage": "Select image", 
+      "fileTooLarge": "File too large. Maximum size is 5MB.",
+      "invalidFileType": "Please select a valid image file."
+    },
+    "bookNow": "Book Now",
+    "viewAll": "view all",
+    "viewLess": "view less",
+    "loadingMore": "Loading...",
+    "includedDefault": "Hotel Pick-up & Drop-off\nAir-conditioned vehicle\nCamel Ride\nBedouin Village & Bedouin Tea\nQuad Bike Ride\nLunch & Drinks on Yacht",
+    "notIncludedDefault": "Masks\nFins\nDiving Suits",
+    "takeWithYouDefault": "Swim Suit, Towel, Water, Sunscreen, Sunglasses\nDiving Suits and Snorkeling fins available to rent on site"
+  
   },
   "about": {
     "hero": {
@@ -109,6 +233,7 @@
       "desertBuggy": "Desert Buggy",
       "boatTour": "Boat Tour"
     },
+    
     "services": {
       "title": "Tura Trip Services",
       "subtitle": "Unforgettable Journeys, Exceptional Experiences",

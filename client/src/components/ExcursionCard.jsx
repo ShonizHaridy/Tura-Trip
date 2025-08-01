@@ -73,7 +73,7 @@ const ExcursionCard = ({
             </div>
 
             {/* Transportation or Days of Week */}
-            {isFeatured && daysOfWeek ? (
+            { daysOfWeek ? (
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-1">
                   <Calendar2 color='currentColor' className="w-4 h-4 text-[#8A8D95]" />
@@ -138,7 +138,7 @@ const ExcursionCard = ({
         <div className="absolute left-0 top-[6px] z-10">
           {/* Badge background */}
           <div 
-            className="h-[35px] bg-[#2BA6A4] rounded-tl-md rounded-tr-md rounded-br-md relative py-1 px-3 min-w-[80px] max-w-[140px] inline-flex items-center justify-center"
+            className="h-[35px] bg-[#2BA6A4] rounded-tl-md rounded-tr-md rounded-br-md relative py-1 px-3 min-w-[80px] inline-flex items-center justify-center"
             style={{
               background: "linear-gradient(0deg, rgba(0, 0, 0, 0.20), rgba(0, 0, 0, 0.20)), #2BA6A4",
             }}

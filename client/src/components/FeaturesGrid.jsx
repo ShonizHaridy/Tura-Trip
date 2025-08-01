@@ -9,57 +9,62 @@ import {
   Camera,
   EyeSlash
 } from 'iconsax-react';
+import { useTranslation } from 'react-i18next';
 
 const FeaturesGrid = ({ section = "hero", position = "middle" }) => {
+
+  const { t, i18n } = useTranslation();
+
+
   const allFeatures = [
     {
       id: 1,
       icon: WalletRemove,
-      title: "No Prepayment",
+      title: t("features.noPrepayment"),
       section: "hero"
     },
     {
       id: 2,
       icon: Timer1,
-      title: "Reservation in 3 minutes",
-      section: "next"
+      title: t("features.reservation3Min"),
+      section: "explore"
     },
 
     {
       id: 3,
       icon: VolumeHigh,
-      title: "English Speaking Guides",
+      title: t("features.englishGuides"),
       section: "hero"
     },
     {
       id: 4,
       icon: Personalcard,
-      title: "Personal Manager",
+      title: t("features.personalManager"),
       section: "hero"
     },
     {
       id: 5,
       icon: ShieldTick,
-      title: "Insurance is Valid",
+      title: t("features.insuranceValid"),
       section: "hero"
     },
     {
       id: 6,
       icon: EmojiHappy,
-      title: "2400 Happy Customers",
-      section: "next"
+      title: t("features.happyCustomers"),
+      section: "explore"
     },
     {
       id: 7,
       icon: Camera,
-      title: "Real Photos excursions",
-      section: "next"
+      title: t("features.realPhotos"),
+      section: "explore"
     },
     {
       id: 8,
       icon: EyeSlash,
-      title: "No Hidden Extra",
-      section: "next"
+      title: t("features.noHiddenExtra"),
+      section: "explore"
     }
   ];
 
@@ -71,7 +76,7 @@ const FeaturesGrid = ({ section = "hero", position = "middle" }) => {
       // Hero section (bottom) - keep top corners rounded, remove bottom corners
       return "rounded-t-[24px] lg:rounded-t-[20px] pb-0";
     } else if (position === "top") {
-      // Next section (top) - keep bottom corners rounded, remove top corners
+      // Explore section (top) - keep bottom corners rounded, remove top corners
       return "rounded-b-[24px] lg:rounded-b-[20px] pt-0";
     } else {
       // Default - all corners rounded

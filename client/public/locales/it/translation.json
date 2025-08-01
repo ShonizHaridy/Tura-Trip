@@ -12,7 +12,7 @@
       "title": "Contattaci",
       "call": "Chiama",
       "description": "Praesent nulla massa, hendrerit vestibulum gravida in, feugiat auctor felis.",
-      "email": "Email: example@mail.com",
+      "email": "Email",
       "bookNow": "Prenota ora"
     },
     "quickLinks": {
@@ -29,7 +29,7 @@
       "marsaAlam": "Marsa Alam"
     },
     "legal": {
-      "title": "Termini e politiche",
+      "title": "Sicurezza",
       "termsOfService": "Termini di servizio",
       "privacyPolicy": "Politica sulla privacy",
       "security": "Sicurezza"
@@ -49,7 +49,50 @@
     "loadingDots": "Caricamento...",
     "popular": "Popolare",
     "greatValue": "Ottimo valore",
-    "new": "Nuovo"
+    "new": "Nuovo",
+    "noToursFound": "Nessun tour trovato per questa categoria",
+    "readMore": "Leggi di più",
+    "readLess": "Leggi di meno",
+    "viewLess": "vedi meno",
+    "fullDay": "Giornata intera",
+    "daily": "Quotidiano",
+    "tourTitle": "Titolo del tour non disponibile",
+    "tryDifferentCategory": "Prova a selezionare una categoria diversa o ricontrolla più tardi."
+  },
+  "features": {
+    "noPrepayment": "Nessun pagamento anticipato",
+    "reservation3Min": "Prenotazione in 3 minuti",
+    "englishGuides": "Guide che parlano italiano",
+    "personalManager": "Manager personale",
+    "insuranceValid": "Assicurazione valida",
+    "happyCustomers": "2400 clienti felici",
+    "realPhotos": "Foto reali delle escursioni",
+    "noHiddenExtra": "Nessun extra nascosto"
+  },
+  "currencyConverter": {
+    "title": "Convertitore di valuta",
+    "usdAmount": "Importo USD",
+    "currentRate": "Tasso attuale",
+    "organizerCommission": "Commissione dell'organizzatore",
+    "totalAmount": "Importo totale",
+    "commissionNote": "Commissione aggiunta al tasso di cambio per dollaro",
+    "roundingNote": "Importo arrotondato per multiplo di 10",
+    "liveRates": "Utilizzo di tassi di cambio in tempo reale",
+    "calculate": "Calcola",
+    "calculating": "Calcolando...",
+    "fetchError": "Impossibile recuperare i tassi di cambio attuali. Riprova.",
+    "ratesNotLoaded": "Tassi di cambio non caricati. Attendi o aggiorna.",
+    "retry": "Riprova"
+  },
+  "priceList": {
+    "titleWithCity": "{{city}} - Prezzi escursioni oggi",
+    "citySummary": "{{total}} tour disponibili. Prezzi da ${{min}} a ${{max}}. Prezzo medio: ${{avg}}",
+    "historical": "Storico",
+    "excursion": "ESCURSIONE",
+    "priceAdults": "PREZZO (adulti)",
+    "priceChildren": "PREZZO (bambini)",
+    "adults": "ADULTI",
+    "children": "BAMBINI"
   },
   "homepage": {
     "hero": {
@@ -70,19 +113,100 @@
     },
     "payment": {
       "title": "Accettiamo pagamenti in rubli, tenge o grivnie tramite bonifico su carta:",
-      "rates": "$1 = tasso della Banca Centrale + 7 ₽ ; o 10 ₸ ; o 3 ₴ ; anche trasferimento USD T su wallet critico",
+      "rates": "$1 = tasso della Banca Centrale + {{rub}} <0>₽</0> ; o {{tenge}} <1>₸</1> ; o {{uah}} <2>₴</2> ; anche trasferimento USD T su wallet crypto",
       "converterButton": "Apri il convertitore di valuta online"
     },
-    "priceList": {
+    "pricesSection": {
       "title": "Prezzi di tutte le escursioni oggi",
-      "hurghadaPrices": "Prezzi attuali al 11/05/2025 a Hurghada",
-      "sharmPrices": "Prezzi attuali al 11/05/2025 a Sharm El-Sheikh",
-      "marsaPrices": "Prezzi attuali al 11/05/2025 a Marsa Alam"
+       "citySummary": "{{total}} tour disponibili. Prezzi da ${{min}} a ${{max}}. Prezzo medio: ${{avg}}",
+      "currentPricesOn": "Prezzi attuali il {{date}} a {{cityName}}"
     },
     "testimonials": {
       "title": "Recensioni reali",
       "subtitle": "Già 2400 recensioni, tutte con conferma screenshot"
+    },
+    "faq":{
+      "title": "Domande frequenti"
     }
+  },
+  "city": {
+    "about": "Chi siamo",
+    "currentPrices": "Prezzi attuali oggi a",
+    "allTrips": "TUTTI I VIAGGI",
+    "showing": "Mostrando",
+    "of": "di",
+    "tours": "tour",
+    "page": "Pagina"
+  },
+  "tripDetail": {
+    "notFound": "Viaggio non trovato",
+    "duration": "Durata",
+    "daysOfWeek": "Giorni della settimana",
+    "tripProgram": "Programma del viaggio",
+    "tripProgramSoon": "Le informazioni sul programma del viaggio saranno presto disponibili.",
+    "whatsIncluded": "Cosa è incluso",
+    "whatsNotIncluded": "Cosa non è incluso",
+    "takeWithYou": "Porta con te",
+    "details": "Dettagli",
+    "customerReviews": "Recensioni dei clienti",
+    "moreLikeThis": "Altri viaggi simili",
+    "noSimilarTours": "Nessun tour simile trovato",
+    "pricing": {
+      "adult": "Adulto (sopra i 12 anni)",
+      "child": "Bambino (5-11 anni)"
+    },
+    "features": {
+      "booking3Min": "Prenotazione in 3 min.",
+      "hotelPickup": "Ritiro in hotel",
+      "multilingualGuide": "Guida che parla italiano",
+      "personalManager": "Manager personale",
+      "realPhotos": "Foto e recensioni reali",
+      "noPrepayment": "Nessun pagamento anticipato",
+      "insuranceValid": "Assicurazione valida",
+      "noHiddenCharges": "Nessun costo nascosto"
+    },
+    "detailItems": {
+      "pickupDetails": {
+        "title": "Dettagli del ritiro",
+        "description": "Una volta prenotato con noi, il nostro agente ti contatterà per confermare il numero della tua camera"
+      },
+      "hotelPickupOffered": {
+        "title": "Ritiro in hotel offerto",
+        "description": "Durante il checkout potrai selezionare dall'elenco degli hotel inclusi."
+      },
+      "additionalPickup": {
+        "title": "Opzioni di ritiro aggiuntive",
+        "description": "Durante il checkout potrai selezionare dall'elenco di Hurghada, Mar Rosso, Egitto"
+      },
+      "cancellationPolicy": {
+        "title": "Politica di cancellazione",
+        "description": "Per un rimborso completo, devi cancellare almeno 24 ore prima dell'orario di inizio dell'esperienza."
+      }
+    },
+    "review": {
+      "fillAllFields": "Si prega di compilare tutti i campi",
+      "success": "Recensione inviata con successo!",
+      "error": "Errore nell'invio della recensione. Riprova.",
+      "namePlaceholder": "Nome*",
+      "writeReview": "Scrivi la tua recensione",
+      "commentPlaceholder": "Condividi la tua esperienza...",
+      "send": "Invia",
+      "customer": "Cliente",
+      "sampleTitle": "Ottima esperienza!",
+      "sampleComment": "Tour fantastico con guida meravigliosa e luoghi bellissimi. Altamente raccomandato!",
+      "defaultTitle": "Ottima esperienza!",
+      "selectProfileImage": "Seleziona immagine del profilo",
+      "selectImage": "Seleziona immagine",
+      "fileTooLarge": "File troppo grande. La dimensione massima è 5MB.",
+      "invalidFileType": "Si prega di selezionare un file immagine valido."
+    },
+    "bookNow": "Prenota ora",
+    "viewAll": "vedi tutto",
+    "viewLess": "vedi meno",
+    "loadingMore": "Caricamento...",
+    "includedDefault": "Ritiro e rientro in hotel\nVeicolo climatizzato\nGiro in cammello\nVillaggio beduino e tè beduino\nGiro in quad\nPranzo e bevande sullo yacht",
+    "notIncludedDefault": "Maschere\nPinne\nMute da sub",
+    "takeWithYouDefault": "Costume da bagno, asciugamano, acqua, crema solare, occhiali da sole\nMute da sub e pinne per snorkeling disponibili per il noleggio in loco"
   },
   "about": {
     "hero": {
@@ -98,7 +222,7 @@
       "noPrepayment": "Nessun pagamento anticipato",
       "insuranceValid": "Assicurazione valida",
       "personalManager": "Manager personale",
-      "englishGuides": "Guide che parlano inglese",
+      "englishGuides": "Guide che parlano italiano",
       "quickReservation": "Prenotazione in 3 minuti",
       "happyCustomers": "2400 clienti soddisfatti",
       "realPhotos": "Foto reali delle escursioni",
@@ -130,8 +254,8 @@
       "founderDescription": "Con oltre 15 anni di esperienza nel turismo, la passione di Ahmed per la cultura egiziana guida la nostra azienda",
       "tourOperationsManager": "Manager delle operazioni turistiche",
       "tourManagerDescription": "garantisce che ogni escursione si svolga senza intoppi, con un occhio attento ai dettagli e alla soddisfazione del cliente.",
-      "russianRelationsDirector": "Direttore delle relazioni con i clienti russi",
-      "russianDirectorDescription": "si specializza nell'assistenza ai clienti russofoni, garantendo una comunicazione fluida.",
+      "russianRelationsDirector": "Direttore delle relazioni italiane",
+      "russianDirectorDescription": "si specializza nell'assistenza ai clienti di lingua italiana, garantendo una comunicazione fluida.",
       "customerExperienceLead": "Responsabile dell'esperienza del cliente",
       "customerLeadDescription": "guida il nostro team di supporto clienti, dedicato a fornire assistenza personalizzata ai viaggiatori."
     },
@@ -140,11 +264,10 @@
       "diverseOptions": {
         "title": "Opzioni di escursione diversificate",
         "description": "Da tour storici ad avventure marine, esperienze di safari e luoghi di intrattenimento in tutto l'Egitto."
-     
       },
       "multilingualSupport": {
         "title": "Supporto multilingue",
-        "description": "Assistenza per i viaggiatori russofoni con contenuti e guide disponibili in russo."
+        "description": "Assistenza per i viaggiatori di lingua italiana con contenuti e guide disponibili in italiano."
       },
       "flexiblePayment": {
         "title": "Pagamento flessibile",
@@ -179,7 +302,7 @@
     },
     "form": {
       "title": "Contattaci",
-      "description": "Le nostre esper added guide egiziane sono qui per assisterti con qualsiasi domanda o richiesta di prenotazione. Non esitare a contattarci tramite email, WhatsApp o telefono — siamo pronti ad aiutarti a pianificare la tua perfetta avventura egiziana!",
+      "description": "Le nostre esperte guide egiziane sono qui per assisterti con qualsiasi domanda o richiesta di prenotazione. Non esitare a contattarci tramite email, WhatsApp o telefono — siamo pronti ad aiutarti a pianificare la tua perfetta avventura egiziana!",
       "firstName": "Nome",
       "firstNamePlaceholder": "Inserisci il tuo nome",
       "lastName": "Cognome",
@@ -203,20 +326,20 @@
     "methods": {
       "title": "Metodi di pagamento",
       "subtitle": "Accettiamo i seguenti metodi di pagamento:",
-      "transfer": "Bonifico su conto solo per russi (RUB)",
+      "transfer": "Bonifico su conto solo per italiani (EUR)",
       "cash": "Contanti"
     },
     "features": {
       "title": "Caratteristiche del pagamento per le escursioni",
       "noPrepayment": "<span class=\"font-bold\">✓ Nessun pagamento anticipato</span><span class=\"font-normal\">. Lavoriamo senza pagamenti anticipati per le escursioni di gruppo. Paghi il programma sull'autobus o durante il tour. Il pagamento anticipato può essere richiesto solo quando si ordina un programma da 5 persone ($5 a persona, per alcuni programmi) e escursioni individuali o programmi per i quali è necessario acquistare biglietti aerei o redigere documenti. Altre escursioni possono essere pagate direttamente durante il trasferimento o sul posto;</span>",
       "convenientMethods": "<span class=\"font-bold\">✓ Metodi di pagamento convenienti.</span><span class=\"font-normal\"> Non devi cercare qualcuno per pagare il tour. Un rappresentante dell'organizzatore sul posto ti informerà sulla necessità di pagamento. Puoi pagare il programma in contanti in dollari (banconote non precedenti al 2000), euro o sterline egiziane. Il pagamento anticipato per escursioni individuali e programmi per i quali è necessario acquistare biglietti aerei può essere effettuato anche in contanti al rappresentante dell'organizzatore. Per contattarci, rivolgiti al nostro dipartimento di prenotazione tramite qualsiasi messenger conveniente,</span>",
-      "nonCashPayment": "<span class=\"font-normal\">✓ Possibilità di pagamento senza contanti.</span><span class=\"font-normal\"> Per tua comodità, abbiamo previsto la possibilità di effettuare un trasferimento di un anticipo o del costo totale del programma sulle carte bancarie degli organizzatori in rubli, tenge, grivnie o euro, con una piccola commissione indicata sulla pagina principale del nostro sito. Puoi anche trasferire pagamenti in USDT su un portafoglio crittografico </span><span class=\"font-normal\">senza commissioni</span><span class=\"font-normal\">. Per chiarire i dettagli, contatta il dipartimento di prenotazione.</span>"
+      "nonCashPayment": "<span class=\"font-normal\">✓ Possibilità di pagamento senza contanti.</span><span class=\"font-normal\"> Per tua comodità, abbiamo previsto la possibilità di effettuare un trasferimento di un anticipo o del costo totale del programma sulle carte bancarie degli organizzatori in euro, rubli, tenge o grivnie, con una piccola commissione indicata sulla pagina principale del nostro sito. Puoi anche trasferire pagamenti in USDT su un portafoglio crypto </span><span class=\"font-normal\">senza commissioni</span><span class=\"font-normal\">. Per chiarire i dettagli, contatta il dipartimento di prenotazione.</span>"
     },
     "refund": {
       "title": "Rimborso del pagamento anticipato per i programmi di escursione",
       "conditions": "L'organizzatore rimborserà completamente il tuo pagamento anticipato se: Lo hai pagato in contanti o tramite bonifico su carta bancaria, e il tour non si è svolto per colpa dell'organizzatore; Hai annullato il programma più di un giorno prima della data del tour.",
       "exception": "L'eccezione sono i programmi che richiedono l'acquisto di biglietti aerei. In tali casi, l'organizzatore non potrà restituire il pagamento anticipato dopo l'acquisto dei biglietti.",
-      "process": "Il pagamento anticipato può essere restituito in contanti o su una carta bancaria in rubli al tasso di cambio del giorno del rimborso, o al tasso stabilito il giorno in cui il pagamento anticipato è stato trasferito sulla carta bancaria. I rimborsi vengono effettuati entro 3 giorni di calendario."
+      "process": "Il pagamento anticipato può essere restituito in contanti o su una carta bancaria in euro al tasso di cambio del giorno del rimborso, o al tasso stabilito il giorno in cui il pagamento anticipato è stato trasferito sulla carta bancaria. I rimborsi vengono effettuati entro 3 giorni di calendario."
     },
     "obligations": {
       "title": "Cosa fare se gli organizzatori non adempiono adeguatamente ai loro obblighi",
@@ -231,8 +354,8 @@
       "caseByCase": "In ogni caso, il risarcimento viene discusso caso per caso.",
       "afterTour": "<span class=\"font-bold\">Se hai scritto</span><span class=\"font-normal\"> al nostro dipartimento di prenotazione dopo la fine del </span><span class=\"font-bold\">tour e desideri richiedere</span><span class=\"font-normal\"> uno sconto, un rimborso totale o parziale </span><span class=\"font-bold\">dell'importo pagato</span><span class=\"font-normal\"> all'organizzatore</span><span class=\"font-bold\">, devi soddisfare </span><span class=\"font-normal\">i punti seguenti:</span>",
       "requirement1": "<span class=\"font-normal\">▲ </span><span class=\"font-bold\">Scrivi al nostro dipartimento di prenotazione</span><span class=\"font-normal\"> e segnala la discrepanza tra il programma completato e quello descritto sul nostro sito; assicurati di allegare una conferma video del reclamo, dove sarà visibile la non conformità del programma completato;</span>",
-      "requirement2": "<span class=\"font-normal\">▲ </span><span class=\"font-bold\">Se non ci sono file video</span><span class=\"font-normal\"> e non è possibile soddisfare il punto sopra, </span><span class=\"font-bold\">devi: Scrivere una richiesta di rimborso</span><span class=\"font-normal\"> in forma libera, con una dichiarazione dettagliata della non conformità del programma (stampare); </span><span class=\"font-bold\">inviare una foto della richiesta </span><span class=\"font-normal\">con la tua firma e la data; </span><span class=\"font-bold\">allegare dichiarazioni simili</span><span class=\"font-normal\"> da altri due turisti che erano con te nel tour, che hanno effettuato la prenotazione del programma separatamente da te (due prenotazioni separate), con i loro numeri di telefono nel messenger WhatsApp e informazioni su quale compagnia hanno prenotato il tour;</span>",
-      "requirement3": "<span class=\"font-normal\">▲</span><span class=\"font-bold\"> Attendi la valutazione della richiesta</span><span class=\"font-normal\"> da parte della direzione dell'organizzatore e la conferma del rimborso (fino a 7 giorni di calendario); ricevi il rimborso in contanti in dollari o su una carta bancaria in rubli, grivnie, tenge o euro al tasso di cambio del giorno del rimborso, o al tasso stabilito il giorno in cui il pagamento è stato trasferito sulla carta bancaria dell'organizzatore.</span>",
+      "requirement2": "<span class=\"font-normal\">▲ </span><span class=\"font-bold\">Se non ci sono file video</span><span class=\"font-normal\"> e non è possibile soddisfare il punto sopra, </span><span class=\"font-bold\">devi: Scrivere una richiesta di rimborso</span><span class=\"font-normal\"> in forma libera, con una dichiarazione dettagliata della non conformità del programma (stampare); </span><span class=\"font-bold\">inviare una foto della richiesta </span><span class=\"font-normal\">con la tua firma e data; </span><span class=\"font-bold\">allegare dichiarazioni simili</span><span class=\"font-normal\"> da altri due turisti che erano con te nel tour, che hanno effettuato la prenotazione del programma separatamente da te (due prenotazioni separate), con i loro numeri di telefono nel messenger WhatsApp e informazioni su quale compagnia hanno prenotato il tour;</span>",
+      "requirement3": "<span class=\"font-normal\">▲</span><span class=\"font-bold\"> Attendi la valutazione della richiesta</span><span class=\"font-normal\"> da parte della direzione dell'organizzatore e la conferma del rimborso (fino a 7 giorni di calendario); ricevi il rimborso in contanti in dollari o su una carta bancaria in euro, rubli, grivnie o tenge al tasso di cambio del giorno del rimborso, o al tasso stabilito il giorno in cui il pagamento è stato trasferito sulla carta bancaria dell'organizzatore.</span>",
       "disclaimer": "<span class=\"font-bold\">Il nostro servizio online non è una persona autorizzata per i rimborsi per le escursioni.</span><span class=\"font-normal\"> Paghi i programmi direttamente agli organizzatori delle escursioni durante il trasferimento sul posto o tramite bonifico su carta bancaria; non hai con noi rapporti commerciali e monetari. Forniamo supporto informativo gratuito e assistenza necessaria, rimanendo in contatto ogni giorno dalle 07:30 alle 23:00 ora del Cairo. </span><span class=\"font-bold\">Per risolvere la situazione a tuo favore, abbiamo bisogno di materiali multimediali di supporto (video</span><span class=\"font-normal\">/foto) per fornirli alla direzione degli organizzatori. Albatross Travel Egypt è interessata a risolvere tutte le situazioni di conflitto tra turisti e organizzatori di tour il più rapidamente possibile. Facciamo del nostro meglio per garantire che le vacanze in Egitto portino solo emozioni positive e ricordi vividi.</span>"
     }
   },

@@ -12,7 +12,7 @@
       "title": "Kontaktieren Sie uns",
       "call": "Anrufen",
       "description": "Praesent nulla massa, hendrerit vestibulum gravida in, feugiat auctor felis.",
-      "email": "E-Mail: example@mail.com",
+      "email": "E-Mail",
       "bookNow": "Jetzt buchen"
     },
     "quickLinks": {
@@ -29,7 +29,7 @@
       "marsaAlam": "Marsa Alam"
     },
     "legal": {
-      "title": "Allgemeine Geschäftsbedingungen",
+      "title": "Sicherheit",
       "termsOfService": "Nutzungsbedingungen",
       "privacyPolicy": "Datenschutzrichtlinie",
       "security": "Sicherheit"
@@ -49,7 +49,49 @@
     "loadingDots": "Laden...",
     "popular": "Beliebt",
     "greatValue": "Gutes Preis-Leistungs-Verhältnis",
-    "new": "Neu"
+    "new": "Neu",
+    "noToursFound": "Keine Touren für diese Kategorie gefunden",
+    "readMore": "Mehr lesen",
+    "readLess": "Weniger lesen",
+    "viewLess": "weniger anzeigen",
+    "fullDay": "Ganztägig",
+    "daily": "Täglich",
+    "tourTitle": "Tourtitel nicht verfügbar",
+    "tryDifferentCategory": "Versuchen Sie eine andere Kategorie oder schauen Sie später noch einmal vorbei."
+  },
+  "features": {
+    "noPrepayment": "Keine Vorauszahlung",
+    "reservation3Min": "Reservierung in 3 Minuten",
+    "englishGuides": "Deutschsprachige Reiseführer",
+    "personalManager": "Persönlicher Manager",
+    "insuranceValid": "Versicherung ist gültig",
+    "happyCustomers": "2400 zufriedene Kunden",
+    "realPhotos": "Echte Fotos von Ausflügen",
+    "noHiddenExtra": "Keine versteckten Extras"
+  },
+  "currencyConverter": {
+    "title": "Währungsumrechner",
+    "usdAmount": "USD-Betrag",
+    "currentRate": "Aktueller Kurs",
+    "organizerCommission": "Provision des Veranstalters",
+    "totalAmount": "Gesamtbetrag",
+    "commissionNote": "Provision zum Wechselkurs pro Dollar hinzugefügt",
+    "roundingNote": "Betrag auf Vielfaches von 10 aufgerundet",
+    "liveRates": "Verwendung von Live-Wechselkursen",
+    "calculate": "Berechnen",
+    "calculating": "Berechnung läuft...",
+    "fetchError": "Aktuelle Wechselkurse konnten nicht abgerufen werden. Bitte versuchen Sie es erneut.",
+    "ratesNotLoaded": "Wechselkurse nicht geladen. Bitte warten oder aktualisieren.",
+    "retry": "Erneut versuchen"
+  },
+  "priceList": {
+    "titleWithCity": "{{city}} Ausflüge Preise heute",
+    "historical": "Historisch",
+    "excursion": "AUSFLUG",
+    "priceAdults": "PREIS (Erwachsene)",
+    "priceChildren": "PREIS (Kinder)",
+    "adults": "ERWACHSENE",
+    "children": "KINDER"
   },
   "homepage": {
     "hero": {
@@ -70,19 +112,100 @@
     },
     "payment": {
       "title": "Wir akzeptieren Zahlungen in Rubel, Tenge oder Griwna per Überweisung auf eine Karte:",
-      "rates": "$1 = Zentralbankkurs + 7 ₽ ; oder 10 ₸ ; oder 3 ₴ ; auch Überweisung USD T auf eine Krypto-Wallet",
+      "rates": "$1 = Zentralbankkurs + {{rubCommission}} ₽ ; oder {{tengeCommission}} ₸ ; oder {{uahCommission}} ₴ ; auch Überweisung USD T auf eine Krypto-Wallet",
       "converterButton": "Online-Währungsumrechner öffnen"
     },
-    "priceList": {
+    "PricesSection": {
       "title": "Preise für alle Ausflüge heute",
-      "hurghadaPrices": "Aktuelle Preise am 11/05/2025 in Hurghada",
-      "sharmPrices": "Aktuelle Preise am 11/05/2025 in Sharm El-Sheikh",
-      "marsaPrices": "Aktuelle Preise am 11/05/2025 in Marsa Alam"
+      "currentPricesOn": "Aktuelle Preise am {{date}} in {{cityName}}",
+      "citySummary": "{{total}} Touren verfügbar. Preise von ${{min}} bis ${{max}}. Durchschnittspreis: ${{avg}}"
     },
     "testimonials": {
       "title": "Echte Bewertungen",
       "subtitle": "Bereits 2400 Bewertungen, alle mit Screenshot-Bestätigung"
+    },
+    "faq": {
+      "title": "Häufig gestellte Fragen"
     }
+  },
+  "city": {
+    "about": "Über uns",
+    "currentPrices": "Aktuelle Preise heute in",
+    "allTrips": "ALLE REISEN",
+    "showing": "Zeige",
+    "of": "von",
+    "tours": "Touren",
+    "page": "Seite"
+  },
+  "tripDetail": {
+    "notFound": "Reise nicht gefunden",
+    "duration": "Dauer",
+    "daysOfWeek": "Wochentage",
+    "tripProgram": "Reiseprogramm",
+    "tripProgramSoon": "Informationen zum Reiseprogramm werden bald verfügbar sein.",
+    "whatsIncluded": "Was ist enthalten",
+    "whatsNotIncluded": "Was ist nicht enthalten",
+    "takeWithYou": "Mitbringen",
+    "details": "Details",
+    "customerReviews": "Kundenbewertungen",
+    "moreLikeThis": "Mehr wie diese Reise",
+    "noSimilarTours": "Keine ähnlichen Touren gefunden",
+    "pricing": {
+      "adult": "Erwachsene (ab 12 Jahren)",
+      "child": "Kind (5-11 Jahre)"
+    },
+    "features": {
+      "booking3Min": "Buchung in 3 Min.",
+      "hotelPickup": "Hotel-Abholung",
+      "multilingualGuide": "Deutschsprachiger Führer",
+      "personalManager": "Persönlicher Manager",
+      "realPhotos": "Echte Fotos und Bewertungen",
+      "noPrepayment": "Keine Vorauszahlung",
+      "insuranceValid": "Versicherung gültig",
+      "noHiddenCharges": "Keine versteckten Kosten"
+    },
+    "detailItems": {
+      "pickupDetails": {
+        "title": "Abholungsdetails",
+        "description": "Nachdem Sie bei uns gebucht haben, wird sich unser Agent melden und Ihre Zimmernummer bestätigen"
+      },
+      "hotelPickupOffered": {
+        "title": "Hotel-Abholung angeboten",
+        "description": "Beim Checkout können Sie aus der Liste der inkludierten Hotels auswählen."
+      },
+      "additionalPickup": {
+        "title": "Zusätzliche Abholungsoptionen",
+        "description": "Beim Checkout können Sie aus der Liste von Hurghada, Rotes Meer, Ägypten auswählen"
+      },
+      "cancellationPolicy": {
+        "title": "Stornierungsrichtlinie",
+        "description": "Für eine vollständige Rückerstattung müssen Sie mindestens 24 Stunden vor Beginn der Erfahrung stornieren."
+      }
+    },
+    "review": {
+      "fillAllFields": "Bitte füllen Sie alle Felder aus",
+      "success": "Bewertung erfolgreich eingereicht!",
+      "error": "Fehler beim Einreichen der Bewertung. Bitte versuchen Sie es erneut.",
+      "namePlaceholder": "Name*",
+      "writeReview": "Ihre Bewertung schreiben",
+      "commentPlaceholder": "Teilen Sie Ihre Erfahrung...",
+      "send": "Senden",
+      "customer": "Kunde",
+      "sampleTitle": "Großartige Erfahrung!",
+      "sampleComment": "Fantastische Tour mit wunderbarem Führer und schönen Orten. Sehr empfehlenswert!",
+      "defaultTitle": "Großartige Erfahrung!",
+      "selectProfileImage": "Profilbild auswählen",
+      "selectImage": "Bild auswählen",
+      "fileTooLarge": "Datei zu groß. Maximale Größe ist 5MB.",
+      "invalidFileType": "Bitte wählen Sie eine gültige Bilddatei aus."
+    },
+    "bookNow": "Jetzt buchen",
+    "viewAll": "alle anzeigen",
+    "viewLess": "weniger anzeigen",
+    "loadingMore": "Laden...",
+    "includedDefault": "Hotel-Abholung & Rückfahrt\nKlimatisiertes Fahrzeug\nKamelritt\nBeduinendorf & Beduinentee\nQuad-Bike-Fahrt\nMittagessen & Getränke auf der Yacht",
+    "notIncludedDefault": "Masken\nFlossen\nTauchanzüge",
+    "takeWithYouDefault": "Badeanzug, Handtuch, Wasser, Sonnencreme, Sonnenbrille\nTauchanzüge und Schnorchelflossen können vor Ort gemietet werden"
   },
   "about": {
     "hero": {
@@ -98,7 +221,7 @@
       "noPrepayment": "Keine Vorauszahlung",
       "insuranceValid": "Versicherung gültig",
       "personalManager": "Persönlicher Manager",
-      "englishGuides": "Englischsprachige Führer",
+      "englishGuides": "Deutschsprachige Führer",
       "quickReservation": "Reservierung in 3 Minuten",
       "happyCustomers": "2400 zufriedene Kunden",
       "realPhotos": "Echte Fotos von Ausflügen",
@@ -130,8 +253,8 @@
       "founderDescription": "Mit über 15 Jahren Erfahrung im Tourismus treibt Ahmeds Leidenschaft für die ägyptische Kultur unser Unternehmen an",
       "tourOperationsManager": "Manager für Tourenoperationen",
       "tourManagerDescription": "stellt sicher, dass jeder Ausflug reibungslos verläuft, mit einem scharfen Blick für Details und Kundenzufriedenheit.",
-      "russianRelationsDirector": "Direktor für russische Beziehungen",
-      "russianDirectorDescription": "spezialisiert sich auf die Betreuung unserer russischsprachigen Kunden und sorgt für nahtlose Kommunikation.",
+      "russianRelationsDirector": "Direktor für deutsche Beziehungen",
+      "russianDirectorDescription": "spezialisiert sich auf die Betreuung unserer deutschsprachigen Kunden und sorgt für nahtlose Kommunikation.",
       "customerExperienceLead": "Leiter für Kundenerfahrung",
       "customerLeadDescription": "leitet unser Kundensupport-Team, das sich der persönlichen Unterstützung von Reisenden widmet."
     },
@@ -143,7 +266,7 @@
       },
       "multilingualSupport": {
         "title": "Mehrsprachige Unterstützung",
-        "description": "Betreuung russischsprachiger Reisender mit Inhalten und Führern auf Russisch."
+        "description": "Betreuung deutschsprachiger Reisender mit Inhalten und Führern auf Deutsch."
       },
       "flexiblePayment": {
         "title": "Flexible Zahlung",
@@ -202,20 +325,20 @@
     "methods": {
       "title": "Zahlungsmethoden",
       "subtitle": "Wir akzeptieren die folgenden Zahlungsmethoden:",
-      "transfer": "Überweisung auf Konto nur für Russen (RUB)",
+      "transfer": "Überweisung auf Konto nur für Deutsche (EUR)",
       "cash": "Barzahlung"
     },
     "features": {
       "title": "Merkmale der Zahlung für Ausflüge",
       "noPrepayment": "<span class=\"font-bold\">✓ Keine Vorauszahlung</span><span class=\"font-normal\">. Wir arbeiten ohne Vorauszahlung für Gruppenausflüge. Sie zahlen für das Programm im Bus oder während der Tour. Eine Vorauszahlung kann nur erforderlich sein, wenn Sie ein Programm für 5 Personen ($5 pro Person, bei einigen Programmen) und individuelle Ausflüge oder Programme bestellen, für die Flugtickets oder Dokumente erforderlich sind. Andere Ausflüge können direkt während des Transfers oder vor Ort bezahlt werden;</span>",
       "convenientMethods": "<span class=\"font-bold\">✓ Bequeme Zahlungsmethoden.</span><span class=\"font-normal\"> Sie müssen niemanden suchen, um für die Tour zu bezahlen. Ein Vertreter des Veranstalters vor Ort informiert Sie über die Notwendigkeit der Zahlung. Sie können das Programm bar in Dollar (Banknoten nicht älter als 2000), Euro oder ägyptischen Pfund bezahlen. Die Vorauszahlung für individuelle Ausflüge und Programme, für die Flugtickets gekauft werden müssen, kann auch bar an den Vertreter des Veranstalters erfolgen. Um uns zu kontaktieren, wenden Sie sich an unsere Buchungsabteilung über einen beliebigen Messenger,</span>",
-      "nonCashPayment": "<span class=\"font-normal\">✓ Möglichkeit der bargeldlosen Zahlung.</span><span class=\"font-normal\"> Für Ihre Bequemlichkeit haben wir die Möglichkeit vorgesehen, eine Anzahlung oder die vollen Kosten des Programms auf die Bankkarten der Veranstalter in Rubel, Tenge, Griwna oder Euro zu überweisen, mit einer kleinen Gebühr, die auf der Hauptseite unserer Website angegeben ist. Sie können auch Zahlungen in USDT auf eine Krypto-Wallet </span><span class=\"font-normal\">ohne Gebühren</span><span class=\"font-normal\"> überweisen. Für weitere Details kontaktieren Sie bitte die Buchungsabteilung.</span>"
+      "nonCashPayment": "<span class=\"font-normal\">✓ Möglichkeit der bargeldlosen Zahlung.</span><span class=\"font-normal\"> Für Ihre Bequemlichkeit haben wir die Möglichkeit vorgesehen, eine Anzahlung oder die vollen Kosten des Programms auf die Bankkarten der Veranstalter in Euro, Rubel, Tenge oder Griwna zu überweisen, mit einer kleinen Gebühr, die auf der Hauptseite unserer Website angegeben ist. Sie können auch Zahlungen in USDT auf eine Krypto-Wallet </span><span class=\"font-normal\">ohne Gebühren</span><span class=\"font-normal\"> überweisen. Für weitere Details kontaktieren Sie bitte die Buchungsabteilung.</span>"
     },
     "refund": {
       "title": "Rückerstattung der Vorauszahlung für Ausflugsprogramme",
       "conditions": "Der Veranstalter erstattet Ihre Vorauszahlung vollständig zurück, wenn: Sie diese bar oder per Überweisung auf eine Bankkarte bezahlt haben und die Tour aufgrund eines Verschuldens des Veranstalters nicht stattgefunden hat; Sie das Programm mehr als einen Tag vor dem Datum der Tour storniert haben.",
       "exception": "Ausnahme sind Programme, die den Kauf von Flugtickets erfordern. In solchen Fällen kann der Veranstalter die Vorauszahlung nach dem Kauf der Flugtickets nicht zurückerstatten.",
-      "process": "Die Vorauszahlung kann bar oder auf eine Bankkarte in Rubel zum Wechselkurs am Tag der Rückerstattung oder zum Kurs, der am Tag der Überweisung der Vorauszahlung auf die Bankkarte festgelegt wurde, zurückerstattet werden. Rückerstattungen erfolgen innerhalb von 3 Kalendertagen."
+      "process": "Die Vorauszahlung kann bar oder auf eine Bankkarte in Euro zum Wechselkurs am Tag der Rückerstattung oder zum Kurs, der am Tag der Überweisung der Vorauszahlung auf die Bankkarte festgelegt wurde, zurückerstattet werden. Rückerstattungen erfolgen innerhalb von 3 Kalendertagen."
     },
     "obligations": {
       "title": "Was tun, wenn die Veranstalter ihre Verpflichtungen nicht ordnungsgemäß erfüllen",
@@ -231,7 +354,7 @@
       "afterTour": "<span class=\"font-bold\">Wenn Sie nach dem Ende der </span><span class=\"font-normal\">Tour an unsere Buchungsabteilung geschrieben haben und </span><span class=\"font-bold\">einen Rabatt, eine vollständige oder teilweise </span><span class=\"font-normal\">Rückerstattung des an den </span><span class=\"font-bold\">Veranstalter gezahlten Betrags beantragen möchten</span><span class=\"font-normal\">, müssen Sie die folgenden Punkte erfüllen:</span>",
       "requirement1": "<span class=\"font-normal\">▲ </span><span class=\"font-bold\">Schreiben Sie an unsere Buchungsabteilung</span><span class=\"font-normal\"> und melden Sie die Abweichung zwischen dem durchgeführten Programm und dem auf unserer Website beschriebenen; fügen Sie unbedingt eine Videobestätigung der Beschwerde bei, in der die Nichtübereinstimmung des durchgeführten Programms sichtbar ist;</span>",
       "requirement2": "<span class=\"font-normal\">▲ </span><span class=\"font-bold\">Wenn keine Videodateien vorhanden sind</span><span class=\"font-normal\"> und der obige Punkt nicht erfüllt werden kann, </span><span class=\"font-bold\">müssen Sie: Einen Antrag auf Rückerstattung</span><span class=\"font-normal\"> in freier Form schreiben, mit einer detaillierten Darstellung der Nichtübereinstimmung des Programms (ausdrucken); </span><span class=\"font-bold\">ein Foto des Antrags </span><span class=\"font-normal\">mit Ihrer Unterschrift und Datum senden; </span><span class=\"font-bold\">ähnliche Erklärungen</span><span class=\"font-normal\"> von zwei anderen Touristen beifügen, die mit Ihnen auf der Tour waren und die das Programm getrennt von Ihnen gebucht haben (zwei separate Buchungen), mit ihren Telefonnummern im WhatsApp-Messenger und Informationen, bei welchem Unternehmen sie die Tour gebucht haben;</span>",
-      "requirement3": "<span class=\"font-normal\">▲</span><span class=\"font-bold\"> Warten Sie auf die Prüfung des Antrags</span><span class=\"font-normal\"> durch die Geschäftsleitung des Veranstalters und die Bestätigung der Rückerstattung (bis zu 7 Kalendertage); erhalten Sie die Rückerstattung bar in Dollar oder auf eine Bankkarte in Rubel, Griwna, Tenge oder Euro zum Wechselkurs am Tag der Rückerstattung oder zum Kurs, der am Tag der Überweisung der Zahlung auf die Bankkarte des Veranstalters festgelegt wurde.</span>",
+      "requirement3": "<span class=\"font-normal\">▲</span><span class=\"font-bold\"> Warten Sie auf die Prüfung des Antrags</span><span class=\"font-normal\"> durch die Geschäftsleitung des Veranstalters und die Bestätigung der Rückerstattung (bis zu 7 Kalendertage); erhalten Sie die Rückerstattung bar in Dollar oder auf eine Bankkarte in Euro, Rubel, Griwna oder Tenge zum Wechselkurs am Tag der Rückerstattung oder zum Kurs, der am Tag der Überweisung der Zahlung auf die Bankkarte des Veranstalters festgelegt wurde.</span>",
       "disclaimer": "<span class=\"font-bold\">Unser Onlinedienst ist keine autorisierte Person für Rückerstattungen für Ausflüge.</span><span class=\"font-normal\"> Sie zahlen für die Programme direkt an die Veranstalter der Ausflüge während des Transfers vor Ort oder per Überweisung auf eine Bankkarte; Sie haben keine Handels- und Geldbeziehungen mit uns. Wir bieten kostenlose Informationsunterstützung und die notwendige Hilfe und bleiben jeden Tag von 07:30 bis 23:00 Kairoer Zeit in Kontakt. </span><span class=\"font-bold\">Um die Situation zu Ihren Gunsten zu lösen, benötigen wir unterstützende Medienmaterialien (Video</span><span class=\"font-normal\">/Fotos), um sie der Geschäftsleitung der Veranstalter vorzulegen. Albatross Travel Egypt ist daran interessiert, alle Konfliktsituationen zwischen Touristen und Tourveranstaltern so schnell wie möglich zu lösen. Wir tun unser Bestes, um sicherzustellen, dass der Urlaub in Ägypten nur positive Emotionen und lebendige Erinnerungen bringt.</span>"
     }
   },

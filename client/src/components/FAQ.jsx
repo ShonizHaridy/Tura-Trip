@@ -85,7 +85,7 @@ const FAQ = () => {
         {/* Section Title - Cursive Style */}
         <div className="text-center mb-12">
           <h2 className="text-4xl lg:text-5xl text-danim-800 mb-2 font-great-vibes font-normal ">
-            Frequently Asked Questions
+            {t("homepage.faq.title")}
           </h2>
         </div>
 

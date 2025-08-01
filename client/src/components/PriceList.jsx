@@ -5,6 +5,16 @@ import { useTranslation } from "react-i18next";
 const PriceList = ({ isOpen, onClose, pricesData = [] }) => {
   const { t } = useTranslation();
 
+  const getCityDisplayName = () => {
+    console.log("Prices Data:", pricesData);
+  if (pricesData.length === 1) {
+    return pricesData[0].city_name;
+  } else if (pricesData.length > 1) {
+    return t("priceList.allCities"); // Add this translation
+  }
+  return t("priceList.priceList"); // Fallback
+};
+
   // Fallback data if no pricesData provided
   const defaultExcursions = [
     {
@@ -33,7 +43,7 @@ const PriceList = ({ isOpen, onClose, pricesData = [] }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-white/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl p-4 md:p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-lg">
         {/* Header */}
         <div className="flex justify-between items-center pb-4 border-b border-gray-300 mb-6">
@@ -57,7 +67,7 @@ const PriceList = ({ isOpen, onClose, pricesData = [] }) => {
               />
             </svg>
             <h2 className="text-lg md:text-[22px] font-bold text-[#2D467C] font-cairo">
-              {t("homepage.priceList.title")}
+                {t("priceList.titleWithCity", { city: getCityDisplayName() })}
             </h2>
           </div>
           <button
@@ -89,7 +99,7 @@ const PriceList = ({ isOpen, onClose, pricesData = [] }) => {
         <div className="mb-4">
           <div className="bg-[#BEE3E3] rounded-[10px] px-2 py-3 md:py-4 flex justify-center items-center">
             <h3 className="text-[#120E2B] text-center font-cairo text-lg md:text-[20px] font-bold">
-              Historical
+              {t("priceList.historical")}
             </h3>
           </div>
         </div>
@@ -107,7 +117,7 @@ const PriceList = ({ isOpen, onClose, pricesData = [] }) => {
               <div className="flex justify-between items-center">
                 <div className="text-center">
                   <div className="text-[#010818] font-roboto text-xs font-medium mb-1">
-                    ADULTS
+                    {t("priceList.adults")}
                   </div>
                   <div className="text-[#2D467C] font-roboto text-sm font-medium">
                     {excursion.adultPrice}
@@ -115,7 +125,7 @@ const PriceList = ({ isOpen, onClose, pricesData = [] }) => {
                 </div>
                 <div className="text-center">
                   <div className="text-[#010818] font-roboto text-xs font-medium mb-1">
-                    CHILDREN
+                    {t("priceList.children")}
                   </div>
                   <div className="text-[#2D467C] font-roboto text-sm font-medium">
                     {excursion.childPrice}
@@ -134,7 +144,7 @@ const PriceList = ({ isOpen, onClose, pricesData = [] }) => {
               <div className="flex-1 min-w-[300px]">
                 <div className="bg-[#ECEFF7] px-4 py-3 border-b border-[#E6E6E8]">
                   <div className="text-[#010818] font-roboto text-[16px] leading-[19.2px]">
-                    EXCURSION
+                    {t("priceList.excursion")}
                   </div>
                 </div>
                 {excursions.map((excursion, index) => (
@@ -154,7 +164,7 @@ const PriceList = ({ isOpen, onClose, pricesData = [] }) => {
               <div className="w-48">
                 <div className="bg-[#ECEFF7] px-4 py-3 border-b border-[#E6E6E8]">
                   <div className="text-[#010818] font-roboto text-[16px] leading-[19.2px]">
-                    PRICE (adults)
+                    {t("priceList.priceAdults")}
                   </div>
                 </div>
                 {excursions.map((excursion, index) => (
@@ -174,7 +184,7 @@ const PriceList = ({ isOpen, onClose, pricesData = [] }) => {
               <div className="w-48">
                 <div className="bg-[#ECEFF7] px-4 py-3 border-b border-[#E6E6E8]">
                   <div className="text-[#010818] font-roboto text-[16px] leading-[19.2px]">
-                    PRICE (children)
+                    {t("priceList.priceChildren")}
                   </div>
                 </div>
                 {excursions.map((excursion, index) => (
