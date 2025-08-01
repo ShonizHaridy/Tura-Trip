@@ -24,10 +24,12 @@ class CitiesController {
       query += ' ORDER BY c.name ASC';
 
       const [cities] = await pool.execute(query, queryParams);
+      const processedCities = imageHelper.processArrayImages(cities, 'city');
+
 
       res.json({
         success: true,
-        data: cities
+        data: processedCities
       });
     } catch (error) {
       console.error('Get all cities error:', error);

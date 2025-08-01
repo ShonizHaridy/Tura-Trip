@@ -11,6 +11,7 @@ USE tura_trip;
 CREATE TABLE cities (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
+    tagline VARCHAR(255),
     description TEXT,
     image VARCHAR(255),
     is_active BOOLEAN DEFAULT TRUE,
@@ -27,6 +28,7 @@ CREATE TABLE city_translations (
     city_id INT NOT NULL,
     language_code ENUM('en', 'ru', 'it', 'de') NOT NULL,
     name VARCHAR(100) NOT NULL,
+    tagline VARCHAR(255),
     description TEXT,
     
     FOREIGN KEY (city_id) REFERENCES cities(id) ON DELETE CASCADE,
@@ -150,7 +152,7 @@ CREATE TABLE faq_translations (
     question TEXT NOT NULL,
     answer TEXT NOT NULL,
     
-    FOREIGN KEY (faq_id) REFERENCES faq(id) ON DELETE CASCADE,
+    FOREIGN KEY (faq_id) REFERENCES faqs(id) ON DELETE CASCADE,
     UNIQUE KEY unique_faq_language (faq_id, language_code),
     
     INDEX idx_faq_lang (faq_id, language_code)

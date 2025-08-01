@@ -69,6 +69,53 @@ const seedDatabase = async () => {
       ('Luxor', 'Open-air museum with Valley of the Kings and magnificent ancient temples.', 'luxor.jpg', TRUE)
     `);
 
+    // Update cities with taglines
+    await connection.execute(`
+      UPDATE cities SET tagline = CASE
+        WHEN id = 1 THEN 'A hub for marine activities and desert safaris.'
+        WHEN id = 2 THEN 'A hub for marine activities and desert safaris.'
+        WHEN id = 3 THEN 'A Paradise of stunning beaches and diving spots.'
+        WHEN id = 4 THEN 'Ancient Wonders'
+        WHEN id = 5 THEN 'Open Air Museum'
+      END
+    `);
+
+    // Update city translations with taglines for all languages
+    await connection.execute(`
+      UPDATE city_translations SET tagline = CASE
+        -- Hurghada taglines
+        WHEN city_id = 1 AND language_code = 'en' THEN 'A hub for marine activities and desert safaris.'
+        WHEN city_id = 1 AND language_code = 'ru' THEN 'Центр морских развлечений и пустынных сафари.'
+        WHEN city_id = 1 AND language_code = 'it' THEN 'Un centro per attività marine e safari nel deserto.'
+        WHEN city_id = 1 AND language_code = 'de' THEN 'Ein Zentrum für Meeresaktivitäten und Wüstensafaris.'
+        
+        -- Sharm El-Sheikh taglines
+        WHEN city_id = 2 AND language_code = 'en' THEN 'A hub for marine activities and desert safaris.'
+        WHEN city_id = 2 AND language_code = 'ru' THEN 'Центр морских развлечений и пустынных сафари.'
+        WHEN city_id = 2 AND language_code = 'it' THEN 'Un centro per attività marine e safari nel deserto.'
+        WHEN city_id = 2 AND language_code = 'de' THEN 'Ein Zentrum für Meeresaktivitäten und Wüstensafaris.'
+        
+        -- Marsa Alam taglines
+        WHEN city_id = 3 AND language_code = 'en' THEN 'A paradise of stunning beaches and diving spots.'
+        WHEN city_id = 3 AND language_code = 'ru' THEN 'Рай потрясающих пляжей и мест для дайвинга.'
+        WHEN city_id = 3 AND language_code = 'it' THEN 'Un paradiso di spiagge mozzafiato e spot per immersioni.'
+        WHEN city_id = 3 AND language_code = 'de' THEN 'Ein Paradies mit atemberaubenden Stränden und Tauchplätzen.'
+        
+        -- Cairo taglines
+        WHEN city_id = 4 AND language_code = 'en' THEN 'Ancient wonders and timeless history.'
+        WHEN city_id = 4 AND language_code = 'ru' THEN 'Древние чудеса и вечная история.'
+        WHEN city_id = 4 AND language_code = 'it' THEN 'Meraviglie antiche e storia senza tempo.'
+        WHEN city_id = 4 AND language_code = 'de' THEN 'Antike Wunder und zeitlose Geschichte.'
+        
+        -- Luxor taglines
+        WHEN city_id = 5 AND language_code = 'en' THEN 'The world\'s greatest open-air museum.'
+        WHEN city_id = 5 AND language_code = 'ru' THEN 'Величайший музей под открытым небом.'
+        WHEN city_id = 5 AND language_code = 'it' THEN 'Il più grande museo a cielo aperto del mondo.'
+        WHEN city_id = 5 AND language_code = 'de' THEN 'Das größte Freilichtmuseum der Welt.'
+      END
+      WHERE city_id IN (1, 2, 3, 4, 5)
+    `);
+
     // Insert city translations (add this after the cities insert)
     await connection.execute(`
       INSERT INTO city_translations (city_id, language_code, name, description) VALUES
@@ -294,7 +341,85 @@ await connection.execute(`
       (3, 'de', 'Ausgezeichneter Service! Tura Trip ist die beste Firma für Reisen in Ägypten. Großartige Führer, komfortabler Transport und unvergessliche Eindrücke!')
     `);
 
+      // More data
 
+      // After the existing tour inserts, add these additional tours:
+
+    // Insert additional tours with cover images
+    await connection.execute(`
+      INSERT INTO tours (city_id, category_id, location, price_adult, price_child, featured_tag, discount_percentage, status, views, cover_image) VALUES
+      (2, 2, 'Ras Mohammed National Park', 85.00, 45.00, 'popular', 0.00, 'active', 1150, 'ras_mohammed.jpeg'),
+      (1, 3, 'Eastern Desert', 95.00, 50.00, 'new', 20.00, 'active', 890, 'safari.jpg'),
+      (5, 1, 'Luxor, Egypt', 195.00, 100.00, 'popular', 15.00, 'active', 1680, 'luxor.png'),
+      (1, 2, 'Hurghada Reefs', 65.00, 35.00, 'great_value', 10.00, 'active', 720, 'ras_mohammed.jpeg'),
+      (2, 3, 'Sinai Desert', 110.00, 60.00, 'new', 0.00, 'active', 560, 'safari.jpg'),
+      (4, 1, 'Cairo and Giza', 160.00, 85.00, 'popular', 12.00, 'active', 1340, 'luxor.png')
+    `);
+
+    // Add the additional tour content after your existing tourContent array:
+    const additionalTourContent = [
+      // Tour 7 - Ras Mohammed National Park
+      [7, 'en', 'Ras Mohammed National Park Snorkeling', 'Sea Excursions', '6 Hours', 'Daily', 
+      'Explore the underwater paradise of Ras Mohammed National Park with its pristine coral reefs and diverse marine life.',
+      '["Boat transportation", "Snorkeling equipment", "Professional guide", "Lunch", "Soft drinks", "Park fees"]',
+      '["Personal expenses", "Alcoholic beverages", "Underwater photography", "Tips"]',
+      '["08:00 - Hotel pickup", "09:00 - Boat departure from Sharm", "10:30 - First snorkeling stop", "12:00 - Second reef location", "13:00 - Lunch on boat", "14:30 - Third snorkeling spot", "16:00 - Return journey", "17:30 - Hotel drop-off"]',
+      '["Swimwear", "Towel", "Sunscreen SPF 50+", "Sunglasses", "Underwater camera", "Light snacks"]'],
+
+      [7, 'ru', 'Снорклинг в национальном парке Рас-Мохаммед', 'Морские экскурсии', '6 часов', 'Ежедневно',
+      'Исследуйте подводный рай национального парка Рас-Мохаммед с его нетронутыми коралловыми рифами и разнообразной морской жизнью.',
+      '["Транспорт на лодке", "Снаряжение для снорклинга", "Профессиональный гид", "Обед", "Безалкогольные напитки", "Входные билеты в парк"]',
+      '["Личные расходы", "Алкогольные напитки", "Подводная фотография", "Чаевые"]',
+      '["08:00 - Трансфер из отеля", "09:00 - Отправление лодки из Шарма", "10:30 - Первая остановка для снорклинга", "12:00 - Второй риф", "13:00 - Обед на лодке", "14:30 - Третье место для снорклинга", "16:00 - Обратный путь", "17:30 - Возвращение в отель"]',
+      '["Купальник", "Полотенце", "Солнцезащитный крем SPF 50+", "Солнцезащитные очки", "Подводная камера", "Легкие закуски"]'],
+
+      // Tour 8 - Premium Desert Safari
+      [8, 'en', 'Premium Desert Safari Adventure', 'Safari & Adventure', '8 Hours', 'Daily except Sunday',
+      'Ultimate desert experience with quad biking, camel rides, sandboarding, traditional Bedouin camp, and stargazing.',
+      '["Quad bike adventure", "Professional guide", "Camel riding", "Sandboarding", "Bedouin dinner", "Traditional show", "Stargazing session", "Safety equipment"]',
+      '["Personal expenses", "Professional photos", "Extra drinks", "Shisha"]',
+      '["13:00 - Hotel pickup", "14:30 - Quad biking session", "16:00 - Sandboarding", "17:00 - Camel ride", "18:00 - Bedouin camp arrival", "19:30 - Traditional dinner", "20:30 - Cultural show", "21:30 - Stargazing", "22:30 - Hotel return"]',
+      '["Comfortable clothes", "Closed shoes", "Sunglasses", "Scarf for dust", "Light jacket for evening", "Camera"]'],
+
+      [8, 'ru', 'Премиум сафари в пустыне', 'Сафари и приключения', '8 часов', 'Ежедневно кроме воскресенья',
+      'Максимальное приключение в пустыне с поездками на квадроциклах, верблюдах, сэндбордингом, традиционным лагерем бедуинов и наблюдением за звездами.',
+      '["Приключение на квадроцикле", "Профессиональный гид", "Поездка на верблюде", "Сэндбординг", "Ужин у бедуинов", "Традиционное шоу", "Наблюдение за звездами", "Защитное снаряжение"]',
+      '["Личные расходы", "Профессиональные фото", "Дополнительные напитки", "Кальян"]',
+      '["13:00 - Трансфер из отеля", "14:30 - Поездка на квадроциклах", "16:00 - Сэндбординг", "17:00 - Поездка на верблюде", "18:00 - Прибытие в лагерь бедуинов", "19:30 - Традиционный ужин", "20:30 - Культурное шоу", "21:30 - Наблюдение за звездами", "22:30 - Возвращение в отель"]',
+      '["Удобная одежда", "Закрытая обувь", "Солнцезащитные очки", "Шарф от пыли", "Легкая куртка на вечер", "Фотоаппарат"]'],
+
+      // Tour 9 - Luxor Ancient Wonders
+      [9, 'en', 'Luxor Ancient Wonders Tour', 'Historical Cities', 'Full Day', 'Daily',
+      'Journey through time in Luxor, the world\'s greatest open-air museum. Visit Valley of the Kings, Karnak Temple, and Hatshepsut Temple.',
+      '["Round-trip flights", "Egyptologist guide", "All entrance fees", "Lunch at Nile view restaurant", "Air-conditioned transport", "Small group tour"]',
+      '["Personal expenses", "Drinks", "Tips", "Photography tickets", "Optional tomb visits"]',
+      '["05:30 - Hotel pickup", "07:00 - Flight to Luxor", "08:30 - Valley of the Kings", "10:30 - Hatshepsut Temple", "12:00 - Lunch break", "14:00 - Karnak Temple Complex", "16:00 - Free time/shopping", "17:30 - Flight back", "19:00 - Hotel arrival"]',
+      '["Comfortable walking shoes", "Sun hat", "Sunscreen", "Camera", "Cash for tips", "Light jacket"]'],
+
+      [9, 'ru', 'Тур по древним чудесам Луксора', 'Исторические города', 'Полный день', 'Ежедневно',
+      'Путешествие во времени в Луксоре, величайшем музее под открытым небом. Посетите Долину царей, храм Карнак и храм Хатшепсут.',
+      '["Авиаперелет туда-обратно", "Гид-египтолог", "Все входные билеты", "Обед в ресторане с видом на Нил", "Транспорт с кондиционером", "Тур в малой группе"]',
+      '["Личные расходы", "Напитки", "Чаевые", "Билеты на фотосъемку", "Дополнительные посещения гробниц"]',
+      '["05:30 - Трансфер из отеля", "07:00 - Вылет в Луксор", "08:30 - Долина царей", "10:30 - Храм Хатшепсут", "12:00 - Обеденный перерыв", "14:00 - Комплекс храмов Карнак", "16:00 - Свободное время/шоппинг", "17:30 - Обратный рейс", "19:00 - Прибытие в отель"]',
+      '["Удобная обувь для ходьбы", "Солнцезащитная шляпа", "Солнцезащитный крем", "Фотоаппарат", "Наличные для чаевые", "Легкая куртка"]']
+    ];
+
+    // Insert additional tour content
+    for (const content of additionalTourContent) {
+      await connection.execute(`
+        INSERT INTO tour_content (tour_id, language_code, title, category, duration, availability, description, included, not_included, trip_program, take_with_you)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, content);
+    }
+
+    // Add additional reviews
+    await connection.execute(`
+      INSERT INTO reviews (tour_id, client_name, rating, comment, tour_name, review_date, is_active) VALUES
+      (7, 'David Miller', 5, 'Incredible snorkeling experience! Ras Mohammed has the most beautiful coral reefs I\\'ve ever seen. Highly recommend!', 'Ras Mohammed National Park Snorkeling', '2024-01-28', TRUE),
+      (8, 'Lisa Anderson', 5, 'Best desert safari ever! The stargazing was magical and the Bedouin dinner was authentic and delicious.', 'Premium Desert Safari Adventure', '2024-01-30', TRUE),
+      (9, 'Roberto Bianchi', 4, 'Luxor is breathtaking! So much history in one place. The guide was very knowledgeable about ancient Egypt.', 'Luxor Ancient Wonders Tour', '2024-02-01', TRUE),
+      (7, 'Helen Smith', 5, 'Perfect day trip! The marine life at Ras Mohammed is spectacular. Great organization and friendly crew.', 'Ras Mohammed National Park Snorkeling', '2024-02-03', TRUE)
+    `);
 
     console.log('✅ Database seeded successfully!');
     console.log('👤 Admin credentials: admin@turatrip.com / admin123');

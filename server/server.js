@@ -9,6 +9,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 const morgan = require('morgan');
+const path = require('path');
 const { testConnection } = require('./config/database');
 const currencyService = require('./services/currencyService');
 require('dotenv').config();
@@ -125,13 +126,13 @@ app.use(express.urlencoded({
 }));
 
 // Static files with proper caching
-app.use('/uploads', express.static('uploads', {
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
   maxAge: process.env.NODE_ENV === 'production' ? '7d' : '1h',
   etag: true,
   lastModified: true,
-  setHeaders: (res, path) => {
-    if (path.endsWith('.jpg') || path.endsWith('.jpeg') || path.endsWith('.png') || path.endsWith('.webp')) {
-      res.setHeader('Cache-Control', 'public, max-age=604800'); // 7 days for images
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg') || filePath.endsWith('.png') || filePath.endsWith('.webp')) {
+      res.setHeader('Cache-Control', 'public, max-age=604800');
     }
   }
 }));

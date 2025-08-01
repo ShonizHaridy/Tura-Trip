@@ -680,6 +680,7 @@ class ContentController {
       `;
 
       const [reviews] = await pool.execute(query, [language]);
+      processedReviews = imageHelper.processArrayImages(cities, 'review');
 
       res.json({
         success: true,
@@ -723,10 +724,11 @@ class ContentController {
         `;
 
         const [reviews] = await pool.execute(query, [language_code]);
+        processedReviews = imageHelper.processArrayImages(cities, 'review');
 
         res.json({
           success: true,
-          data: reviews
+          data: processedReviews
         });
       } else {
         // Get all reviews with all translations (multi-query approach)

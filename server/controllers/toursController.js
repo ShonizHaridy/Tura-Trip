@@ -1,5 +1,6 @@
 const { pool } = require('../config/database');
 const fs = require('fs').promises;
+const imageHelper = require('../utils/imageHelper');
 
 class ToursController {
   // Get all tours with filters and pagination
@@ -116,13 +117,15 @@ async getAllTours(req, res) {
 
     // Execute with only WHERE parameters (LIMIT/OFFSET are safely built into string)
     const [tours] = await pool.execute(toursQuery, whereParams);
+    const processedTours = imageHelper.processArrayImages(tours, 'tour');
+
 
     console.log('✅ Tours query succeeded, found:', tours.length, 'tours');
 
     res.json({
       success: true,
       data: {
-        tours,
+        tours: processedTours,
         pagination: {
           currentPage: safePage,
           totalPages: Math.ceil(totalTours / safeLimit),
@@ -167,6 +170,8 @@ async getTourById(req, res) {
     }
 
     const tour = tourRows[0];
+    const processedTour = imageHelper.processImages(tour, 'tour');
+
 
     // Get tour content for all languages
     const [contentRows] = await pool.execute(
@@ -174,11 +179,17 @@ async getTourById(req, res) {
       [id]
     );
 
+
     // Get tour images
     const [imageRows] = await pool.execute(
       'SELECT * FROM tour_images WHERE tour_id = ? ORDER BY id',
       [id]
     );
+
+    const processedImages = imageRows.map(img => ({
+      ...img,
+      image_url: imageHelper.getImageUrl(img.image_url)
+    }));
 
     // Get reviews
     const [reviewRows] = await pool.execute(`
@@ -186,6 +197,8 @@ async getTourById(req, res) {
       WHERE tour_id = ? AND is_active = true
       ORDER BY review_date DESC
     `, [id]);
+
+    const processedReviews = imageHelper.processArrayImages(reviewRows, 'review');
 
     // Organize content by language (with safe JSON parsing)
     const content = {};
@@ -249,10 +262,10 @@ async getTourById(req, res) {
     res.json({
       success: true,
       data: {
-        tour,
+        tour: processedTour,
         content,
-        images: imageRows,
-        reviews: reviewRows,
+        images: processedImages,
+        reviews: processedReviews,
         avgRating: Math.round(avgRating * 10) / 10,
         reviewsCount: reviewRows.length
       }

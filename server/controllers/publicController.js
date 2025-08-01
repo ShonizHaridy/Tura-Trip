@@ -1,18 +1,20 @@
 const { pool } = require('../config/database');
 const currencyService = require('../services/currencyService');
+const imageHelper = require('../utils/imageHelper');
+
+const emailService = require('../services/emailService');
+const countryService = require('../services/countryService');
+
 
 class PublicController {
   // Get homepage data with RANDOM selections as requested
   async getHomepageData(req, res) {
     try {
       const { language = 'en' } = req.query;
-      
-      // Base URL for images
-      const baseImageUrl = `${process.env.API_BASE_URL || 'http://localhost:5000'}/uploads/`;
 
-      // Get featured tours with PROPER TRANSLATIONS
+      // Get featured tours with proper translations
       const [featuredTours] = await pool.execute(`
-        SELECT 
+        SELECT
           t.*,
           COALESCE(tc.title, 'Tour Title Not Available') as title,
           COALESCE(tc.category, cat.name) as category,
@@ -29,22 +31,29 @@ class PublicController {
         LEFT JOIN tour_categories cat ON t.category_id = cat.id
         LEFT JOIN tour_category_translations cat_trans ON cat.id = cat_trans.category_id AND cat_trans.language_code = ?
         WHERE t.status = 'active' AND t.featured_tag IS NOT NULL
-        ORDER BY RAND()
+        ORDER BY 
+          CASE WHEN t.featured_tag IS NOT NULL THEN 0 ELSE 1 END,
+          t.views DESC,
+          t.created_at DESC
         LIMIT 6
       `, [language, language, language]);
 
-      // Process featured tours with full image URLs
-      const processedFeaturedTours = featuredTours.map(tour => ({
-        ...tour,
-        cover_image_url: tour.cover_image ? `${baseImageUrl}${tour.cover_image}` : null,
-        days_of_week: tour.availability || 'Daily'
-      }));
+      // Check if there are more than 6 featured tours available for view more button
+      const [featuredCount] = await pool.execute(`
+        SELECT COUNT(*) as total
+        FROM tours t
+        WHERE t.status = 'active' AND t.featured_tag IS NOT NULL
+      `);
 
-      // Get 3 cities RANDOMLY for explore section WITH TRANSLATIONS
+      // Process featured tours with images
+      const processedFeaturedTours = imageHelper.processArrayImages(featuredTours, 'tour');
+
+      // Get 3 cities RANDOMLY for explore section WITH TRANSLATIONS and tagline
       const [exploreCities] = await pool.execute(`
-        SELECT 
+        SELECT
           c.*,
           COALESCE(ct.name, c.name) as name,
+          COALESCE(ct.tagline, c.tagline) as tagline,
           COALESCE(ct.description, c.description) as description,
           COUNT(t.id) as tours_count,
           MIN(t.price_adult) as min_price
@@ -52,21 +61,18 @@ class PublicController {
         LEFT JOIN city_translations ct ON c.id = ct.city_id AND ct.language_code = ?
         LEFT JOIN tours t ON c.id = t.city_id AND t.status = 'active'
         WHERE c.is_active = true
-        GROUP BY c.id, COALESCE(ct.name, c.name), COALESCE(ct.description, c.description), c.image
+        GROUP BY c.id, COALESCE(ct.name, c.name), COALESCE(ct.tagline, c.tagline), COALESCE(ct.description, c.description), c.image
         HAVING tours_count > 0
         ORDER BY RAND()
         LIMIT 3
       `, [language]);
 
-      // Process explore cities with full image URLs
-      const processedExploreCities = exploreCities.map(city => ({
-        ...city,
-        image_url: city.image ? `${baseImageUrl}${city.image}` : null
-      }));
+      // Process explore cities with images
+      const processedExploreCities = imageHelper.processArrayImages(exploreCities, 'city');
 
       // Get ALL cities for header with TRANSLATIONS
       const [allCitiesForHeader] = await pool.execute(`
-        SELECT 
+        SELECT
           c.id,
           COALESCE(ct.name, c.name) as name,
           c.image,
@@ -80,15 +86,12 @@ class PublicController {
         ORDER BY COALESCE(ct.name, c.name) ASC
       `, [language]);
 
-      // Process header cities with full image URLs
-      const processedHeaderCities = allCitiesForHeader.map(city => ({
-        ...city,
-        image_url: city.image ? `${baseImageUrl}${city.image}` : null
-      }));
+      // Process header cities with images
+      const processedHeaderCities = imageHelper.processArrayImages(allCitiesForHeader, 'city');
 
       // Get today's prices with TRANSLATED TOUR TITLES
       const [allCitiesWithPrices] = await pool.execute(`
-        SELECT 
+        SELECT
           c.id as city_id,
           COALESCE(ct.name, c.name) as city_name,
           COUNT(t.id) as total_tours,
@@ -110,7 +113,7 @@ class PublicController {
         ORDER BY COALESCE(ct.name, c.name) ASC
       `, [language, language]);
 
-      // Process tours with prices (same as before)
+      // Process tours with prices
       const processedCitiesWithPrices = allCitiesWithPrices.map(city => {
         const tours = [];
         if (city.tours_with_prices) {
@@ -125,7 +128,7 @@ class PublicController {
             });
           });
         }
-        
+
         return {
           city_id: city.city_id,
           city_name: city.city_name,
@@ -137,9 +140,9 @@ class PublicController {
         };
       });
 
-      // Get PROMOTIONAL REVIEWS (already correct)
+      // Get PROMOTIONAL REVIEWS
       const [promotionalReviews] = await pool.execute(`
-        SELECT 
+        SELECT
           pr.id,
           pr.client_name,
           pr.screenshot_image,
@@ -153,11 +156,8 @@ class PublicController {
         LIMIT 6
       `, [language]);
 
-      // Process promotional reviews with full image URLs
-      const processedPromotionalReviews = promotionalReviews.map(review => ({
-        ...review,
-        screenshot_image_url: review.screenshot_image ? `${baseImageUrl}${review.screenshot_image}` : null
-      }));
+      // Process promotional reviews with images
+      const processedPromotionalReviews = imageHelper.processArrayImages(promotionalReviews, 'review');
 
       res.json({
         success: true,
@@ -167,6 +167,7 @@ class PublicController {
           allCitiesForHeader: processedHeaderCities,
           todaysPrices: processedCitiesWithPrices,
           promotionalReviews: processedPromotionalReviews,
+          hasMoreFeatured: featuredCount[0].total > 6, // For view more button logic
           serverDate: new Date().toISOString().split('T')[0]
         }
       });
@@ -188,23 +189,19 @@ class PublicController {
         SELECT
           c.id,
           COALESCE(ct.name, c.name) as name,
-          COALESCE(ct.description, c.description) as description,
+          COALESCE(ct.tagline, c.tagline) as description,
           c.image,
           COUNT(t.id) as tours_count
         FROM cities c
         LEFT JOIN city_translations ct ON c.id = ct.city_id AND ct.language_code = ?
         LEFT JOIN tours t ON c.id = t.city_id AND t.status = 'active'
         WHERE c.is_active = true
-        GROUP BY c.id, COALESCE(ct.name, c.name), COALESCE(ct.description, c.description), c.image
+        GROUP BY c.id, COALESCE(ct.name, c.name), COALESCE(ct.tagline, c.tagline), c.image
         HAVING tours_count > 0
         ORDER BY COALESCE(ct.name, c.name) ASC
       `, [language]);
 
-      // Process cities to include full image URLs
-      const processedCities = cities.map(city => ({
-        ...city,
-        image_url: city.image ? `${process.env.API_BASE_URL || 'http://localhost:5000'}/uploads/${city.image}` : null
-      }));
+      const processedCities = imageHelper.processArrayImages(cities, 'city');
 
       res.json({
         success: true,
@@ -219,137 +216,289 @@ class PublicController {
     }
   }
 
-// Get city page data
-async getCityPageData(req, res) {
-  try {
-    const { cityName } = req.params;
-    const { language = 'en', page = 1, limit = 12, category_id, sort_by = 'created_at' } = req.query;
+    // Get more featured tours for homepage view more
+  async getMoreFeaturedTours(req, res) {
+    try {
+      const { language = 'en', offset = 0, limit = 6 } = req.query;
+      const safeOffset = parseInt(offset) || 0;
+      const safeLimit = Math.min(parseInt(limit) || 6, 6); // Max 6 per request
 
-    // Get city info
-    const [cityRows] = await pool.execute(
-      'SELECT * FROM cities WHERE name = ? AND is_active = true',
-      [cityName]
-    );
+      // First try to get more featured tours
+      const [featuredTours] = await pool.execute(`
+        SELECT
+          t.*,
+          COALESCE(tc.title, 'Tour Title Not Available') as title,
+          COALESCE(tc.category, cat.name) as category,  
+          COALESCE(tc.duration, 'Duration TBA') as duration,
+          COALESCE(tc.availability, 'Daily') as availability,
+          COALESCE(ct_city.name, c.name) as city_name,
+          COALESCE(cat_trans.name, cat.name) as category_type,
+          (SELECT AVG(rating) FROM reviews r WHERE r.tour_id = t.id AND r.is_active = true) as avg_rating,
+          (SELECT COUNT(*) FROM reviews r WHERE r.tour_id = t.id AND r.is_active = true) as reviews_count
+        FROM tours t
+        LEFT JOIN tour_content tc ON t.id = tc.tour_id AND tc.language_code = ?
+        LEFT JOIN cities c ON t.city_id = c.id
+        LEFT JOIN city_translations ct_city ON c.id = ct_city.city_id AND ct_city.language_code = ?
+        LEFT JOIN tour_categories cat ON t.category_id = cat.id
+        LEFT JOIN tour_category_translations cat_trans ON cat.id = cat_trans.category_id AND cat_trans.language_code = ?
+        WHERE t.status = 'active' AND t.featured_tag IS NOT NULL
+        ORDER BY t.created_at DESC
+        LIMIT ${safeLimit} OFFSET ${safeOffset}
+      `, [language, language, language]);
 
-    if (cityRows.length === 0) {
-      return res.status(404).json({
+      let tours = [...featuredTours];
+
+      // If we don't have enough featured tours, fill with regular active tours
+      if (tours.length < safeLimit) {
+        const remaining = safeLimit - tours.length;
+        const featuredIds = tours.map(t => t.id);
+        
+        const [regularTours] = await pool.execute(`
+          SELECT
+            t.*,
+            COALESCE(tc.title, 'Tour Title Not Available') as title,
+            COALESCE(tc.category, cat.name) as category,
+            COALESCE(tc.duration, 'Duration TBA') as duration,
+            COALESCE(tc.availability, 'Daily') as availability,
+            COALESCE(ct_city.name, c.name) as city_name,
+            COALESCE(cat_trans.name, cat.name) as category_type,
+            (SELECT AVG(rating) FROM reviews r WHERE r.tour_id = t.id AND r.is_active = true) as avg_rating,
+            (SELECT COUNT(*) FROM reviews r WHERE r.tour_id = t.id AND r.is_active = true) as reviews_count
+          FROM tours t
+          LEFT JOIN tour_content tc ON t.id = tc.tour_id AND tc.language_code = ?
+          LEFT JOIN cities c ON t.city_id = c.id
+          LEFT JOIN city_translations ct_city ON c.id = ct_city.city_id AND ct_city.language_code = ?
+          LEFT JOIN tour_categories cat ON t.category_id = cat.id
+          LEFT JOIN tour_category_translations cat_trans ON cat.id = cat_trans.category_id AND cat_trans.language_code = ?
+          WHERE t.status = 'active' ${featuredIds.length > 0 ? 'AND t.id NOT IN (' + featuredIds.join(',') + ')' : ''}
+          ORDER BY t.created_at DESC
+          LIMIT ${remaining}
+        `, [language, language, language]);
+
+        tours = [...tours, ...regularTours];
+      }
+
+      // Get total count to determine if there are more tours
+      const [totalCount] = await pool.execute(`
+        SELECT COUNT(*) as total
+        FROM tours t
+        WHERE t.status = 'active'
+      `);
+
+      const processedTours = imageHelper.processArrayImages(tours, 'tour');
+      
+      res.json({
+        success: true,
+        data: {
+          tours: processedTours,
+          hasMore: (safeOffset + tours.length) < totalCount[0].total,
+          totalAvailable: totalCount[0].total
+        }
+      });
+    } catch (error) {
+      console.error('Get more featured tours error:', error);
+      res.status(500).json({
         success: false,
-        message: 'City not found'
+        message: 'Internal server error'
       });
     }
+  }
 
-    const city = cityRows[0];
-    
-    // Safe pagination values
-    const safeLimit = Math.max(1, Math.min(50, parseInt(limit)));
-    const safePage = Math.max(1, parseInt(page));
-    const safeOffset = (safePage - 1) * safeLimit;
+  // Get city page data with enhanced functionality
+  async getCityPageData(req, res) {
+    try {
+      const { cityName } = req.params;
+      const { 
+        language = 'en', 
+        page = 1, 
+        limit = 6, // Changed default to 6
+        category_id, 
+        sort_by = 'created_at' 
+      } = req.query;
 
-    // Build WHERE conditions
-    let whereConditions = ['t.city_id = ?', 't.status = "active"'];
-    let whereParams = [city.id];
+      // Get city info with tagline
+      const [cityRows] = await pool.execute(`
+        SELECT 
+          c.*,
+          COALESCE(ct.name, c.name) as name,
+          COALESCE(ct.tagline, c.tagline) as tagline,
+          COALESCE(ct.description, c.description) as description
+        FROM cities c
+        LEFT JOIN city_translations ct ON c.id = ct.city_id AND ct.language_code = ?
+        WHERE COALESCE(ct.name, c.name) = ? AND c.is_active = true
+      `, [language, cityName]);
 
-    if (category_id) {
-      whereConditions.push('t.category_id = ?');
-      whereParams.push(parseInt(category_id));
-    }
+      if (cityRows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'City not found'
+        });
+      }
+      
+      const city = imageHelper.processImages(cityRows[0], 'city');
+      console.log(city)
 
-    const whereClause = `WHERE ${whereConditions.join(' AND ')}`;
+      // Safe pagination values
+      const safeLimit = Math.max(1, Math.min(6, parseInt(limit))); // Max 6 per page
+      const safePage = Math.max(1, parseInt(page));
+      const safeOffset = (safePage - 1) * safeLimit;
 
-    // Get total tours count
-    const countQuery = `
-      SELECT COUNT(*) as total
-      FROM tours t
-      ${whereClause}
-    `;
+      // Build WHERE conditions
+      let whereConditions = ['t.city_id = ?', 't.status = "active"'];
+      let whereParams = [city.id];
 
-    const [countResult] = await pool.execute(countQuery, whereParams);
-    const totalTours = countResult[0].total;
+      if (category_id) {
+        whereConditions.push('t.category_id = ?');
+        whereParams.push(parseInt(category_id));
+      }
 
-    // Safe sort validation
-    const validSorts = ['created_at', 'price_adult', 'views', 'rating'];
-    const safeSortBy = validSorts.includes(sort_by) ? sort_by : 'created_at';
+      const whereClause = `WHERE ${whereConditions.join(' AND ')}`;
 
-    // Get tours with pagination (hybrid approach)
-    const toursQuery = `
-      SELECT 
-        t.*,
-        tc.title,
-        tc.category,
-        tc.duration,
-        tc.description,
-        cat.name as category_type,
-        (SELECT AVG(rating) FROM reviews r WHERE r.tour_id = t.id AND r.is_active = true) as avg_rating,
-        (SELECT COUNT(*) FROM reviews r WHERE r.tour_id = t.id AND r.is_active = true) as reviews_count
-      FROM tours t
-      LEFT JOIN tour_content tc ON t.id = tc.tour_id AND tc.language_code = '${language}'
-      LEFT JOIN tour_categories cat ON t.category_id = cat.id
-      ${whereClause}
-      ORDER BY 
+      // Get total tours count
+      const countQuery = `
+        SELECT COUNT(*) as total
+        FROM tours t
+        ${whereClause}
+      `;
+
+      const [countResult] = await pool.execute(countQuery, whereParams);
+      const totalTours = countResult[0].total;
+
+      // Safe sort validation
+      const validSorts = ['created_at', 'price_adult', 'views', 'rating'];
+      const safeSortBy = validSorts.includes(sort_by) ? sort_by : 'created_at';
+
+      // Get tours with pagination and transportation info
+      const toursQuery = `
+        SELECT
+          t.*,
+          tc.title,
+          tc.category,
+          tc.duration,
+          tc.description,
+          tc.availability,
+          cat.name as category_type,
+          COALESCE(cat_trans.name, cat.name) as localized_category_type,
+          (SELECT AVG(rating) FROM reviews r WHERE r.tour_id = t.id AND r.is_active = true) as avg_rating,
+          (SELECT COUNT(*) FROM reviews r WHERE r.tour_id = t.id AND r.is_active = true) as reviews_count
+
+        FROM tours t
+        LEFT JOIN tour_content tc ON t.id = tc.tour_id AND tc.language_code = ?
+        LEFT JOIN tour_categories cat ON t.category_id = cat.id
+        LEFT JOIN tour_category_translations cat_trans ON cat.id = cat_trans.category_id AND cat_trans.language_code = ?
+        ${whereClause}
+        ORDER BY
         CASE '${safeSortBy}'
           WHEN 'price_adult' THEN t.price_adult
           WHEN 'views' THEN t.views
           WHEN 'rating' THEN (SELECT AVG(rating) FROM reviews r WHERE r.tour_id = t.id AND r.is_active = true)
           ELSE t.created_at
         END DESC
-      LIMIT ${safeLimit} OFFSET ${safeOffset}
-    `;
+        LIMIT ${safeLimit} OFFSET ${safeOffset}
+      `;
 
-    const [tours] = await pool.execute(toursQuery, whereParams);
+      const [tours] = await pool.execute(toursQuery, [language, language, ...whereParams]);
+      const processedTours = imageHelper.processArrayImages(tours, 'tour');
 
-    // Get categories for this city
-    const [categories] = await pool.execute(`
-      SELECT DISTINCT
-        cat.id,
-        cat.name,
-        COUNT(t.id) as tours_count
-      FROM tour_categories cat
-      INNER JOIN tours t ON cat.id = t.category_id
-      WHERE t.city_id = ? AND t.status = 'active' AND cat.is_active = true
-      GROUP BY cat.id, cat.name
-      ORDER BY cat.name ASC
-    `, [city.id]);
+      // Get categories for this city
+      const [categories] = await pool.execute(`
+        SELECT DISTINCT
+          cat.id,
+          COALESCE(cat_trans.name, cat.name) as name,
+          COUNT(t.id) as tours_count
+        FROM tour_categories cat
+        INNER JOIN tours t ON cat.id = t.category_id
+        LEFT JOIN tour_category_translations cat_trans ON cat.id = cat_trans.category_id AND cat_trans.language_code = ?
+        WHERE t.city_id = ? AND t.status = 'active' AND cat.is_active = true
+        GROUP BY cat.id, COALESCE(cat_trans.name, cat.name)
+        ORDER BY COALESCE(cat_trans.name, cat.name) ASC
+      `, [language, city.id]);
 
-    res.json({
-      success: true,
-      data: {
-        city,
-        tours,
-        categories,
-        pagination: {
-          currentPage: safePage,
-          totalPages: Math.ceil(totalTours / safeLimit),
-          totalItems: totalTours,
-          itemsPerPage: safeLimit
-        }
+      // Get today's prices for this city
+      const [pricesData] = await pool.execute(`
+        SELECT
+          COUNT(t.id) as total_tours,
+          MIN(t.price_adult) as min_price,
+          MAX(t.price_adult) as max_price,
+          AVG(t.price_adult) as avg_price,
+          GROUP_CONCAT(
+            CONCAT(COALESCE(tc.title, 'Tour'), '|', t.price_adult, '|', t.price_child, '|', t.id)
+            ORDER BY t.price_adult ASC
+            SEPARATOR ';;'
+          ) as tours_with_prices
+        FROM tours t
+        LEFT JOIN tour_content tc ON t.id = tc.tour_id AND tc.language_code = ?
+        WHERE t.city_id = ? AND t.status = 'active'
+      `, [language, city.id]);
+
+      const todaysPrices = pricesData[0] || { total_tours: 0, tours_with_prices: null };
+      const pricesTours = [];
+
+      if (todaysPrices.tours_with_prices) {
+        const toursList = todaysPrices.tours_with_prices.split(';;');
+        toursList.forEach(tourStr => {
+          const [title, priceAdult, priceChild, tourId] = tourStr.split('|');
+          pricesTours.push({
+            id: parseInt(tourId),
+            title,
+            price_adult: parseFloat(priceAdult),
+            price_child: parseFloat(priceChild)
+          });
+        });
       }
-    });
-  } catch (error) {
-    console.error('❌ Get city page data error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
-  }
-}
 
-  // Get tour detail page data
+      res.json({
+        success: true,
+        data: {
+          city,
+          tours: processedTours,
+          categories,
+          pagination: {
+            currentPage: safePage,
+            totalPages: Math.ceil(totalTours / safeLimit),
+            totalItems: totalTours,
+            itemsPerPage: safeLimit,
+            hasMore: (safeOffset + processedTours.length) < totalTours
+          },
+          todaysPrices: {
+            total_tours: todaysPrices.total_tours,
+            min_price: todaysPrices.min_price ? parseFloat(todaysPrices.min_price) : 0,
+            max_price: todaysPrices.max_price ? parseFloat(todaysPrices.max_price) : 0,
+            avg_price: todaysPrices.avg_price ? parseFloat(todaysPrices.avg_price) : 0,
+            tours: pricesTours,
+            serverDate: new Date().toISOString().split('T')[0]
+          }
+        }
+      });
+    } catch (error) {
+      console.error('❌ Get city page data error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error'
+      });
+    }
+  }
+
+  // Get tour detail page data with breadcrumb and more like this
   async getTourDetailData(req, res) {
     try {
       const { cityName, tourId } = req.params;
       const { language = 'en' } = req.query;
 
-      // Get tour with city check
+      // Get tour with city check and category info for breadcrumb
       const [tourRows] = await pool.execute(`
         SELECT
           t.*,
-          c.name as city_name,
-          cat.name as category_type
+          COALESCE(ct_city.name, c.name) as city_name,
+          COALESCE(cat_trans.name, cat.name) as category_type,
+          cat.id as category_id
         FROM tours t
         LEFT JOIN cities c ON t.city_id = c.id
+        LEFT JOIN city_translations ct_city ON c.id = ct_city.city_id AND ct_city.language_code = ?
         LEFT JOIN tour_categories cat ON t.category_id = cat.id
-        WHERE t.id = ? AND c.name = ? AND t.status = 'active'
-      `, [tourId, cityName]);
+        LEFT JOIN tour_category_translations cat_trans ON cat.id = cat_trans.category_id AND cat_trans.language_code = ?
+        WHERE t.id = ? AND COALESCE(ct_city.name, c.name) = ? AND t.status = 'active'
+      `, [language, language, tourId, cityName]);
 
       if (tourRows.length === 0) {
         return res.status(404).json({
@@ -358,7 +507,7 @@ async getCityPageData(req, res) {
         });
       }
 
-      const tour = tourRows[0];
+      const tour = imageHelper.processArrayImages(tourRows, 'tour')[0];
 
       // Get tour content for the specified language
       const [contentRows] = await pool.execute(
@@ -372,6 +521,12 @@ async getCityPageData(req, res) {
         [tourId]
       );
 
+      // Process image URLs for gallery
+      const processedImages = imageRows.map(img => ({
+        ...img,
+        image_url: imageHelper.getImageUrl(img.image_url)
+      }));
+
       // Get reviews
       const [reviewRows] = await pool.execute(`
         SELECT * FROM reviews
@@ -380,11 +535,13 @@ async getCityPageData(req, res) {
         LIMIT 10
       `, [tourId]);
 
+      const processedReviews = imageHelper.processArrayImages(reviewRows, 'review');
+
       // Process tour content with safe JSON parsing
       const parseJSONSafe = (jsonString) => {
         if (!jsonString) return [];
         if (Array.isArray(jsonString)) return jsonString;
-        
+
         try {
           return JSON.parse(jsonString);
         } catch (error) {
@@ -419,6 +576,33 @@ async getCityPageData(req, res) {
         take_with_you: parseJSONSafe(contentRows[0].take_with_you)
       } : null;
 
+      // Get "More Like This" trips (4 trips from same category or city)
+      const [moreLikeThis] = await pool.execute(`
+        SELECT
+          t.*,
+          tc.title,
+          tc.category,
+          tc.duration,
+          COALESCE(ct_city.name, c.name) as city_name,
+          COALESCE(cat_trans.name, cat.name) as category_type,
+          (SELECT AVG(rating) FROM reviews r WHERE r.tour_id = t.id AND r.is_active = true) as avg_rating,
+          (SELECT COUNT(*) FROM reviews r WHERE r.tour_id = t.id AND r.is_active = true) as reviews_count
+        FROM tours t
+        LEFT JOIN tour_content tc ON t.id = tc.tour_id AND tc.language_code = ?
+        LEFT JOIN cities c ON t.city_id = c.id
+        LEFT JOIN city_translations ct_city ON c.id = ct_city.city_id AND ct_city.language_code = ?
+        LEFT JOIN tour_categories cat ON t.category_id = cat.id
+        LEFT JOIN tour_category_translations cat_trans ON cat.id = cat_trans.category_id AND cat_trans.language_code = ?
+        WHERE t.id != ? AND t.status = 'active' 
+        AND (t.category_id = ? OR t.city_id = ?)
+        ORDER BY 
+          CASE WHEN t.category_id = ? THEN 0 ELSE 1 END,
+          RAND()
+        LIMIT 4
+      `, [language, language, language, tourId, tour.category_id, tour.city_id, tour.category_id]);
+
+      const processedMoreLikeThis = imageHelper.processArrayImages(moreLikeThis, 'tour');
+
       // Calculate average rating
       const avgRating = reviewRows.length > 0
         ? reviewRows.reduce((sum, review) => sum + review.rating, 0) / reviewRows.length
@@ -429,14 +613,101 @@ async getCityPageData(req, res) {
         data: {
           tour,
           content,
-          images: imageRows,
-          reviews: reviewRows,
+          images: processedImages,
+          reviews: processedReviews,
           avgRating: Math.round(avgRating * 10) / 10,
-          reviewsCount: reviewRows.length
+          reviewsCount: reviewRows.length,
+          moreLikeThis: processedMoreLikeThis
+          // breadcrumb: {
+          //   city: tour.city_name,
+          //   category: tour.category_type,
+          //   tour: content?.title || 'Tour Details'
+          // }
         }
       });
     } catch (error) {
       console.error('❌ Get tour detail data error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error'
+      });
+    }
+  }
+
+    // Get all tours from same category/city for "More Like This" view all
+  async getMoreLikeThisAll(req, res) {
+    try {
+      const { tourId } = req.params;
+      const { language = 'en', page = 1, limit = 12 } = req.query;
+
+      // Get original tour info
+      const [originalTour] = await pool.execute(`
+        SELECT city_id, category_id FROM tours WHERE id = ?
+      `, [tourId]);
+
+      if (originalTour.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Original tour not found'
+        });
+      }
+
+      const { city_id, category_id } = originalTour[0];
+
+      const safeLimit = Math.max(1, Math.min(50, parseInt(limit)));
+      const safePage = Math.max(1, parseInt(page));
+      const safeOffset = (safePage - 1) * safeLimit;
+
+      // Get similar tours
+      const [similarTours] = await pool.execute(`
+        SELECT
+          t.*,
+          tc.title,
+          tc.category,
+          tc.duration,
+          COALESCE(ct_city.name, c.name) as city_name,
+          COALESCE(cat_trans.name, cat.name) as category_type,
+          (SELECT AVG(rating) FROM reviews r WHERE r.tour_id = t.id AND r.is_active = true) as avg_rating,
+          (SELECT COUNT(*) FROM reviews r WHERE r.tour_id = t.id AND r.is_active = true) as reviews_count
+        FROM tours t
+        LEFT JOIN tour_content tc ON t.id = tc.tour_id AND tc.language_code = ?
+        LEFT JOIN cities c ON t.city_id = c.id
+        LEFT JOIN city_translations ct_city ON c.id = ct_city.city_id AND ct_city.language_code = ?
+        LEFT JOIN tour_categories cat ON t.category_id = cat.id
+        LEFT JOIN tour_category_translations cat_trans ON cat.id = cat_trans.category_id AND cat_trans.language_code = ?
+        WHERE t.id != ? AND t.status = 'active' 
+        AND (t.category_id = ? OR t.city_id = ?)
+        ORDER BY 
+          CASE WHEN t.category_id = ? THEN 0 ELSE 1 END,
+          t.created_at DESC
+        LIMIT ${safeLimit} OFFSET ${safeOffset}
+      `, [language, language, language, tourId, category_id, city_id, category_id]);
+
+      // Get total count
+      const [countResult] = await pool.execute(`
+        SELECT COUNT(*) as total
+        FROM tours t
+        WHERE t.id != ? AND t.status = 'active' 
+        AND (t.category_id = ? OR t.city_id = ?)
+      `, [tourId, category_id, city_id]);
+
+      const totalTours = countResult[0].total;
+      const processedTours = imageHelper.processArrayImages(similarTours, 'tour');
+
+      res.json({
+        success: true,
+        data: {
+          tours: processedTours,
+          pagination: {
+            currentPage: safePage,
+            totalPages: Math.ceil(totalTours / safeLimit),
+            totalItems: totalTours,
+            itemsPerPage: safeLimit
+          }
+        }
+      });
+    } catch (error) {
+      console.error('❌ Get more like this all error:', error);
       res.status(500).json({
         success: false,
         message: 'Internal server error'
@@ -606,11 +877,12 @@ async getCityPageData(req, res) {
       `;
 
       const [tours] = await pool.execute(toursQuery, whereParams);
+      const processedTours = imageHelper.processArrayImages(tours, 'tour');
 
       res.json({
         success: true,
         data: {
-          tours,
+          tours: processedTours,
           pagination: {
             currentPage: safePage,
             totalPages: Math.ceil(totalTours / safeLimit),
@@ -688,10 +960,11 @@ async getCityPageData(req, res) {
       `;
 
       const [reviews] = await pool.execute(query, [language]);
+      processedReviews = imageHelper.processArrayImages(reviews, 'review')
 
       res.json({
         success: true,
-        data: reviews
+        data: processedReviews
       });
     } catch (error) {
       console.error('❌ Get promotional reviews error:', error);
@@ -701,6 +974,242 @@ async getCityPageData(req, res) {
       });
     }
   }
+
+  async submitTourReview(req, res) {
+      try {
+          const { tourId } = req.params;
+          console.log('Submit tour review for tourId:', tourId);
+          console.log('Submit tour review body:', req.body);
+          console.log('Submit tour review files:', req.files);
+          
+          const { client_name, comment, language = 'en' } = req.body;
+
+          // Validation (NO RATING)
+          if (!client_name || !comment) {
+              return res.status(400).json({
+                  success: false,
+                  message: 'Client name and comment are required'
+              });
+          }
+
+          if (client_name.trim().length < 2) {
+              return res.status(400).json({
+                  success: false,
+                  message: 'Client name must be at least 2 characters long'
+              });
+          }
+
+          if (comment.trim().length < 10) {
+              return res.status(400).json({
+                  success: false,
+                  message: 'Comment must be at least 10 characters long'
+              });
+          }
+
+          // Check if tour exists and get tour details
+          const [tourCheck] = await pool.execute(`
+              SELECT
+                  t.id,
+                  COALESCE(tc.title, 'Tour') as tour_name,
+                  t.status
+              FROM tours t
+              LEFT JOIN tour_content tc ON t.id = tc.tour_id AND tc.language_code = ?
+              WHERE t.id = ?
+          `, [language, tourId]);
+
+          if (tourCheck.length === 0) {
+              return res.status(404).json({
+                  success: false,
+                  message: 'Tour not found'
+              });
+          }
+
+          if (tourCheck[0].status !== 'active') {
+              return res.status(400).json({
+                  success: false,
+                  message: 'Reviews cannot be submitted for inactive tours'
+              });
+          }
+
+          const tourName = tourCheck[0].tour_name;
+
+          // Handle file uploads
+          const client_image = req.files?.client_image?.[0]?.filename || null;
+          const profile_image = req.files?.profile_image?.[0]?.filename || null;
+
+          // Insert the review (NO RATING - set to null)
+          const [result] = await pool.execute(`
+              INSERT INTO reviews (
+                  tour_id,
+                  client_name,
+                  rating,
+                  comment,
+                  tour_name,
+                  review_date,
+                  client_image,
+                  profile_image,
+                  is_active,
+                  created_at
+              ) VALUES (?, ?, null, ?, ?, CURDATE(), ?, ?, true, NOW())
+          `, [
+              tourId,
+              client_name.trim(),
+              comment.trim(),
+              tourName,
+              client_image,
+              profile_image
+          ]);
+
+          // Get the inserted review with processed images
+          const [newReview] = await pool.execute(`
+              SELECT
+                  id,
+                  client_name,
+                  rating,
+                  comment,
+                  tour_name,
+                  review_date,
+                  client_image,
+                  profile_image,
+                  created_at
+              FROM reviews
+              WHERE id = ?
+          `, [result.insertId]);
+
+          // Process the review with images using imageHelper
+          const processedReview = imageHelper.processImages(newReview[0], 'review');
+
+          res.status(201).json({
+              success: true,
+              message: 'Review submitted successfully',
+              data: {
+                  review: processedReview,
+                  message: 'Thank you for your review! It will appear on the tour page shortly.'
+              }
+          });
+
+      } catch (error) {
+          console.error('❌ Submit tour review error:', error);
+
+          res.status(500).json({
+              success: false,
+              message: 'Internal server error. Please try again later.'
+          });
+      }
+  }
+
+
+  async submitContactForm(req, res) {
+  try {
+    const { firstName, lastName, email, phone, subject, message } = req.body;
+    console.log('Submit contact form body:', req.body);
+    // Validation
+    if (!firstName || !lastName || !email || !subject || !message) {
+      return res.status(400).json({
+        success: false,
+        message: 'All fields are required'
+      });
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please enter a valid email address'
+      });
+    }
+
+    // Name validation
+    if (firstName.trim().length < 2 || lastName.trim().length < 2) {
+      return res.status(400).json({
+        success: false,
+        message: 'First name and last name must be at least 2 characters long'
+      });
+    }
+
+    // Message validation
+    if (message.trim().length < 10) {
+      return res.status(400).json({
+        success: false,
+        message: 'Message must be at least 10 characters long'
+      });
+    }
+
+    // Prepare form data
+    const formData = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: email.trim().toLowerCase(),
+      phone: phone ? phone.trim() : '',
+      subject: subject.trim(),
+      message: message.trim()
+    };
+
+    // Send email
+    await emailService.sendContactForm(formData);
+
+    // Later update: Saving to database for records
+    // await this.saveContactFormToDatabase(formData);
+
+    res.json({
+      success: true,
+      message: 'Thank you for your message! We will get back to you soon.',
+      data: {
+        submittedAt: new Date().toISOString(),
+        reference: `CONTACT-${Date.now()}`
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Submit contact form error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Sorry, there was an error sending your message. Please try again later.'
+    });
+  }
+}
+
+async getClientCountry(req, res) {
+  try {
+    // Get client IP address
+    const clientIP = req.headers['x-forwarded-for'] || 
+                     req.headers['x-real-ip'] || 
+                     req.connection.remoteAddress || 
+                     req.socket.remoteAddress ||
+                     (req.connection.socket ? req.connection.socket.remoteAddress : null) ||
+                     req.ip;
+
+    // Clean IP address (remove IPv6 prefix if present)
+    const cleanIP = clientIP ? clientIP.replace(/^::ffff:/, '') : null;
+    
+    console.log('Detected client IP:', cleanIP);
+
+    // Get country information
+    const country = countryService.getCountryFromIP(cleanIP);
+    const allCountries = countryService.getAllCountries();
+
+    res.json({
+      success: true,
+      data: {
+        detectedCountry: country,
+        allCountries: allCountries,
+        clientIP: cleanIP
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Get client country error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Could not detect country',
+      data: {
+        detectedCountry: { code: 'EG', name: 'Egypt', dialCode: '+20' },
+        allCountries: countryService.getAllCountries()
+      }
+    });
+  }
+}
 
 }
 
