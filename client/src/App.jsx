@@ -25,6 +25,14 @@ import AddTour from "./pages/admin/AddTour";
 import EditTour from "./pages/admin/EditTour";
 import ViewTour from "./pages/admin/ViewTour";
 
+import BrowseTours from "./pages/BrowseTours";
+
+
+import SearchResults from "./pages/SearchResults";
+
+import ScrollToTop from "./components/ScrollToTop";
+
+
 // Admin route wrapper that redirects to login or dashboard
 const AdminRoute = () => {
   return <Navigate to="/admin/dashboard" replace />;
@@ -39,6 +47,8 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <ScrollToTop /> {/* Add this inside Router but outside Routes */}
+
         <Routes>
           {/* Admin Routes - No Header/Footer */}
           <Route path="/admin" element={<AdminRoute />} />
@@ -119,15 +129,24 @@ function App() {
                 <main className="flex-grow">
                   <Routes>
                     <Route path="/" element={<Home />} />
+                    <Route path="/search" element={<SearchResults />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/payment" element={<Payment />} />
                     <Route path="/contact" element={<Contact />} />
                     <Route path="/security" element={<Security />} />
                     <Route path="/destination/:cityName" element={<City />} />
+                    <Route path="/destination/:citySlug" element={<City />} />
                     <Route
                       path="/destination/:cityName/:tripId"
                       element={<TripDetail />}
                     />
+                    <Route
+                      path="/destination/:citySlug/:tripId"
+                      element={<TripDetail />}
+                    />
+                    
+                    <Route path="/browse-tours" element={<BrowseTours />} />
+
                   </Routes>
                 </main>
                 <Footer />

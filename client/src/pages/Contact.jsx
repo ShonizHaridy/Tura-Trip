@@ -197,7 +197,7 @@ const countriesWithFlags = result.data.allCountries.map(country => ({
                         {t("contact.info.phone.label")}
                       </p>
                       <p className="text-[#343946] font-family-primary text-lg lg:text-xl font-normal leading-normal self-stretch">
-                        +2001055957451
+                        +201055957451
                       </p>
                     </div>
                   </div>
@@ -303,7 +303,7 @@ const countriesWithFlags = result.data.allCountries.map(country => ({
                     </label>
                     <div className="flex h-10 lg:h-[38px] items-center self-stretch rounded-lg border border-[#E6E6E6] bg-white" style={{ overflow: 'visible' }}>
                       {/* FIXED: Country selector with proper flag display */}
-                      <div className="relative country-selector" style={{ zIndex: 1000 }}>
+                      <div className="relative country-selector" style={{ zIndex: 30 }}>
                         <div 
                           className="flex items-center gap-2 px-3 border-r border-[#E6E6E6] bg-white cursor-pointer hover:bg-gray-50 transition-colors"
                           onClick={() => {
@@ -328,7 +328,7 @@ const countriesWithFlags = result.data.allCountries.map(country => ({
                         
                         {/* Country Dropdown */}
                         {showCountryDropdown && (
-                          <div className="absolute top-full left-0 z-50 bg-white border border-gray-200 rounded-lg text-black shadow-xl max-h-48 overflow-y-auto w-50 mt-1"> 
+                          <div className="absolute top-full left-0 z-10 bg-white border border-gray-200 rounded-lg text-black shadow-xl max-h-48 overflow-y-auto w-50 mt-1"> 
                             {/* style={{
                               top: '100%',
                               left: '0',
@@ -359,7 +359,7 @@ const countriesWithFlags = result.data.allCountries.map(country => ({
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
-                        placeholder={t("contact.form.phonePlaceholder")}
+                        placeholder="Phone number"
                         className="text-[#8A8D95] font-family-primary text-sm lg:text-base font-normal leading-normal flex-1 outline-none px-3 min-w-0 focus:text-gray-700"
                         required
                         disabled={isSubmitting}

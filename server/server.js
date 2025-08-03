@@ -56,7 +56,7 @@ if (process.env.NODE_ENV !== 'test') {
 // Rate limiting - protect against brute force attacks
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 1000, // limit each IP to 100 requests per windowMs // will be limited on production to 100
   message: {
     success: false,
     message: 'Too many requests from this IP, please try again later.'
@@ -90,7 +90,7 @@ app.use('/api/admin/login', authLimiter);
 const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = process.env.NODE_ENV === 'production' 
-      ? ['https://yourdomain.com', 'https://admin.yourdomain.com']
+      ? ['https://turatrip.com', 'https://api.turatrip.com']
       : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:3001', 'http://127.0.0.1:3000'];
     
     // Allow requests with no origin (mobile apps, curl, etc.)

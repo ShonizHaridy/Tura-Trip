@@ -13,10 +13,13 @@ import {
   EyeSlash,
 } from "iconsax-react";
 
+import { useTranslatedFeaturedLabel } from "../hooks/useTranslatedFeaturedLabel";
+
 const City = () => {
   const { cityName } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const { t, i18n } = useTranslation();
+  const getTranslatedFeaturedLabel = useTranslatedFeaturedLabel();
   
   // State management
   const [cityData, setCityData] = useState(null);
@@ -168,7 +171,8 @@ const City = () => {
   };
 
   const getCitySlug = () => {
-    return cityName.toLowerCase().replace(/\s+/g, '-');
+    // return cityName.toLowerCase().replace(/\s+/g, '-');
+    return cityName
   };
 
   if (loading && !tours.length) {
@@ -412,7 +416,8 @@ const City = () => {
                   price={parseFloat(tour.price_adult)}
                   originalPrice={tour.discount_percentage > 0 ? Math.round(parseFloat(tour.price_adult) / (1 - tour.discount_percentage / 100)) : null}
                   priceUnit={t('common.perPerson') || "per person"}
-                  isFeatured={tour.featured_tag || false}
+                  isFeatured={tour.featured_tag !== null && tour.featured_tag !== undefined}
+                  featuredLabel={getTranslatedFeaturedLabel(tour.featured_tag) || t('common.featured') || "Featured"}
                 />
               </Link>
             ))}

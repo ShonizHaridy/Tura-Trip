@@ -5,8 +5,8 @@ class ImageHelper {
     
     // Image field configurations
     this.configs = {
-      tour: { cover_image: 'cover_image_url' },
-      city: { image: 'image_url' },
+      tour: { cover_image: 'cover_image_url', image: 'image_url' },
+      city: { image: 'image_url', city_image: 'city_image_url' },
       review: {
         client_image: 'client_image_url',
         profile_image: 'profile_image_url', 

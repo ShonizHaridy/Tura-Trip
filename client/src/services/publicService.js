@@ -40,6 +40,7 @@ class PublicService {
     try {
       const queryString = new URLSearchParams(params).toString();
       const response = await api.get(`/public/city/${cityName}?${queryString}`);
+      console.log("City data response:", response.data);
       return response.data;
     } catch (error) {
       console.error('Error fetching city page data:', error);
@@ -82,6 +83,19 @@ class PublicService {
     }
   }
 
+
+  // Get browse tours data
+  async getBrowseToursData(language = 'en') {
+    try {
+      const response = await api.get(`/public/browse-tours?language=${language}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching browse tours data:', error);
+      throw error;
+    }
+  }
+  
+
   // Search tours with filters
   async searchTours(params) {
     try {
@@ -90,6 +104,28 @@ class PublicService {
       return response.data;
     } catch (error) {
       console.error('Error searching tours:', error);
+      throw error;
+    }
+  }
+
+  // Get categories for search dropdown
+  async getPublicCategories(language = 'en') {
+    try {
+      const response = await api.get(`/public/categories?language=${language}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching public categories:', error);
+      throw error;
+    }
+  }
+
+  // Get search suggestions
+  async getSearchSuggestions(query, language = 'en') {
+    try {
+      const response = await api.get(`/public/search/suggestions?q=${query}&language=${language}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching search suggestions:', error);
       throw error;
     }
   }

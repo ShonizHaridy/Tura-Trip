@@ -26,7 +26,7 @@ const Footer = () => {
               </div>
               
               <h3 className="font-semibold text-lg mb-4">{t("footer.contact.title")}</h3>
-              <p className="text-gray-300 mb-2">{t("footer.contact.call")} : +123 400 123 </p>
+              <p className="text-gray-300 mb-2">{t("footer.contact.call")} : +201055957451 </p>
               <p className="text-gray-400 text-sm mb-2 leading-relaxed">
                 {t("footer.contact.description")}
               </p>
@@ -225,7 +225,7 @@ const Footer = () => {
       <div className="">
         <div className="container mx-auto px-6 py-4">
           <p className="text-center font-family-primary font-medium text-sm text-white">
-            Tura Trip - Novix Code © 2025 - All Rights Reserved
+            Tura Trip - <a href='https://novixcode.com' target='_blank'>Novix Code</a> © 2025 - All Rights Reserved
           </p>
         </div>
       </div>

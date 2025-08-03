@@ -11,7 +11,7 @@
     "contact": {
       "title": "Contact Us",
       "call": "Call",
-      "description": "Praesent nulla massa, hendrerit vestibulum gravida in, feugiat auctor felis.",
+      "description": "Discover authentic Egypt tours with expert guides and seamless planning across top cities.",
       "email": "Email",
       "bookNow": "Book Now"
     },
@@ -49,6 +49,7 @@
     "loadingDots": "Loading...",
     "popular": "Popular",
     "greatValue": "Great Value",
+    "great_value": "Great Value",
     "new": "New",
     "noToursFound": "No tours found for this category",
     "readMore": "Read More",
@@ -57,9 +58,24 @@
     "fullDay": "Full Day",
     "daily": "Daily",
     "tourTitle": "Tour Title Not Available",
-    "tryDifferentCategory": "Try selecting a different category or check back later."
+    "tryDifferentCategory": "Try selecting a different category or check back later.",
+    "searching": "Searching...",
+    "noResults": "No results found",
+    "showMoreResults": "Show me more results",
+    "destinations": "Destinations",
+    "tours": "Tours",
+    "categories": "Categories",
+    "noDestinations": "No destinations available",
+    "noCategories": "No categories available",
+    "goBack": "Go Back",
+    "backToHome": "Back to Home",
+    "contactUs": "Contact Us"
   },
-    "features": {
+  "search": {
+    "resultsFor": "Search Results for",
+    "resultsFound": "Search Results Found"
+  },
+  "features": {
     "noPrepayment": "No Prepayment",
     "reservation3Min": "Reservation in 3 minutes",
     "englishGuides": "English Speaking Guides",
@@ -100,7 +116,9 @@
       "title2": "Beauty of Egypt",
       "description": "From the golden sands of the Sahara to the timeless wonders of ancient temples, Egypt offers a journey through history, nature, and culture. Every step reveals hidden stories, majestic landscapes, and unforgettable moments waiting to be explored.",
       "searchDestination": "Enter Destination..",
-      "searchExcursions": "Enter Excursions.."
+      "searchExcursions": "Enter Excursions..",
+      "searchCategory": "Enter Category..",
+      "quickSearch": "Quick search..."
     },
     "explore": {
       "title": "Explore Egypt",
@@ -138,7 +156,10 @@
     "page": "Page"
   },
   "tripDetail": {
-    "notFound": "Trip not found",
+    "notFound": "Trip not found for this language, details will be live soon",
+    "contentNotAvailable": "Content Not Available Yet",
+    "contentComingSoon": "Tour details will be available soon. Please check back later!",
+    "needHelp": "Need immediate assistance?",
     "duration": "Duration",
     "daysOfWeek": "Days of Week",
     "tripProgram": "Trip Program",
@@ -211,7 +232,7 @@
   "about": {
     "hero": {
       "title": "About Us",
-      "subtitle": "Learn about our passion for creating unforgettable Egyptian adventures since 2010"
+      "subtitle": "Discover our passion for crafting unforgettable Egyptian adventures filled with culture, history, and local charm."
     },
     "planTrip": {
       "subtitle": "Lets Go together",
@@ -298,7 +319,7 @@
       },
       "location": {
         "label": "Location",
-        "address": "Praesent nulla massa, hendrerit vestibulum gravida in, feugiat auctor."
+        "address": "Sharm Elsheikh"
       }
     },
     "form": {
@@ -322,7 +343,7 @@
   "payment": {
     "hero": {
       "title": "Payment Policies",
-      "subtitle": "Learn about our passion for creating unforgettable Egyptian adventures since 2010"
+      "subtitle": "Enjoy flexible and secure payment options designed to make booking your Egyptian adventure easy and worry-free"
     },
     "methods": {
       "title": "Payment Methods",
@@ -409,5 +430,19 @@
       "description": "Contact us for more information about our safety measures and travel security protocols.",
       "button": "Contact Us"
     }
+  },
+  "browseTours": {
+    "title": "Explore All Destinations",
+    "subtitle": "Discover amazing tours across Egypt's most beautiful destinations",
+    "cities": "Cities",
+    "tours": "Tours", 
+    "priceRange": "Price Range",
+    "viewByCities": "View by Cities",
+    "viewAllTours": "All Tours",
+    "exploreCity": "Explore City",
+    "featuredTours": "Featured Tours",
+    "allTours": "All Available Tours",
+    "viewAllInCity": "View {{count}} more tours",
+    "from": "Starting from"
   }
 }

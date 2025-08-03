@@ -7,6 +7,8 @@ import { Message, Car, Buildings, Bus, Shield, Image, Location, Timer1, Calendar
 import PofileIcon from '../assets/SVG/Profile Icon.svg?react';
 import publicService from "../services/publicService";
 
+import { SlugHelper } from '../utils/slugHelper';
+
 const TripDetail = () => {
   const { cityName, tripId } = useParams();
   const navigate = useNavigate();
@@ -139,6 +141,37 @@ const TripDetail = () => {
     }
   };
 
+  const generateBreadcrumb = () => {
+    const currentPath = location.pathname;
+    const referrer = document.referrer;
+    
+    // Parse current tour's city/category
+    const currentCity = tour.city_name;
+    const currentCategory = content?.category || tour.category_type;
+    
+    // Determine previous context based on referrer or navigation state
+    if (referrer.includes('/destination/') && !referrer.includes(tour.id)) {
+      // Coming from another city page
+      const referrerCitySlug = referrer.split('/destination/')[1].split('/')[0];
+      const parsedReferrer = SlugHelper.parseCitySlug(referrerCitySlug);
+      
+      if (parsedReferrer.id !== tour.city_id) {
+        // Different city - show both cities
+        return {
+          showBothCities: true,
+          referrerCity: parsedReferrer,
+          currentCity: { id: tour.city_id, name: currentCity }
+        };
+      }
+    }
+    
+    return {
+      showBothCities: false,
+      currentCity: { id: tour.city_id, name: currentCity },
+      currentCategory: currentCategory
+    };
+  };
+
   const getCitySlug = () => {
     // return cityName.toLowerCase().replace(/\s+/g, '-');
     return cityName;
@@ -154,7 +187,8 @@ const TripDetail = () => {
   };
 
   const handleCityClick = () => {
-    navigate(`/destination/${getCitySlug()}`);
+    const cityUrl = SlugHelper.createCityUrl(tour.city_id, tour.city_name);
+    navigate(cityUrl);
   };
 
   const handleCategoryClick = () => {
@@ -181,12 +215,61 @@ const TripDetail = () => {
     );
   }
   if (!tripData.content) {
-  return (
-    <div className="flex justify-center items-center min-h-screen">
-      <div className="text-xl">{t('tripDetail.notFound') || 'Trip not found in this language'}</div>
-    </div>
-  );
-}
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white pt-24">
+        <div className="text-center space-y-6 max-w-md mx-auto px-4">
+          {/* Icon */}
+          <div className="flex justify-center">
+            <div className="w-16 h-16 bg-danim-100 rounded-full flex items-center justify-center">
+              <Calendar2 size={32} color="#3F62AE" variant="Bulk" />
+            </div>
+          </div>
+          
+          {/* Main Message */}
+          <div className="space-y-2">
+            <h2 className="text-2xl font-semibold text-danim-800">
+              {t('tripDetail.contentNotAvailable') || 'Content Not Available Yet'}
+            </h2>
+            <p className="text-lg text-rose-black-300">
+              {t('tripDetail.contentComingSoon') || 'Tour details will be available soon. Please check back later!'}
+            </p>
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 justify-center bg-isabelline text-sea-green-900 px-6 py-3 rounded-lg border border-danim-200 hover:bg-danim-50 transition-colors font-semibold"
+            >
+              <ArrowLeft2 size={20} color="currentColor" />
+              {t('common.goBack') || 'Go Back'}
+            </button>
+            
+            <button
+              onClick={() => navigate('/')}
+              className="bg-danim text-white px-6 py-3 rounded-lg hover:bg-danim-700 transition-colors font-semibold"
+            >
+              {t('common.backToHome') || 'Back to Home'}
+            </button>
+          </div>
+          
+          {/* Contact Info */}
+          <div className="pt-4 border-t border-isabelline-600">
+            <p className="text-sm text-rose-black-300 mb-3">
+              {t('tripDetail.needHelp') || 'Need immediate assistance?'}
+            </p>
+            <button
+              onClick={() => window.open("https://wa.me/2001055957451", "_blank")}
+              className="inline-flex items-center gap-2 text-sea-green-600 hover:text-sea-green-700 font-medium"
+            >
+              <Message size={16} color="currentColor" variant="Bulk" />
+              {t('common.contactUs') || 'Contact Us'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
 
   const { tour, content, images, reviews, avgRating, reviewsCount } = tripData;
@@ -960,7 +1043,7 @@ const tripProgramText = Array.isArray(content?.trip_program) ? content.trip_prog
           {moreLikeThis && moreLikeThis.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {(showAllMoreLikeThis ? moreLikeThis : moreLikeThis.slice(0, 4)).map((trip) => (
-                <Link key={trip.id} to={`/destination/${getCitySlug()}/${trip.id}`}>
+                <Link key={trip.id}   to={SlugHelper.createTourUrl(trip.city_id, trip.city_name, trip.id)}>
                   <ExcursionCard
                     id={trip.id}
                     title={trip.title}

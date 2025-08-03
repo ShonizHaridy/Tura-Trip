@@ -16,3 +16,15 @@ export const useLocalizedText = () => {
 
   return { getLocalizedText, currentLanguage: i18n.language };
 };
+
+export const getTranslatedFeaturedLabel = (featuredTag) => {
+  if (!featuredTag) return t('common.featured');
+  
+  // Convert the tag to lowercase and try to find translation
+  // const tagKey = featuredTag.toLowerCase().replace(/\s+/g, '');
+  const translationKey = `common.${tagKey}`;
+  
+  // Try to get translation, fallback to original tag if not found
+  const translated = t(translationKey);
+  return translated !== translationKey ? translated : featuredTag;
+};

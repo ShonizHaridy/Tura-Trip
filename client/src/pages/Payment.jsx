@@ -8,12 +8,12 @@ const Payment = () => {
   return (
     <div className="bg-white">
       {/* Hero Banner Section */}
-      <section className="relative h-[483px] flex items-center justify-center bg-gradient-to-r from-black/30 to-black/30 bg-[url('/images/payment-hero.jpg')] bg-cover bg-center">
-        <div className="flex w-full max-w-[889px] flex-col justify-center items-center gap-2 px-4">
-          <h1 className="text-center text-gray-100 font-family-primary text-4xl md:text-5xl lg:text-[56px] font-bold leading-normal drop-shadow-[0_14px_42px_rgba(20,20,43,0.14)]">
+      <section className="relative h-[280px] lg:h-[483px] bg-cover bg-center flex items-center justify-center bg-gradient-to-r from-black/30 to-black/30 bg-[url('/images/payment-hero.jpg')] bg-cover bg-center">
+        <div className="text-center text-white px-4 pt-20">
+          <h1 className="text-[28px] md:text-5xl lg:text-6xl text-isabelline font-bold mb-4 drop-shadow-[0_14px_42px_rgba(20,20,43,0.14)]">
             {t("payment.hero.title")}
           </h1>
-          <p className="text-center text-[#DDDDD9] font-family-primary text-lg md:text-xl lg:text-2xl font-normal leading-normal drop-shadow-[0_14px_42px_rgba(20,20,43,0.14)]">
+          <p className="text-[#DDDDD9] font-family-primary text-lg md:text-xl lg:text-2xl font-normal leading-normal drop-shadow-[0_14px_42px_rgba(20,20,43,0.14)] mx-auto">
             {t("payment.hero.subtitle")}
           </p>
         </div>
@@ -21,7 +21,7 @@ const Payment = () => {
 
       {/* Main Content Container */}
       <div className="flex flex-col items-center">
-        <div className="relative max-w-[1246px] w-full px-4 md:px-8 lg:px-12 py-16">
+        <div className="relative px-4 md:px-8 lg:px-24 py-16">
           {/* Background SVG */}
           <svg
             className="absolute top-0 left-1/2 transform -translate-x-1/2 w-full max-w-[1144px] h-auto opacity-20 fill-[#A7B7DA] -z-10"

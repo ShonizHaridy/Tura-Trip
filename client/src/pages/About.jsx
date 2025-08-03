@@ -1,5 +1,6 @@
 // src/pages/About.jsx
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   WalletRemove,
@@ -76,52 +77,52 @@ const About = () => {
     <div>
       {/* Hero Section */}
       <section
-        className="relative h-[483px] bg-cover bg-center flex items-center justify-center"
+        className="relative h-[280px] lg:h-[483px] bg-cover bg-center flex items-center justify-center"
         style={{
           backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('/images/Aboutus.jpg')`,
         }}
       >
-        <div className="text-center text-white px-4">
-          <h1 className="text-5xl lg:text-6xl font-bold mb-4">{t("about.hero.title")}</h1>
-          <p className="text-lg lg:text-xl max-w-3xl mx-auto">
+        <div className="text-center text-white px-4 pt-20">
+          <h1 className="text-[28px] md:text-5xl lg:text-6xl text-isabelline font-bold font-family-primary mb-4">{t("about.hero.title")}</h1>
+          <p className="text-[18px] md:text-lg lg:text-xl text-isabelline-600 font-family-primary mx-auto">
             {t("about.hero.subtitle")}
           </p>
         </div>
       </section>
 
       {/* Plan Your Trip Section */}
-      <section className="flex flex-col gap-10 lg:flex-row py-20 px-[72px] justify-between items-center w-full  bg-white">
-        <div className="flex flex-col items-start gap-[60px]">
-          <div className="flex flex-col justify-center items-start gap-[46px] w-full">
-            <h2 className="text-danim-700 font-great-vibes text-[48px] font-normal leading-[40px]">
-              {t("about.planTrip.subtitle")}
-            </h2>
-            <div className="flex flex-col items-start gap-2 w-full">
-              <h3 className="text-danim-700 font-family-display text-[70px] font-normal leading-[78px]">
+      <section className="flex flex-col gap-10 lg:gap-[186px] lg:flex-row py-10 lg:py-20 px-4 lg:px-[72px] pb-18 justify-between items-center w-full  bg-white">
+        <div className="flex flex-col lg:items-start gap-[60px]">
+          <div className="flex flex-col justify-center items-start gap-6 w-full">
+            <div className="flex flex-col items-start gap-8 w-full">
+              <h2 className="text-danim-700 font-great-vibes text-[48px] font-normal leading-[40px]">
+                {t("about.planTrip.subtitle")}
+              </h2>
+              <h3 className="text-danim-700 font-family-display text-[40px] lg:text-[70px] font-normal leading-[78px]">
                 {t("about.planTrip.title")}
               </h3>
-              <p className="w-[508px] text-black font-inter text-[16px] font-normal leading-[28px]">
-                {t("about.planTrip.description")}
-              </p>
             </div>
+            <p className=" text-black font-inter text-[16px] font-normal leading-[28px]">
+              {t("about.planTrip.description")}
+            </p>
           </div>
 
           {/* Features Grid */}
-          <div className="flex items-start gap-6">
-            <div className="flex flex-col items-start gap-6">
+          <div className="flex items-start lg:gap-6 font-family-primary">
+            <div className="flex flex-1 flex-col items-start gap-1 lg:gap-6">
               {features.slice(0, 4).map((feature, index) => {
                 const IconComponent = feature.icon;
                 return (
-                  <div key={index} className="flex items-center gap-2">
-                    <div className="flex w-10 h-10 p-2 justify-center items-center gap-2 rounded-[50px]">
+                  <div key={index} className="flex items-center gap-1 lg:gap-2">
+                    <div className="flex w-8 h-8 lg:w-10 lg:h-10 p-2 justify-center items-center gap-2 rounded-[50px]">
                       <IconComponent
-                        variant="bulk"
+                        variant="Bulk"
                         color="#3F62AE"
-                        className="w-8 h-8"
+                        className="w-6 h-6 lg:w-8 lg:h-8"
                       />
                     </div>
                     <div className="flex flex-col items-start gap-2">
-                      <span className="text-[#2D467C] font-roboto text-[18px] font-bold">
+                      <span className="text-[#2D467C] font-roboto text-[11px] lg:text-[18px] font-semibold lg:font-bold">
                         {t(`about.features.${feature.key}`)}
                       </span>
                     </div>
@@ -129,20 +130,20 @@ const About = () => {
                 );
               })}
             </div>
-            <div className="flex flex-col items-start gap-6">
+            <div className="flex flex-1 flex-col items-start gap-1 lg:gap-6">
               {features.slice(4, 8).map((feature, index) => {
                 const IconComponent = feature.icon;
                 return (
-                  <div key={index} className="flex items-center gap-2">
-                    <div className="flex w-10 h-10 p-2 justify-center items-center gap-2 rounded-[8px]">
+                  <div key={index} className="flex items-center gap-1 lg:gap-2">
+                    <div className="flex w-8 h-8 lg:w-10 lg:h-10 p-2 justify-center items-center gap-2 rounded-[50px]">
                       <IconComponent
-                        variant="bulk"
+                        variant="Bulk"
                         color="#3F62AE"
-                        className="w-8 h-8"
+                        className="w-6 h-6 lg:w-8 lg:h-8"
                       />
                     </div>
                     <div className="flex flex-col items-start gap-2">
-                      <span className="text-[#2D467C] font-roboto text-[18px] font-bold">
+                      <span className="text-[#2D467C] font-roboto text-[11px] lg:text-[18px] font-semibold lg:font-bold">
                         {t(`about.features.${feature.key}`)}
                       </span>
                     </div>
@@ -154,55 +155,54 @@ const About = () => {
         </div>
 
         {/* Right Images */}
-        <div className="relative w-[607px] h-[757px]">
+        <div className="relative w-full max-w-[343px] lg:max-w-[1200px] h-[427px] lg:h-[757px]">
           <img
             src="https://cdn.builder.io/api/v1/image/assets/TEMP/7c17a7029fce170077a1c476f2f5af565c4c9e59?width=751"
             alt={t("about.images.resortPool")}
-            className="absolute top-0 right-0 w-[376px] h-[441px] rounded-[24px] shadow-[0px_8px_28px_rgba(20,20,43,0.10)] object-cover"
+            className="z-1 absolute top-0 right-[2.5%] w-[60.6%] rounded-[14px] lg:rounded-[24px] shadow-[0px_8px_28px_rgba(20,20,43,0.10)] object-cover"
           />
           <img
             src="https://cdn.builder.io/api/v1/image/assets/TEMP/36243efbf1a3e9241c1d3731f3b2904b80cae2aa?width=767"
             alt={t("about.images.desertBuggy")}
-            className="absolute top-[98px] left-0 w-[384px] h-[449px] rounded-[24px] shadow-[0px_8px_28px_rgba(20,20,43,0.10)] object-cover"
+            className="z-2 absolute top-[16.3%] left-0 w-[63%] rounded-[14px] lg:rounded-[24px] shadow-[0px_8px_28px_rgba(20,20,43,0.10)] object-cover"
           />
           <img
             src="https://cdn.builder.io/api/v1/image/assets/TEMP/b1dba8229033f5ae6488845180989724e43460e2?width=767"
             alt={t("about.images.boatTour")}
-            className="absolute top-[464px] left-[222px] w-[384px] h-[292px] rounded-[24px] shadow-[0px_8px_28px_rgba(20,20,43,0.10)] object-cover"
+            className="z-3 absolute top-[55%] right-[2.5%] w-[63%] rounded-[14px] lg:rounded-[24px] shadow-[0px_8px_28px_rgba(20,20,43,0.10)] object-cover"
           />
         </div>
       </section>
 
       {/* Services Section */}
-      {/* Services Section */}
-      <section className="flex py-24 px-[72px] flex-col items-center gap-10 bg-[rgba(17,32,51,0.18)]">
-        <div className="flex flex-col items-start gap-12 w-full">
-          <div className="flex flex-col items-start gap-6">
-            <div className="flex flex-col items-start gap-3 w-full">
-              <h2 className="text-[#1A2949] font-bebas text-[56px] font-normal leading-[44px] tracking-[-1.12px]">
+      <section className="flex py-10 lg:py-24 px-4 lg:px-[72px] flex-col items-center gap-10 bg-[rgba(17,32,51,0.18)]">
+        <div className="flex flex-col items-start w-full px-2">
+          <div className="flex flex-col items-start gap-4 lg:gap-6">
+            <div className="flex flex-col items-start w-full">
+              <h2 className="text-[#1A2949] font-family-display text-4xl lg:text-[56px] font-normal leading-[44px] tracking-[-2%]">
                 {t("about.services.title")}
               </h2>
             </div>
-            <p className="text-[#1A2949] font-roboto text-[20px] font-normal leading-[25.4px]">
+            <p className="text-[#1A2949] font-family-primary text-[20px] font-normal leading-[25.4px]">
               {t("about.services.subtitle")}
             </p>
           </div>
         </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:flex lg:p-8 lg:items-start lg:gap-10 gap-6 p-4 rounded-[24px] bg-[#FEFEFD] shadow-[0px_4px_4px_rgba(0,0,0,0.25)]">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:flex lg:p-8 lg:items-start lg:gap-10 gap-4 p-4 rounded-[24px] bg-[#FEFEFD] shadow-[0px_4px_4px_rgba(0,0,0,0.25)]">
           {services.map((service, index) => (
             <div
               key={index}
               className="flex flex-col justify-center items-start gap-3"
             >
               <div
-      className="flex w-full lg:w-[170px] h-[116px] justify-center items-center gap-2 rounded-[16px]"
+                className="flex w-full lg:w-[170px] h-[116px] md:[150px] lg:h-[116px] justify-center items-center gap-2 rounded-[16px]"
                 style={{
                   background: `url('${service.bgUrl}') lightgray 50% / cover no-repeat`,
                 }}
               ></div>
-              <div className="flex flex-col items-start gap-2 w-full">
-                <h3 className="text-[#2D467C] text-center font-roboto text-[18px] font-bold">
+              <div className="flex flex-col items-center gap-2 w-full">
+                <h3 className="text-[#2D467C] text-center font-family-primary text-[18px] font-semibold lg:font-bold">
                   {t(`about.services.${service.name}`)}
                 </h3>
               </div>
@@ -212,19 +212,20 @@ const About = () => {
       </section>
 
       {/* About Tura Trip Section */}
-      <section className="flex py-20 px-[72px] flex-col justify-center items-center gap-10 bg-white">
-        <div className="flex  flex-col justify-center items-center gap-8">
-          <h2 className="text-center text-[#233660] font-bebas text-[56px] font-normal leading-[120%]">
+      <section className="flex py-6 lg:py-20 px-4 lg:px-[72px] flex-col justify-center items-center gap-10 bg-white">
+        <div className="flex  flex-col justify-center items-center gap-4 lg:gap-8">
+          <h2 className="text-center text-[#233660] font-family-display text-[32px] lg:text-[56px] font-normal leading-[120%]">
             {t("about.company.title")}
           </h2>
           <div className="flex flex-col-reverse lg:flex-row items-center gap-10">
-            <div className=" text-[#1A2949] font-family-primary text-[27px] font-normal leading-[180%]">
+            <div className=" text-[#1A2949] font-family-primary text-[20px] lg:text-[27px] font-normal leading-[180%]">
               <div dangerouslySetInnerHTML={{ __html: t("about.company.description") }} />
             </div>
             <img
               src="/images/aboutturatrip.png"
               alt={t("about.company.officeAlt")}
-              className="w-[458px] h-[491px] rounded-[32px] shadow-[0px_14px_42px_rgba(20,20,43,0.14)] object-cover"
+              className="w-[344px] h-[256px] lg:w-[458px] lg:h-[491px] rounded-[32px] shadow-[0px_14px_42px_rgba(20,20,43,0.14)] object-cover"
+              // className="w-fit object-cover laspect-[500/600] bg-amber-700"
             />
           </div>
         </div>
@@ -276,42 +277,41 @@ const About = () => {
       </section> */}
 
       {/* Why Choose Us Section */}
-{/* Why Choose Us Section */}
-<section className="py-[60px] px-[72px] bg-white">
-  <div className="flex flex-col justify-center items-center gap-10 max-w-[1296px] mx-auto">
-    <h2 className="text-center text-[#233660] font-bebas text-[56px] font-normal leading-[120%]">
-      {t("about.whyChoose.title")}
-    </h2>
+      <section className="py-10 lg:py-15 px-4 lg:px-[72px] bg-white">
+        <div className="flex flex-col justify-center items-center gap-8 lg:gap-10 max-w-[1296px] mx-auto">
+          <h2 className="text-center text-[#233660] font-family-display text-[32px] lg:text-[56px] font-normal leading-[120%]">
+            {t("about.whyChoose.title")}
+          </h2>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
-      {whyChooseFeatures.map((feature, index) => {
-        const IconComponent = feature.icon;
-        return (
-          <div key={index} className="flex p-6 items-start gap-4 rounded-[20px] bg-[#ECEFF7] flex-1 max-w-[632px]">
-            <div className="relative w-16 h-16">
-              <div className="w-16 h-16 rounded-[12px] bg-[#C3CEE6]"></div>
-              <div className="absolute top-4 left-4">
-                <IconComponent
-                  variant="bulk"
-                  color="#3F62AE"
-                  className="w-8 h-8"
-                />
-              </div>
-            </div>
-            <div className="flex flex-col items-start gap-2 flex-1">
-              <h3 className="text-[#272727] font-roboto text-[24px] font-bold">
-                {t(`about.whyChoose.${feature.key}.title`)}
-              </h3>
-              <p className="text-[#272727] font-roboto text-[20px] font-normal opacity-70 leading-normal">
-                {t(`about.whyChoose.${feature.key}.description`)}
-              </p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+            {whyChooseFeatures.map((feature, index) => {
+              const IconComponent = feature.icon;
+              return (
+                <div key={index} className="flex p-6 items-start gap-4 rounded-[20px] bg-[#ECEFF7] flex-1 max-w-[632px]">
+                  <div className="relative w-16 h-16">
+                    <div className="w-16 h-16 rounded-[12px] bg-[#C3CEE6]"></div>
+                    <div className="absolute top-4 left-4">
+                      <IconComponent
+                        variant="Bulk"
+                        color="#3F62AE"
+                        className="w-8 h-8"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-start gap-2 flex-1">
+                    <h3 className="text-[#272727] font-family-primary text-[20px] lg:text-[24px] font-semibold">
+                      {t(`about.whyChoose.${feature.key}.title`)}
+                    </h3>
+                    <p className="text-[#272727] font-family-primary text-[14px] lg:text-[20px] font-medium opacity-70 leading-normal">
+                      {t(`about.whyChoose.${feature.key}.description`)}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        );
-      })}
-    </div>
-  </div>
-</section>
+        </div>
+      </section>
 
       {/* CTA Section */}
       <section
@@ -321,15 +321,17 @@ const About = () => {
         }}
       >
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+          <h2 className="text-[18px] lg:text-4xl font-bold text-white mb-4">
             {t("about.cta.title")}
           </h2>
-          <p className="text-lg text-gray-200 mb-8 max-w-2xl mx-auto">
+          <p className="text-[16px] text-gray-200 mb-8 max-w-2xl mx-auto">
             {t("about.cta.description")}
           </p>
-          <button className="bg-white text-danim-800 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors text-lg">
+          <Link 
+          to="/browse-tours"
+          className="bg-white-secondary2 text-sea-green-900 px-3 lg:px-4 py-2 rounded-sm lg:rounded-[6px] font-semibold hover:bg-sea-green-600 hover:text-sea-green-900 transition-colors text-lg">
             {t("about.cta.button")}
-          </button>
+          </Link>
         </div>
       </section>
     </div>

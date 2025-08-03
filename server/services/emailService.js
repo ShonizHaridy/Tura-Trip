@@ -4,18 +4,19 @@ class EmailService {
   constructor() {
     // Configure your SMTP settings here
     this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com', // or your hosting provider's SMTP
+      host: process.env.SMTP_HOST || 'smtp.hostinger.com', // or your hosting provider's SMTP
       port: process.env.SMTP_PORT || 587,
       secure: false, // true for 465, false for other ports
       auth: {
         user: process.env.SMTP_USER || 'info@turatrip.com',
-        pass: process.env.SMTP_PASS || 'your-email-password' // App password if using Gmail
+        pass: process.env.SMTP_PASS || 'Ahmed5100200$' // App password if using Gmail
       }
     });
   }
 
   async sendContactForm(formData) {
     try {
+      console.log(["Credentials are as following", process.env.SMTP_USER, process.env.SMTP_PASS]);
       const { firstName, lastName, email, phone, subject, message } = formData;
 
       console.log('Sending contact form email with data:', formData);
