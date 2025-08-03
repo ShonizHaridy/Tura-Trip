@@ -107,7 +107,9 @@
     "priceAdults": "PRICE (adults)",
     "priceChildren": "PRICE (children)",
     "adults": "ADULTS",
-    "children": "CHILDREN"
+    "children": "CHILDREN",
+    "noDataTitle": "No Pricing Data Available",
+    "noDataMessage": "We apologize, but pricing information is not currently available. Please check back soon or contact us for assistance."
   },
   "homepage": {
     "hero": {

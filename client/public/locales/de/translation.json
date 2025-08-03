@@ -11,7 +11,7 @@
     "contact": {
       "title": "Kontaktieren Sie uns",
       "call": "Anrufen",
-      "description": "Praesent nulla massa, hendrerit vestibulum gravida in, feugiat auctor felis.",
+      "description": "Entdecken Sie authentische Ägypten-Touren mit erfahrenen Führern und nahtloser Planung in Top-Städten.",
       "email": "E-Mail",
       "bookNow": "Jetzt buchen"
     },
@@ -56,9 +56,25 @@
     "viewLess": "weniger anzeigen",
     "fullDay": "Ganztägig",
     "daily": "Täglich",
+    "searching": "Suchen...",
+    "noResults": "Keine Ergebnisse gefunden",
+    "showMoreResults": "Mehr Ergebnisse anzeigen",
+    "destinations": "Reiseziele",
+    "tours": "Touren",
+    "categories": "Kategorien",
+    "noDestinations": "Keine Reiseziele verfügbar",
+    "noCategories": "Keine Kategorien verfügbar",
+    "goBack": "Zurück gehen",
+    "backToHome": "Zurück zur Startseite",
+    "contactUs": "Kontaktieren Sie uns",
     "tourTitle": "Tourtitel nicht verfügbar",
     "tryDifferentCategory": "Versuchen Sie eine andere Kategorie oder schauen Sie später noch einmal vorbei."
   },
+  "search": {
+    "resultsFor": "Suchergebnisse für",
+    "resultsFound": "Suchergebnisse gefunden"
+  },
+    
   "features": {
     "noPrepayment": "Keine Vorauszahlung",
     "reservation3Min": "Reservierung in 3 Minuten",
@@ -91,7 +107,8 @@
     "priceAdults": "PREIS (Erwachsene)",
     "priceChildren": "PREIS (Kinder)",
     "adults": "ERWACHSENE",
-    "children": "KINDER"
+    "children": "KINDER",
+    "citySummary": "{{total}} Touren verfügbar. Preise von ${{min}} bis ${{max}}. Durchschnittspreis: ${{avg}}"
   },
   "homepage": {
     "hero": {
@@ -100,7 +117,9 @@
       "title2": "Ägyptens entdecken",
       "description": "Von den goldenen Sanden der Sahara bis zu den zeitlosen Wundern antiker Tempel bietet Ägypten eine Reise durch Geschichte, Natur und Kultur. Jeder Schritt enthüllt verborgene Geschichten, majestätische Landschaften und unvergessliche Momente, die darauf warten, entdeckt zu werden.",
       "searchDestination": "Ziel eingeben..",
-      "searchExcursions": "Ausflüge eingeben.."
+      "searchExcursions": "Ausflüge eingeben..",
+      "searchCategory": "Kategorie eingeben..",
+      "quickSearch": "Schnellsuche..."
     },
     "explore": {
       "title": "Ägypten erkunden",
@@ -150,6 +169,9 @@
     "customerReviews": "Kundenbewertungen",
     "moreLikeThis": "Mehr wie diese Reise",
     "noSimilarTours": "Keine ähnlichen Touren gefunden",
+      "contentNotAvailable": "Inhalt noch nicht verfügbar",
+    "contentComingSoon": "Tourdetails werden bald verfügbar sein. Schauen Sie später noch einmal vorbei!",
+    "needHelp": "Benötigen Sie sofortige Hilfe?",
     "pricing": {
       "adult": "Erwachsene (ab 12 Jahren)",
       "child": "Kind (5-11 Jahre)"
@@ -320,7 +342,7 @@
   "payment": {
     "hero": {
       "title": "Zahlungsrichtlinien",
-      "subtitle": "Erfahren Sie mehr über unsere Leidenschaft, seit 2010 unvergessliche ägyptische Abenteuer zu schaffen"
+      "subtitle": "Genießen Sie flexible und sichere Zahlungsoptionen, die entwickelt wurden, um die Buchung Ihres ägyptischen Abenteuers einfach und sorgenfrei zu machen"
     },
     "methods": {
       "title": "Zahlungsmethoden",
@@ -407,5 +429,19 @@
       "description": "Kontaktieren Sie uns für weitere Informationen über unsere Sicherheitsmaßnahmen und Protokolle zum Schutz von Reisen.",
       "button": "Kontaktieren Sie uns"
     }
+  },
+  "browseTours": {
+    "title": "Alle Reiseziele erkunden",
+    "subtitle": "Entdecken Sie erstaunliche Touren in Ägyptens schönsten Reisezielen",
+    "cities": "Städte",
+    "tours": "Touren", 
+    "priceRange": "Preisspanne",
+    "viewByCities": "Nach Städten anzeigen",
+    "viewAllTours": "Alle Touren",
+    "exploreCity": "Stadt erkunden",
+    "featuredTours": "Empfohlene Touren",
+    "allTours": "Alle verfügbaren Touren",
+    "viewAllInCity": "{{count}} weitere Touren anzeigen",
+    "from": "Ab"
   }
 }

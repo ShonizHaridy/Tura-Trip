@@ -39,41 +39,61 @@ const AdminLogin = () => {
   };
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+      e.preventDefault();
+      setLoading(true);
+      setError("");
 
-    try {
-      const result = await login({
-        admin_id: formData.admin_id,
-        password: formData.password,
-      });
+      try {
+        const result = await login({
+          admin_id: formData.adminId, // Fixed: use adminId from form
+          password: formData.password,
+        });
 
-      if (result.success) {
-        // Redirect to the page they were trying to visit or dashboard
-        const from = location.state?.from?.pathname || '/admin/dashboard';
-        navigate(from, { replace: true });
-      } else {
-        setError(result.message || 'Login failed');
+        if (result.success) {
+          // Redirect to the page they were trying to visit or dashboard
+          const from = location.state?.from?.pathname || '/admin/dashboard';
+          navigate(from, { replace: true });
+        } else {
+          setError(result.message || 'Login failed');
+        }
+      } catch (error) {
+        setError(error.response?.data?.message || 'An error occurred during login');
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      setError('An error occurred during login');
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  const handleForgotPassword = (e) => {
+  const handleForgotPassword = async (e) => {
     e.preventDefault();
     if (formData.adminCode && formData.email && formData.idNumber) {
-      setCurrentState("reset");
+      setLoading(true);
       setError("");
+      
+      try {
+        const response = await adminService.forgotPassword({
+          admin_code: formData.adminCode,
+          email: formData.email,
+          id_number: formData.idNumber,
+        });
+
+        if (response.success) {
+          setCurrentState("reset");
+          setError("");
+        } else {
+          setError(response.message || 'Failed to send reset code');
+        }
+      } catch (error) {
+        setError(error.response?.data?.message || 'An error occurred. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     } else {
       setError("Please fill in all fields.");
     }
   };
 
-  const handleResetPassword = (e) => {
+  // FIXED: Added backend integration for reset password
+  const handleResetPassword = async (e) => {
     e.preventDefault();
     if (
       formData.verificationCode &&
@@ -81,8 +101,34 @@ const AdminLogin = () => {
       formData.confirmPassword
     ) {
       if (formData.newPassword === formData.confirmPassword) {
-        setCurrentState("success");
+        if (formData.newPassword.length < 8) {
+          setError("Password must be at least 8 characters long.");
+          return;
+        }
+
+        setLoading(true);
         setError("");
+
+        try {
+          const response = await adminService.resetPassword({
+            admin_code: formData.adminCode,
+            email: formData.email,
+            id_number: formData.idNumber,
+            verification_code: formData.verificationCode,
+            new_password: formData.newPassword,
+          });
+
+          if (response.success) {
+            setCurrentState("success");
+            setError("");
+          } else {
+            setError(response.message || 'Failed to reset password');
+          }
+        } catch (error) {
+          setError(error.response?.data?.message || 'An error occurred. Please try again.');
+        } finally {
+          setLoading(false);
+        }
       } else {
         setError("Passwords do not match.");
       }
@@ -365,7 +411,7 @@ const renderLoginForm = () => (
     <button
       type="submit"
       disabled={loading}
-      className={`flex p-[14px_24px] justify-center items-center self-stretch rounded-md transition-colors ${
+      className={`flex p-[14px_24px] justify-center items-center self-stretch rounded-md transition-colors cursor-pointer ${
         loading 
           ? "bg-gray-400 cursor-not-allowed" 
           : "bg-[#1F7674] hover:bg-[#1a6562]"

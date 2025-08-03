@@ -11,7 +11,7 @@
     "contact": {
       "title": "Contattaci",
       "call": "Chiama",
-      "description": "Praesent nulla massa, hendrerit vestibulum gravida in, feugiat auctor felis.",
+      "description": "Scopri tour autentici dell'Egitto con guide esperte e pianificazione perfetta nelle migliori città.",
       "email": "Email",
       "bookNow": "Prenota ora"
     },
@@ -56,8 +56,23 @@
     "viewLess": "vedi meno",
     "fullDay": "Giornata intera",
     "daily": "Quotidiano",
+    "searching": "Ricerca in corso...",
+    "noResults": "Nessun risultato trovato",
+    "showMoreResults": "Mostra più risultati",
+    "destinations": "Destinazioni",
+    "tours": "Tour",
+    "categories": "Categorie",
+    "noDestinations": "Nessuna destinazione disponibile",
+    "noCategories": "Nessuna categoria disponibile",
+    "goBack": "Torna indietro",
+    "backToHome": "Torna alla home",
+    "contactUs": "Contattaci",
     "tourTitle": "Titolo del tour non disponibile",
     "tryDifferentCategory": "Prova a selezionare una categoria diversa o ricontrolla più tardi."
+  },
+"search": {
+  "resultsFor": "Risultati di ricerca per",
+  "resultsFound": "Risultati di ricerca trovati"
   },
   "features": {
     "noPrepayment": "Nessun pagamento anticipato",
@@ -101,7 +116,9 @@
       "title2": "Bellezza dell'Egitto",
       "description": "Dalle sabbie dorate del Sahara alle meraviglie senza tempo dei templi antichi, l'Egitto offre un viaggio attraverso la storia, la natura e la cultura. Ogni passo rivela storie nascoste, paesaggi maestosi e momenti indimenticabili che aspettano di essere esplorati.",
       "searchDestination": "Inserisci destinazione..",
-      "searchExcursions": "Inserisci escursioni.."
+      "searchExcursions": "Inserisci escursioni..",
+      "searchCategory": "Inserisci categoria..",
+      "quickSearch": "Ricerca rapida..."
     },
     "explore": {
       "title": "Esplora l'Egitto",
@@ -151,6 +168,9 @@
     "customerReviews": "Recensioni dei clienti",
     "moreLikeThis": "Altri viaggi simili",
     "noSimilarTours": "Nessun tour simile trovato",
+    "contentNotAvailable": "Contenuto non ancora disponibile",
+    "contentComingSoon": "I dettagli del tour saranno presto disponibili. Ricontrolla più tardi!",
+    "needHelp": "Hai bisogno di assistenza immediata?",
     "pricing": {
       "adult": "Adulto (sopra i 12 anni)",
       "child": "Bambino (5-11 anni)"
@@ -321,7 +341,7 @@
   "payment": {
     "hero": {
       "title": "Politiche di pagamento",
-      "subtitle": "Scopri la nostra passione per creare avventure egiziane indimenticabili dal 2010"
+      "subtitle": "Goditi opzioni di pagamento flessibili e sicure progettate per rendere la prenotazione della tua avventura egiziana facile e senza preoccupazioni"
     },
     "methods": {
       "title": "Metodi di pagamento",
@@ -408,5 +428,19 @@
       "description": "Contattaci per maggiori informazioni sulle nostre misure di sicurezza e sui protocolli di protezione dei viaggi.",
       "button": "Contattaci"
     }
+  },
+"browseTours": {
+  "title": "Esplora tutte le destinazioni",
+  "subtitle": "Scopri tour incredibili nelle più belle destinazioni dell'Egitto",
+  "cities": "Città",
+  "tours": "Tour", 
+  "priceRange": "Fascia di prezzo",
+  "viewByCities": "Visualizza per città",
+  "viewAllTours": "Tutti i tour",
+  "exploreCity": "Esplora la città",
+  "featuredTours": "Tour in evidenza",
+  "allTours": "Tutti i tour disponibili",
+  "viewAllInCity": "Visualizza altri {{count}} tour",
+  "from": "A partire da"
   }
 }

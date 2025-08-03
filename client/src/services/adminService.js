@@ -22,6 +22,26 @@ class AdminService {
     localStorage.removeItem('admin_user');
   }
 
+  async forgotPassword(data) {
+    try {
+      const response = await api.post('/admin/forgot-password', data);
+      return response.data;
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      throw error;
+    }
+  }
+
+  async resetPassword(data) {
+    try {
+      const response = await api.post('/admin/reset-password', data);
+      return response.data;
+    } catch (error) {
+      console.error('Reset password error:', error);
+      throw error;
+    }
+  }
+
   async verifyToken() {
     try {
       const response = await api.get('/admin/verify-token');
@@ -31,6 +51,7 @@ class AdminService {
       throw error;
     }
   }
+  
 
   async getProfile() {
     try {

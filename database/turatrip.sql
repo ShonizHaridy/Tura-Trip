@@ -270,3 +270,11 @@ CREATE TABLE organizer_commission (
     INDEX idx_currency (currency_code),
     INDEX idx_active (is_active)
 );
+
+CREATE TABLE password_resets (
+  admin_id INT PRIMARY KEY,
+  verification_code VARCHAR(6) NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (admin_id) REFERENCES admin_users(id) ON DELETE CASCADE
+);

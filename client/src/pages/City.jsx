@@ -94,9 +94,20 @@ const City = () => {
       const response = await publicService.getCityData(cityName, params);
       
       if (response.success) {
-        const { city, tours: newTours, categories: apiCategories, pagination: paginationData } = response.data;
+        const { 
+          city, 
+          tours: newTours, 
+          categories: apiCategories, 
+          pagination: paginationData,
+          todaysPrices  // ← Add this
+        } = response.data;
         
-        setCityData(city);
+        // Merge todaysPrices with city data
+        setCityData({
+          ...city,
+          todaysPrices  // ← Include todaysPrices in cityData
+        });      
+          
         setPagination(paginationData);
         console.log('City data:', city);
         
@@ -159,12 +170,37 @@ const City = () => {
     }
   };
 
-  const handleShowPricing = async () => {
-    if (allTours.length === 0) {
-      await fetchCityData(1, null, true);
-    }
-    setIsPriceListOpen(true);
-  };
+// In City.jsx, add this debugging code in the handleShowPricing function
+const handleShowPricing = async () => {
+  console.log("=== PRICE LIST DEBUG START ===");
+  console.log("cityData:", cityData);
+  console.log("cityData.todaysPrices:", cityData?.todaysPrices);
+  console.log("allTours length:", allTours.length);
+  
+  if (allTours.length === 0) {
+    console.log("📋 Fetching all tours because allTours is empty...");
+    await fetchCityData(1, null, true);
+  }
+  
+  // Debug the data being prepared for PriceList
+  const pricesDataToSend = cityData?.todaysPrices ? [{
+    city_name: cityData.name,
+    tours: (cityData.todaysPrices.tours || []).map(tour => {
+      console.log("Processing tour:", tour);
+      return {
+        ...tour,
+        title: tour.title || `${t('common.tourTitle')} #${tour.id}`,
+        price_adult: parseFloat(tour.price_adult),
+        price_child: parseFloat(tour.price_child)
+      };
+    })
+  }] : [];
+  
+  console.log("📤 Data being sent to PriceList:", pricesDataToSend);
+  console.log("=== PRICE LIST DEBUG END ===");
+  
+  setIsPriceListOpen(true);
+};
 
   const formatPrice = (price) => {
     return parseFloat(price).toFixed(2);
@@ -194,10 +230,10 @@ const City = () => {
   }
 
   return (
-    <div className="min-h-screen pt-[100px]">
+    <div className="min-h-screen pt-[80px] lg:pt-[100px]">
       {/* Category Tabs - Fixed position */}
-      <div className="w-full flex flex-col items-start border-b-2 border-[#E6E6E8] shadow-[0px_2px_12px_0px_rgba(20,20,43,0.08)] bg-white fixed top-[100px] left-0 right-0 z-40">
-        <div className="w-full px-[70px] h-12">
+      <div className="w-full flex flex-col items-start border-b-2 border-[#E6E6E8] shadow-[0px_2px_12px_0px_rgba(20,20,43,0.08)] bg-white fixed top-[85px] md:top-[100px] left-0 right-0 z-40">
+        <div className="w-full px-2 lg:px-[70px] h-12">
           <div className="flex h-12 items-center overflow-x-auto">
             {categories.map((category) => (
               <div
@@ -227,7 +263,7 @@ const City = () => {
       </div>
 
       {/* Main Content */}
-      <div className="px-4 md:px-[70px] pt-16">
+      <div className="px-4 md:px-[70px] pt-12 md:pt-16">
         {/* Breadcrumb */}
         <div className="inline-flex items-center gap-4 py-6 rounded-md">
           <div 
@@ -288,7 +324,7 @@ const City = () => {
         </div>
 
         {/* Hero Banner */}
-        <div className="relative w-full h-[349px] rounded-[32px] overflow-hidden mb-8">
+        <div className="relative w-full h-[260px] lg:h-[349px] rounded-[32px] overflow-hidden mb-8">
           <div
             className="w-full h-full bg-cover bg-center relative"
             style={{
@@ -457,14 +493,19 @@ const City = () => {
       {isPriceListOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div ref={priceListRef}>
-            <PriceList
-              isOpen={isPriceListOpen}
-              onClose={() => setIsPriceListOpen(false)}
-              pricesData={cityData?.todaysPrices ? [{
-                city_name: cityData.name,
-                tours: cityData.todaysPrices.tours || []
-              }] : []}
-            />
+          <PriceList
+            isOpen={isPriceListOpen}
+            onClose={() => setIsPriceListOpen(false)}
+            pricesData={cityData?.todaysPrices ? [{
+              city_name: cityData.name,
+              tours: (cityData.todaysPrices.tours || []).map(tour => ({
+                ...tour,
+                title: tour.title || `${t('common.tourTitle')} #${tour.id}`,
+                price_adult: parseFloat(tour.price_adult),
+                price_child: parseFloat(tour.price_child)
+              }))
+            }] : []}
+          />
           </div>
         </div>
       )}

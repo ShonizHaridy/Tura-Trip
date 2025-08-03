@@ -724,11 +724,11 @@ const getDropdownButtonClasses = () => {
 
       {/* Navigation Content - Scrollable */}
       <div className="flex-1 overflow-y-auto px-5">
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
           {/* Explore with dropdown */}
           <div>
           <button
-            className="flex justify-between items-center w-full py-3"
+            className="flex justify-between items-center w-full"
             onClick={() => {
               console.log('🔄 Mobile explore clicked, current state:', isExploreOpen);
               setIsExploreOpen(!isExploreOpen);
@@ -804,10 +804,11 @@ const getDropdownButtonClasses = () => {
 
           {/* Other nav items */}
           {navItems.slice(1).map((item) => (
-            <div key={item.key} className="border-b border-gray-100 last:border-b-0">
+            // <div key={item.key} className="border-b border-gray-100 last:border-b-0">
+            <div key={item.key}>
               <Link
                 to={item.href}
-                className="flex items-center py-3 w-full"
+                className="flex items-center w-full"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <span className="text-[#0B101A] font-roboto text-base font-medium leading-tight">

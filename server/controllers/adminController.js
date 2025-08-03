@@ -79,6 +79,115 @@ async login(req, res) {
   }
 }
 
+
+  async forgotPassword(req, res) {
+    try {
+      const { admin_code, email, id_number } = req.body;
+
+      // Verify admin exists with provided credentials
+      const [rows] = await pool.execute(
+        'SELECT id, name, email FROM admin_users WHERE admin_code = ? AND email = ? AND id_number = ? AND is_active = true',
+        [admin_code, email, id_number]
+      );
+
+      if (rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Admin not found with provided credentials'
+        });
+      }
+
+      // Generate 6-digit verification code
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+      // Store verification code in database (you may need to create a password_resets table)
+      await pool.execute(
+        'INSERT INTO password_resets (admin_id, verification_code, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE verification_code = ?, expires_at = ?',
+        [rows[0].id, verificationCode, expiresAt, verificationCode, expiresAt]
+      );
+
+      // Send verification code email using your existing email service
+      const emailService = require('../services/emailService');
+      await emailService.sendPasswordResetCode({
+        email: email,
+        name: rows[0].name,
+        verificationCode: verificationCode
+      });
+
+      res.json({
+        success: true,
+        message: 'Verification code sent to your email'
+      });
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error'
+      });
+    }
+  }
+
+  async resetPassword(req, res) {
+    try {
+      const { admin_code, email, id_number, verification_code, new_password } = req.body;
+
+      // Verify admin and get admin ID
+      const [adminRows] = await pool.execute(
+        'SELECT id FROM admin_users WHERE admin_code = ? AND email = ? AND id_number = ? AND is_active = true',
+        [admin_code, email, id_number]
+      );
+
+      if (adminRows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Admin not found'
+        });
+      }
+
+      const adminId = adminRows[0].id;
+
+      // Verify verification code
+      const [codeRows] = await pool.execute(
+        'SELECT * FROM password_resets WHERE admin_id = ? AND verification_code = ? AND expires_at > NOW()',
+        [adminId, verification_code]
+      );
+
+      if (codeRows.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid or expired verification code'
+        });
+      }
+
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(new_password, 12);
+
+      // Update password
+      await pool.execute(
+        'UPDATE admin_users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+        [hashedPassword, adminId]
+      );
+
+      // Delete used verification code
+      await pool.execute(
+        'DELETE FROM password_resets WHERE admin_id = ?',
+        [adminId]
+      );
+
+      res.json({
+        success: true,
+        message: 'Password reset successfully'
+      });
+    } catch (error) {
+      console.error('Reset password error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error'
+      });
+    }
+  }
+
   // Get admin profile
   async getProfile(req, res) {
     try {

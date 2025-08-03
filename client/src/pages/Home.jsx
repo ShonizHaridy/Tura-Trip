@@ -153,10 +153,12 @@ const handleQuickSearch = async (query) => {
 
 const handleSearchSubmit = () => {
   if (selectedCity && selectedCategory) {
-    const citySlug = selectedCity.name.toLowerCase().replace(/\s+/g, '-');
+    // const citySlug = selectedCity.slug.toLowerCase().replace(/\s+/g, '-');
+    const citySlug = selectedCity.slug;
     navigate(`/destination/${citySlug}?category_id=${selectedCategory.id}`);
   } else if (selectedCity) {
-    const citySlug = selectedCity.name.toLowerCase().replace(/\s+/g, '-');
+    // const citySlug = selectedCity.slug.toLowerCase().replace(/\s+/g, '-');
+    const citySlug = selectedCity.slug;
     navigate(`/destination/${citySlug}`);
   } else if (searchQuery) {
     navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
@@ -177,10 +179,13 @@ const handleSuggestionClick = (suggestion) => {
   setSearchQuery('');
   
   if (suggestion.type === 'city') {
-    const citySlug = suggestion.name.toLowerCase().replace(/\s+/g, '-');
+    // const citySlug = suggestion.city.toLowerCase().replace(/\s+/g, '-');
+    console.log("Here are the slugs u want", suggestion)
+    const citySlug = suggestion.slug;
     navigate(`/destination/${citySlug}`);
   } else if (suggestion.type === 'tour') {
-    const citySlug = suggestion.city_name.toLowerCase().replace(/\s+/g, '-');
+    // const citySlug = suggestion.city_slug.toLowerCase().replace(/\s+/g, '-');
+    const citySlug = suggestion.city_slug;
     navigate(`/destination/${citySlug}/${suggestion.id}`);
   } else if (suggestion.type === 'category') {
     navigate(`/search?category_id=${suggestion.id}`);

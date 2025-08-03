@@ -32,6 +32,7 @@ import SearchResults from "./pages/SearchResults";
 
 import ScrollToTop from "./components/ScrollToTop";
 
+import EdgeSocialMedia from "./components/EdgeScoialMedia"; // Add this import
 
 // Admin route wrapper that redirects to login or dashboard
 const AdminRoute = () => {
@@ -144,12 +145,13 @@ function App() {
                       path="/destination/:citySlug/:tripId"
                       element={<TripDetail />}
                     />
-                    
+
                     <Route path="/browse-tours" element={<BrowseTours />} />
 
                   </Routes>
                 </main>
                 <Footer />
+                <EdgeSocialMedia />
               </div>
             }
           />
