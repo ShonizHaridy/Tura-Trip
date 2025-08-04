@@ -1,18 +1,44 @@
-import React, { useState } from "react";
-import { mockTourCategories } from "../../data/adminMockData";
+import React, { useState, useEffect } from "react";
+import { Edit2, Trash } from "iconsax-react";
+import adminService from "../../services/adminService";
 
 const TourCategoriesTable = ({ onEditCategory }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const itemsPerPage = 6;
-  const totalItems = mockTourCategories.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
 
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const response = await adminService.getCategories({ include_stats: true });
+      if (response.success) {
+        setCategories(response.data);
+      } else {
+        setError("Failed to load categories");
+      }
+    } catch (error) {
+      console.error("Categories error:", error);
+      setError("Failed to load categories");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const totalItems = categories.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentCategories = mockTourCategories.slice(startIndex, endIndex);
+  const currentCategories = categories.slice(startIndex, endIndex);
 
   const StatusBadge = ({ status }) => {
-    const isActive = status === "Active";
+    const isActive = status === 1 || status === true || status === "Active";
     return (
       <div
         className={`flex justify-center items-center rounded-full px-2.5 py-0.5 ${
@@ -24,7 +50,7 @@ const TourCategoriesTable = ({ onEditCategory }) => {
             isActive ? "text-green-800" : "text-gray-800"
           }`}
         >
-          {status}
+          {isActive ? "Active" : "Inactive"}
         </span>
       </div>
     );
@@ -36,88 +62,37 @@ const TourCategoriesTable = ({ onEditCategory }) => {
     }
   };
 
-  const handleDelete = (categoryId) => {
+  const handleDelete = async (categoryId) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
-      console.log("Delete category:", categoryId);
+      try {
+        const response = await adminService.deleteCategory(categoryId);
+        if (response.success) {
+          await fetchCategories();
+        } else {
+          alert(response.message || "Failed to delete category");
+        }
+      } catch (error) {
+        console.error("Delete category error:", error);
+        alert("Failed to delete category");
+      }
     }
   };
 
   const ActionButtons = ({ category }) => (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center justify-center gap-4">
       <button
         onClick={() => handleEdit(category)}
         className="text-gray-400 hover:text-gray-600 transition-colors"
         title="Edit Category"
       >
-        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M13.2603 3.60022L5.05034 12.2902C4.74034 12.6202 4.44034 13.2702 4.38034 13.7202L4.01034 16.9602C3.88034 18.1302 4.72034 18.9302 5.88034 18.7302L9.10034 18.1802C9.55034 18.1002 10.1803 17.7702 10.4903 17.4302L18.7003 8.74022C20.1203 7.24022 20.7603 5.53022 18.5503 3.44022C16.3503 1.37022 14.6803 2.10022 13.2603 3.60022Z"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeMiterlimit="10"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M11.8896 5.0498C12.3196 7.8098 14.5596 9.9198 17.3396 10.1998"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeMiterlimit="10"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M3 22H21"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeMiterlimit="10"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <Edit2 size="24" color="currentColor" />
       </button>
       <button
         onClick={() => handleDelete(category.id)}
         className="text-gray-400 hover:text-red-600 transition-colors"
         title="Delete Category"
       >
-        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M21 5.97998C17.67 5.64998 14.32 5.47998 10.98 5.47998C9 5.47998 7.02 5.57998 5.04 5.77998L3 5.97998"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M18.8504 9.14014L18.2004 19.2101C18.0904 20.7801 18.0004 22.0001 15.2104 22.0001H8.79039C6.00039 22.0001 5.91039 20.7801 5.80039 19.2101L5.15039 9.14014"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M10.3301 16.5H13.6601"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M9.5 12.5H14.5"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <Trash size="24" color="currentColor" />
       </button>
     </div>
   );
@@ -213,127 +188,100 @@ const TourCategoriesTable = ({ onEditCategory }) => {
     </div>
   );
 
-  return (
-    <div className="flex flex-col items-start w-full rounded-lg border border-gray-200 bg-white">
-      {/* Table */}
-      <div className="flex h-full items-center w-full">
-        {/* Category Name Column */}
-        <div className="flex flex-col items-end w-64 h-full">
-          <div
-            className="flex h-14 px-4 py-3 items-center w-full"
-            style={{ backgroundColor: "#ECEFF7" }}
-          >
-            <span className="text-gray-900 text-base font-normal">
-              Category Name
-            </span>
-          </div>
-          <div className="h-px w-full bg-gray-200"></div>
-
-          {currentCategories.map((category, index) => (
-            <React.Fragment key={`name-${category.id}`}>
-              <div className="flex px-4 py-4 items-center flex-1 w-full">
-                <span className="text-gray-600 text-base font-normal">
-                  {category.name}
-                </span>
-              </div>
-              {index < currentCategories.length - 1 && (
-                <div className="h-px w-full bg-gray-200"></div>
-              )}
-            </React.Fragment>
-          ))}
-        </div>
-
-        {/* Cities Column */}
-        <div className="flex flex-col items-end w-96 h-full">
-          <div
-            className="flex h-14 px-4 py-3 items-center w-full"
-            style={{ backgroundColor: "#ECEFF7" }}
-          >
-            <span className="text-gray-900 text-base font-normal">cities</span>
-          </div>
-          <div className="h-px w-full bg-gray-200"></div>
-          {currentCategories.map((category, index) => (
-            <React.Fragment key={`cities-${category.id}`}>
-              <div className="flex px-4 py-4 items-center flex-1 w-full">
-                <span className="text-gray-600 text-base font-normal">
-                  {category.cities}
-                </span>
-              </div>
-              {index < currentCategories.length - 1 && (
-                <div className="h-px w-full bg-gray-200"></div>
-              )}
-            </React.Fragment>
-          ))}
-        </div>
-
-        {/* Number of Tours Column */}
-        <div className="flex flex-col items-start w-full">
-          <div
-            className="flex h-14 px-4 py-3 items-center w-full"
-            style={{ backgroundColor: "#ECEFF7" }}
-          >
-            <span className="text-gray-900 text-base font-normal">
-              Number of tours
-            </span>
-          </div>
-          <div className="h-px w-full bg-gray-200"></div>
-          {currentCategories.map((category, index) => (
-            <React.Fragment key={`tours-${category.id}`}>
-              <div className="flex px-4 py-4 items-center flex-1 w-full">
-                <span className="text-gray-600 text-base font-normal">
-                  {category.numberOfTours}
-                </span>
-              </div>
-              {index < currentCategories.length - 1 && (
-                <div className="h-px w-full bg-gray-200"></div>
-              )}
-            </React.Fragment>
-          ))}
-        </div>
-
-        {/* Status Column */}
-        <div className="flex flex-col items-end w-32 h-full">
-          <div
-            className="flex h-14 px-4 py-3 items-center w-full"
-            style={{ backgroundColor: "#ECEFF7" }}
-          >
-            <span className="text-gray-900 text-base font-normal">Status</span>
-          </div>
-          <div className="h-px w-full bg-gray-200"></div>
-          {currentCategories.map((category, index) => (
-            <React.Fragment key={`status-${category.id}`}>
-              <div className="flex px-4 py-4 items-center flex-1 w-full">
-                <StatusBadge status={category.status} />
-              </div>
-              {index < currentCategories.length - 1 && (
-                <div className="h-px w-full bg-gray-200"></div>
-              )}
-            </React.Fragment>
-          ))}
-        </div>
-
-        {/* Actions Column */}
-        <div className="flex flex-col items-end flex-1 h-full">
-          <div className="h-px w-full bg-gray-200"></div>
-          <div
-            className="flex h-14 px-4 py-3 items-center w-full"
-            style={{ backgroundColor: "#ECEFF7" }}
-          >
-            <span className="text-gray-900 text-base font-normal"> </span>
-          </div>
-          <div className="h-px w-full bg-gray-200"></div>
-          {currentCategories.map((category, index) => (
-            <React.Fragment key={`actions-${category.id}`}>
-              <div className="flex px-4 py-4 items-center gap-4 flex-1 w-full">
-                <ActionButtons category={category} />
-              </div>
-              {index < currentCategories.length - 1 && (
-                <div className="h-px w-full bg-gray-200"></div>
-              )}
-            </React.Fragment>
-          ))}
+  if (loading) {
+    return (
+      <div className="flex flex-col items-start w-full rounded-lg border border-gray-200 bg-white">
+        <div className="flex justify-center items-center w-full py-8">
+          <span className="text-gray-500">Loading categories...</span>
         </div>
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-start w-full rounded-lg border border-gray-200 bg-white">
+        <div className="flex justify-center items-center w-full py-8">
+          <span className="text-red-500">{error}</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-start w-full rounded-lg border border-gray-200 bg-white">
+      {/* Table Header */}
+      <div
+        className="grid grid-cols-5 gap-4 w-full h-14 px-4 py-3 items-center border-b border-gray-200"
+        style={{ 
+          backgroundColor: "#ECEFF7",
+          gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr"
+        }}
+      >
+        <div className="text-left">
+          <span className="text-gray-900 text-base font-normal">
+            Category Name
+          </span>
+        </div>
+        <div className="text-center">
+          <span className="text-gray-900 text-base font-normal">Cities</span>
+        </div>
+        <div className="text-center">
+          <span className="text-gray-900 text-base font-normal">
+            Number of Tours
+          </span>
+        </div>
+        <div className="text-center">
+          <span className="text-gray-900 text-base font-normal">Status</span>
+        </div>
+        <div className="text-center">
+          <span className="text-gray-900 text-base font-normal">Actions</span>
+        </div>
+      </div>
+
+      {/* Table Rows */}
+      {currentCategories.map((category, index) => (
+        <React.Fragment key={`row-${category.id}`}>
+          <div
+            className="grid grid-cols-5 gap-4 w-full px-4 py-4 items-center"
+            style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr" }}
+          >
+            {/* Category Name */}
+            <div className="text-left">
+              <span className="text-gray-600 text-base font-normal">
+                {category.name}
+              </span>
+            </div>
+
+            {/* Cities */}
+            <div className="text-center">
+              <span className="text-gray-600 text-base font-normal">
+                {category.cities || "All Cities"}
+              </span>
+            </div>
+
+            {/* Number of Tours */}
+            <div className="text-center">
+              <span className="text-gray-600 text-base font-normal">
+                {category.active_tours_count || category.total_tours_count || 0}
+              </span>
+            </div>
+
+            {/* Status */}
+            <div className="flex justify-center">
+              <StatusBadge status={category.is_active} />
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-center">
+              <ActionButtons category={category} />
+            </div>
+          </div>
+          {index < currentCategories.length - 1 && (
+            <div className="h-px w-full bg-gray-200"></div>
+          )}
+        </React.Fragment>
+      ))}
 
       {/* Pagination */}
       <Pagination />

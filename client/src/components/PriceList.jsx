@@ -43,7 +43,7 @@ const PriceList = ({ isOpen, onClose, pricesData = [] }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-white/50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl p-4 md:p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-lg">
         {/* Header */}
         <div className="flex justify-between items-center pb-4 border-b border-gray-300 mb-6">

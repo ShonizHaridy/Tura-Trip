@@ -320,8 +320,11 @@ async login(req, res) {
   }
 
   // Get dashboard stats
+  // Enhanced getDashboardStats method
   async getDashboardStats(req, res) {
     try {
+      const imageHelper = require('../utils/imageHelper'); // Add this import
+
       // Get total tours count
       const [totalToursResult] = await pool.execute(
         'SELECT COUNT(*) as count FROM tours'
@@ -342,14 +345,89 @@ async login(req, res) {
         'SELECT COUNT(*) as count FROM reviews WHERE is_active = true'
       );
 
-      // Get recent tours
+      // Get total categories count
+      const [totalCategoriesResult] = await pool.execute(
+        'SELECT COUNT(*) as count FROM tour_categories WHERE is_active = true'
+      );
+
+      // Get tours by status breakdown
+      const [statusBreakdown] = await pool.execute(`
+        SELECT 
+          status, 
+          COUNT(*) as count 
+        FROM tours 
+        GROUP BY status
+      `);
+
+      // Get categories with tour counts
+      const [categoriesStats] = await pool.execute(`
+        SELECT 
+          tc.id,
+          tc.name,
+          tc.is_active,
+          COUNT(t.id) as tours_count,
+          COUNT(CASE WHEN t.status = 'active' THEN 1 END) as active_tours_count
+        FROM tour_categories tc
+        LEFT JOIN tours t ON tc.id = t.category_id
+        WHERE tc.is_active = true
+        GROUP BY tc.id, tc.name, tc.is_active
+        ORDER BY tours_count DESC
+        LIMIT 10
+      `);
+
+      // Get recent tours with complete details
       const [recentTours] = await pool.execute(`
-        SELECT t.*, tc.title, tc.category, c.name as city_name 
+        SELECT 
+          t.id,
+          t.price_adult,
+          t.price_child,
+          t.status,
+          t.cover_image,
+          t.created_at,
+          t.updated_at,
+          tc.title,
+          tc.category,
+          c.name as city_name,
+          c.id as city_id,
+          cat.name as category_name,
+          (SELECT AVG(rating) FROM reviews r WHERE r.tour_id = t.id AND r.is_active = true) as avg_rating,
+          (SELECT COUNT(*) FROM reviews r WHERE r.tour_id = t.id AND r.is_active = true) as reviews_count
         FROM tours t
         LEFT JOIN tour_content tc ON t.id = tc.tour_id AND tc.language_code = 'en'
         LEFT JOIN cities c ON t.city_id = c.id
+        LEFT JOIN tour_categories cat ON t.category_id = cat.id
         ORDER BY t.created_at DESC
         LIMIT 5
+      `);
+
+      // Process recent tours images
+      const processedRecentTours = imageHelper.processArrayImages(recentTours, 'tour');
+
+      // Get monthly stats (last 6 months)
+      const [monthlyStats] = await pool.execute(`
+        SELECT 
+          DATE_FORMAT(created_at, '%Y-%m') as month,
+          DATE_FORMAT(created_at, '%M %Y') as month_name,
+          COUNT(*) as tours_created
+        FROM tours
+        WHERE created_at >= DATE_SUB(CURRENT_DATE, INTERVAL 6 MONTH)
+        GROUP BY DATE_FORMAT(created_at, '%Y-%m'), DATE_FORMAT(created_at, '%M %Y')
+        ORDER BY month DESC
+      `);
+
+      // Get recent activities (tours, reviews, etc.)
+      const [recentActivities] = await pool.execute(`
+        (SELECT 'tour' as type, t.id, tc.title as name, t.created_at, 'created' as action
+        FROM tours t 
+        LEFT JOIN tour_content tc ON t.id = tc.tour_id AND tc.language_code = 'en'
+        ORDER BY t.created_at DESC LIMIT 3)
+        UNION ALL
+        (SELECT 'review' as type, r.id, CONCAT('Review for tour #', r.tour_id) as name, r.created_at, 'submitted' as action
+        FROM reviews r 
+        WHERE r.is_active = true
+        ORDER BY r.created_at DESC LIMIT 3)
+        ORDER BY created_at DESC
+        LIMIT 10
       `);
 
       const stats = {
@@ -357,7 +435,12 @@ async login(req, res) {
         activeTours: activeToursResult[0].count,
         totalCities: totalCitiesResult[0].count,
         totalReviews: totalReviewsResult[0].count,
-        recentTours
+        totalCategories: totalCategoriesResult[0].count,
+        recentTours: processedRecentTours,
+        statusBreakdown,
+        categoriesStats,
+        monthlyStats,
+        recentActivities
       };
 
       res.json({

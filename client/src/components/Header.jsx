@@ -117,31 +117,33 @@ const Header = () => {
   }, []);
 
   // Close dropdowns when clicking outside
-useEffect(() => {
-  const handleClickOutside = (event) => {
-    if (languageRef.current && !languageRef.current.contains(event.target)) {
-      setIsLanguageOpen(false);
-    }
+// useEffect(() => {
+//   const handleClickOutside = (event) => {
+//     if (languageRef.current && !languageRef.current.contains(event.target)) {
+//       setIsLanguageOpen(false);
+//     }
 
-    // Only close explore dropdown if:
-    // 1. Not clicking inside desktop explore container AND
-    // 2. Not clicking inside mobile menu (when mobile menu is open)
-    const isInsideDesktopExplore = exploreContainerRef.current && exploreContainerRef.current.contains(event.target);
-    const isInsideMobileMenu = isMobileMenuOpen && event.target.closest('[data-mobile-menu]');
+//     // Only close explore dropdown if:
+//     // 1. Not clicking inside desktop explore container AND
+//     // 2. Not clicking inside mobile menu (when mobile menu is open)
+//     const isInsideDesktopExplore = exploreContainerRef.current && exploreContainerRef.current.contains(event.target);
+//     const isInsideMobileMenu = isMobileMenuOpen && event.target.closest('[data-mobile-menu]');
     
-    if (!isInsideDesktopExplore && !isInsideMobileMenu) {
-      setIsExploreOpen(false);
-    }
+//     if (!isInsideDesktopExplore && !isInsideMobileMenu) {
+//       setIsExploreOpen(false);
+//     }
 
-    // ADD THIS: Header search outside click
-    if (headerSearchRef.current && !headerSearchRef.current.contains(event.target)) {
-      setShowHeaderSuggestions(false);
-    }
-  };
+//     // ADD THIS: Header search outside click
+//     if (headerSearchRef.current && !headerSearchRef.current.contains(event.target)) {
+//       setShowHeaderSuggestions(false);
+//     }
+//   };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isMobileMenuOpen]);
+//   console.log("we are here ")
+
+//     // document.addEventListener("mousedown", handleClickOutside);
+//     return () => document.removeEventListener("mousedown", handleClickOutside);
+//   }, [isMobileMenuOpen]);
 
   //   document.addEventListener("mousedown", handleClickOutside);
   //   return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -154,6 +156,125 @@ useEffect(() => {
     // ✅ Data will be refetched automatically by useEffect above
     // ✅ Explore dropdown stays open and updates smoothly
   };
+
+// Simple, reliable click outside handler
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    const target = event.target;
+    
+    // Language dropdown
+    if (isLanguageOpen && languageRef.current && !languageRef.current.contains(target)) {
+      setIsLanguageOpen(false);
+    }
+    
+    // Search suggestions  
+    if (showHeaderSuggestions && headerSearchRef.current && !headerSearchRef.current.contains(target)) {
+      setShowHeaderSuggestions(false);
+    }
+    
+    // Explore dropdown
+    if (isExploreOpen) {
+      const isInsideExplore = exploreContainerRef.current && exploreContainerRef.current.contains(target);
+      const isInsideMobileMenu = isMobileMenuOpen && target.closest('[data-mobile-menu]');
+      
+      if (!isInsideExplore && !isInsideMobileMenu) {
+        setIsExploreOpen(false);
+      }
+    }
+  };
+
+  // Only use click event - most reliable across all devices
+  document.addEventListener("click", handleClickOutside);
+  
+  return () => {
+    document.removeEventListener("click", handleClickOutside);
+  };
+}, [isMobileMenuOpen, isExploreOpen, isLanguageOpen, showHeaderSuggestions]);
+
+// // Enhanced click outside handler with proper mobile/desktop support
+// useEffect(() => {
+//   let isHandling = false;
+//   let touchHandled = false;
+
+//   const handleClickOutside = (event) => {
+//     // Prevent duplicate handling from multiple event types
+//     if (isHandling) return;
+    
+//     // For touch events, mark as handled and set a timeout to reset
+//     if (event.type === 'touchstart') {
+//       if (touchHandled) return;
+//       touchHandled = true;
+//       setTimeout(() => { touchHandled = false; }, 300);
+//     }
+    
+//     // For mouse events, skip if touch was recently handled
+//     if (event.type === 'mousedown' && touchHandled) return;
+    
+//     isHandling = true;
+//     setTimeout(() => { isHandling = false; }, 10);
+
+//     const clickedElement = event.target;
+    
+//     // Language dropdown handling
+//     if (isLanguageOpen) {
+//       const languageContainer = languageRef.current;
+//       const isClickInsideLanguage = languageContainer && languageContainer.contains(clickedElement);
+//       const isLanguageButton = clickedElement.closest('button[data-language-trigger]');
+      
+//       if (!isClickInsideLanguage && !isLanguageButton) {
+//         console.log("[🌐 CLOSE] Closing language dropdown - clicked outside");
+//         setIsLanguageOpen(false);
+//       }
+//     }
+
+//     // Search suggestions handling
+//     if (showHeaderSuggestions) {
+//       const searchContainer = headerSearchRef.current;
+//       const isClickInsideSearch = searchContainer && searchContainer.contains(clickedElement);
+//       const isSearchInput = clickedElement.closest('input[data-search-input]');
+      
+//       if (!isClickInsideSearch && !isSearchInput) {
+//         console.log("[🔍 CLOSE] Closing search suggestions - clicked outside");
+//         setShowHeaderSuggestions(false);
+//       }
+//     }
+
+//     // Explore dropdown handling
+//     if (isExploreOpen) {
+//       const isInsideDesktopExplore = exploreContainerRef.current && exploreContainerRef.current.contains(clickedElement);
+//       const isInsideMobileMenu = isMobileMenuOpen && clickedElement.closest('[data-mobile-menu]');
+//       const isExploreButton = clickedElement.closest('button[data-explore-trigger]');
+      
+//       if (!isInsideDesktopExplore && !isInsideMobileMenu && !isExploreButton) {
+//         console.log("[🌍 CLOSE] Closing explore dropdown - clicked outside");
+//         setIsExploreOpen(false);
+//       }
+//     }
+//   };
+
+//   // Use both mousedown and touchstart with proper handling
+//   document.addEventListener("mousedown", handleClickOutside);
+//   document.addEventListener("touchstart", handleClickOutside, { passive: true });
+  
+//   return () => {
+//     document.removeEventListener("mousedown", handleClickOutside);
+//     document.removeEventListener("touchstart", handleClickOutside);
+//   };
+// }, [isMobileMenuOpen, isExploreOpen, isLanguageOpen, showHeaderSuggestions]);
+
+// Handle mobile menu state changes - close search and explore when mobile menu closes
+useEffect(() => {
+  if (!isMobileMenuOpen) {
+    // When mobile menu closes, also close search suggestions
+    setShowHeaderSuggestions(false);
+    setHeaderSearchQuery('');
+    
+    // If we're in mobile view, also close explore dropdown to prevent desktop dropdown appearing
+    if (window.innerWidth < 1024) {
+      setIsExploreOpen(false);
+    }
+  }
+}, [isMobileMenuOpen]);
 
   // Handle destination click
   const handleDestinationClick = (citySlug) => {
@@ -184,6 +305,24 @@ useEffect(() => {
   } finally {
     setHeaderSearchLoading(false);
   }
+};
+
+const handleSearchFocus = () => {
+  // Show suggestions if there's a query and we have results
+  if (headerSearchQuery && headerSearchQuery.length >= 2 && headerSuggestions) {
+    setShowHeaderSuggestions(true);
+  }
+  // Or trigger a new search if no results cached
+  else if (headerSearchQuery && headerSearchQuery.length >= 2) {
+    handleHeaderSearch(headerSearchQuery);
+  }
+};
+
+const handleSearchBlur = () => {
+  // Delay hiding suggestions to allow for clicks on suggestions
+  setTimeout(() => {
+    setShowHeaderSuggestions(false);
+  }, 150);
 };
 
 const handleHeaderSearchSubmit = (e) => {
@@ -287,7 +426,8 @@ const getDropdownButtonClasses = () => {
               {navItems.map((item) => (
                 <div key={item.key} className="relative">
                   {item.hasDropdown ? (
-                    <button
+                    <button 
+                      data-explore-trigger="true" 
                       className={`${getDropdownButtonClasses()} text-sm xl:text-base`}
                       onClick={() => setIsExploreOpen(!isExploreOpen)}
                     >
@@ -308,6 +448,7 @@ const getDropdownButtonClasses = () => {
                     <Link
                       to={item.href}
                       className={`${getNavButtonClasses(location.pathname === item.href)} text-sm xl:text-base`}
+                      onClick={() => setIsExploreOpen(false)} 
                     >
                       <span className={`whitespace-nowrap ${getTextSpanClasses(location.pathname === item.href)}`}>
                         {item.label}
@@ -471,7 +612,8 @@ const getDropdownButtonClasses = () => {
           <div className="hidden lg:flex items-center gap-1 lg:gap-2 xl:gap-4 flex-shrink-0">
             {/* Language Selector */}
             <div className="relative" ref={languageRef}>
-              <button
+              <button 
+                // data-language-trigger="true" 
                 className={`${textColor} flex items-center space-x-1 xl:space-x-2 hover:opacity-80 px-1 xl:px-2 py-1 whitespace-nowrap`}
                 onClick={() => setIsLanguageOpen(!isLanguageOpen)}
               >
@@ -543,7 +685,8 @@ const getDropdownButtonClasses = () => {
           {/* Mobile Menu Button */}
           <button
             className={`lg:hidden ${textColor} flex-shrink-0 self-center justify-center`}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent event bubbling
                 if (isMobileMenuOpen) {
                   // Closing mobile menu - also close explore
                   setIsExploreOpen(false);
@@ -644,14 +787,17 @@ const getDropdownButtonClasses = () => {
       <div className="px-5 pt-2 pb-6 flex-shrink-0">
         <form onSubmit={handleHeaderSearchSubmit}>
           <div className="flex h-[45px] px-4 py-3 justify-between items-center gap-2 border border-[#E8E7EA] rounded-md bg-white">
-            <input
+            <input 
+              // data-search-input="true" 
               type="text"
               placeholder="Search"
               value={headerSearchQuery}
               onChange={(e) => {
                 setHeaderSearchQuery(e.target.value);
                 handleHeaderSearch(e.target.value);
-              }}
+              }} 
+              onFocus={handleSearchFocus}
+              onBlur={handleSearchBlur}
               onKeyDown={handleHeaderSearchKeyDown}
               className="flex-1 text-[#8A8D95] font-roboto text-base font-normal outline-none bg-transparent placeholder:text-[#8A8D95]"
             />
@@ -669,13 +815,16 @@ const getDropdownButtonClasses = () => {
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-teal-600 mx-auto"></div>
                 <p className="text-gray-500 text-sm mt-2">{t('common.searching')}</p>
               </div>
-            ) : headerSuggestions && (headerSuggestions.cities?.length > 0 || headerSuggestions.tours?.length > 0 ) ? (
+            ) : headerSuggestions && (headerSuggestions.cities?.length > 0 || headerSuggestions.tours?.length > 0) ? (
               <div className="max-h-48 overflow-y-auto">
-                {/* Mobile version - simplified */}
+                {/* Cities */}
                 {headerSuggestions.cities?.map((city) => (
                   <button
                     key={`mobile-city-${city.id}`}
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log("Mobile city suggestion clicked:", city);
                       handleHeaderSuggestionClick(city);
                       setIsMobileMenuOpen(false);
                     }}
@@ -692,10 +841,15 @@ const getDropdownButtonClasses = () => {
                     </div>
                   </button>
                 ))}
+                
+                {/* Tours */}
                 {headerSuggestions.tours?.map((tour) => (
                   <button
                     key={`mobile-tour-${tour.id}`}
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log("Mobile tour suggestion clicked:", tour);
                       handleHeaderSuggestionClick(tour);
                       setIsMobileMenuOpen(false);
                     }}
@@ -714,7 +868,7 @@ const getDropdownButtonClasses = () => {
                 ))}
               </div>
             ) : headerSearchQuery && (
-              <div className="px-4 py-3 text-rose-black-500 text-center text-sm">
+              <div className="px-4 py-3 text-gray-500 text-center text-sm">
                 {t('common.noResults')}
               </div>
             )}
@@ -727,9 +881,11 @@ const getDropdownButtonClasses = () => {
         <div className="flex flex-col gap-4">
           {/* Explore with dropdown */}
           <div>
-          <button
+          <button 
+            // data-explore-trigger="true" 
             className="flex justify-between items-center w-full"
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent event bubbling
               console.log('🔄 Mobile explore clicked, current state:', isExploreOpen);
               setIsExploreOpen(!isExploreOpen);
             }}
@@ -766,7 +922,7 @@ const getDropdownButtonClasses = () => {
                     {destinations.slice(0, 3).map((destination) => (
                       <div
                         key={destination.id}
-                        className="flex items-start gap-4 p-3 cursor-pointer hover:bg-gray-50 transition-colors rounded-lg"
+                        className="flex items-center gap-4 p-1 cursor-pointer hover:bg-gray-50 transition-colors rounded-lg"
                         onClick={(e) => {
                           e.stopPropagation();
                           console.log('🏃 Mobile city clicked:', destination.name);
@@ -827,11 +983,13 @@ const getDropdownButtonClasses = () => {
           <div className="flex justify-between items-center">
             {/* Language Menu */}
             <div className="relative">
-              <button
+              <button 
+                data-language-trigger="true" 
                 className="flex items-center gap-2 px-2 py-2"
                 onClick={(e) => {
-                  e.stopPropagation();
-                  setIsLanguageOpen(!isLanguageOpen);
+    e.stopPropagation();
+    console.log("[🌐 TOGGLE] Language dropdown toggled");
+    setIsLanguageOpen(!isLanguageOpen);
                 }}
               >
                 <img
@@ -857,14 +1015,22 @@ const getDropdownButtonClasses = () => {
               </button>
               {/* Language Dropdown */}
               {isLanguageOpen && (
-                <div className="absolute bottom-full mb-2 left-0 bg-white rounded-lg shadow-lg overflow-hidden z-50 min-w-[140px] border border-gray-200">
+                <div className="absolute bottom-full mb-2 left-0 bg-white rounded-lg shadow-lg overflow-hidden z-110 min-w-[140px] border border-gray-200">
                   <div className="py-2">
                     {languages.map((language, index) => (
-                      <button
+                      <button  
                         key={language.code}
                         onClick={(e) => {
+                          e.preventDefault();
                           e.stopPropagation();
+                          // // Also stop immediate propagation for other listeners
+                          // // e.nativeEvent?.stopImmediatePropagation?.();
+                          // handleLanguageChange(language.code);
+                          console.log("[🌐 CLICK] Language item clicked:", language.code);
                           handleLanguageChange(language.code);
+                          console.log("[🌐 DONE] handleLanguageChange called");
+                          setIsLanguageOpen(false);
+                          // setIsMobileMenuOpen(false); // if needed
                         }}
                         className={`flex items-center gap-3 px-4 py-3 w-full hover:bg-gray-50 transition-colors text-left ${
                           index !== languages.length - 1 ? 'border-b border-[#E6E6E8]' : ''

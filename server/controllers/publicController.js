@@ -835,6 +835,8 @@ class PublicController {
           });
         }
 
+        console.log('Tours for city:', city.city_name, 'Count:', tours.length);
+
         return {
           city_id: city.city_id,
           original_name: city.original_name,

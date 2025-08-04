@@ -28,7 +28,7 @@ const AddCategoryModal = ({ onClose, onSave }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="flex flex-col items-center gap-4 w-full max-w-2xl bg-white rounded-xl shadow-lg p-4">
         {/* Header */}
         <div className="flex justify-end items-center gap-2 w-full border-b border-gray-300 pb-2">

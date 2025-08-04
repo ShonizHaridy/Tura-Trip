@@ -195,13 +195,37 @@ class AdminService {
     }
   }
 
-  // Categories management
-  async getCategories() {
+  // Add this method to your adminService.js
+  async deleteCity(id) {
     try {
-      const response = await api.get('/admin/categories');
+      const response = await api.delete(`/admin/cities/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting city:', error);
+      throw error;
+    }
+  }
+
+  // Categories management
+  // Replace your existing getCategories method with this:
+  async getCategories(params = {}) {
+    try {
+      const queryString = new URLSearchParams(params).toString();
+      const response = await api.get(`/admin/categories${queryString ? `?${queryString}` : ''}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching categories:', error);
+      throw error;
+    }
+  }
+
+  // Add this method to your adminService.js
+  async deleteCategory(id) {
+    try {
+      const response = await api.delete(`/admin/categories/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting category:', error);
       throw error;
     }
   }
@@ -313,7 +337,7 @@ class AdminService {
   // Currency & Commission Management
   async getCurrencies() {
     try {
-      const response = await api.get('/admin/currency/currencies');
+      const response = await api.get('/admin/currency/currencies?active_only=true');
       return response.data;
     } catch (error) {
       console.error('Error fetching currencies:', error);

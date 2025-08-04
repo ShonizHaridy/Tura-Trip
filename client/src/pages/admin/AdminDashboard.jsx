@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
-import { mockAdminTours, mockFilterOptions } from "../../data/adminMockData";
+import adminService from "../../services/adminService";
+import { GlobalRefresh, Category2, TickCircle, Add, SearchNormal1, Filter, Image, Edit2, Trash } from 'iconsax-react'
 
 const AdminDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -12,132 +13,64 @@ const AdminDashboard = () => {
     priceMax: 1000,
   });
   const [currentPage, setCurrentPage] = useState(1);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetchDashboardStats();
+  }, []);
+
+  const fetchDashboardStats = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const response = await adminService.getDashboardStats();
+      
+      if (response.success) {
+        setDashboardData(response.data);
+        console.log(response.data);
+      } else {
+        setError(response.message || "Failed to load dashboard data");
+      }
+    } catch (error) {
+      console.error("Dashboard stats error:", error);
+      setError(error.response?.data?.message || "Failed to load dashboard data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Get filter options from API data - DESIGN PRESERVED
+  const getFilterOptions = () => {
+    if (!dashboardData) return { cities: [], types: [] };
+    const cities = [...new Set(dashboardData.recentTours?.map(tour => tour.city_name).filter(Boolean))];
+    const types = [...new Set(dashboardData.recentTours?.map(tour => tour.category_name).filter(Boolean))];
+    return { cities, types };
+  };
+
+  const filterOptions = getFilterOptions();
 
   const statsData = [
     {
       title: "Total Tours",
-      value: "542",
+      value: loading ? "..." : (dashboardData?.totalTours || "0"),
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M22 12C22 6.48 17.52 2 12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22"
-            stroke="white"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M8.0001 3H9.0001C7.0501 8.84 7.0501 15.16 9.0001 21H8.0001"
-            stroke="white"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M15 3C15.97 5.92 16.46 8.96 16.46 12"
-            stroke="white"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M3 16V15C5.92 15.97 8.96 16.46 12 16.46"
-            stroke="white"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M3 9.0001C8.84 7.0501 15.16 7.0501 21 9.0001"
-            stroke="white"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M19.4998 14.7C19.1298 14.59 18.7098 14.52 18.2498 14.52C16.1798 14.52 14.5098 16.2 14.5098 18.26C14.5098 20.33 16.1898 22 18.2498 22C20.3098 22 21.9897 20.32 21.9897 18.26C21.9897 17.49 21.7597 16.77 21.3597 16.18"
-            stroke="white"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M20.0396 14.8001L18.7896 13.3701"
-            stroke="white"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M20.0396 14.8003L18.5796 15.8603"
-            stroke="white"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <GlobalRefresh size="24" color="#FFFFFF" />
       ),
     },
     {
       title: "Tour Categories",
-      value: "6",
+      value: loading ? "..." : (dashboardData?.totalCategories || "0"),
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M17 10H19C21 10 22 9 22 7V5C22 3 21 2 19 2H17C15 2 14 3 14 5V7C14 9 15 10 17 10Z"
-            stroke="white"
-            strokeWidth="1.5"
-            strokeMiterlimit="10"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M5 22H7C9 22 10 21 10 19V17C10 15 9 14 7 14H5C3 14 2 15 2 17V19C2 21 3 22 5 22Z"
-            stroke="white"
-            strokeWidth="1.5"
-            strokeMiterlimit="10"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M6 10C8.20914 10 10 8.20914 10 6C10 3.79086 8.20914 2 6 2C3.79086 2 2 3.79086 2 6C2 8.20914 3.79086 10 6 10Z"
-            stroke="white"
-            strokeWidth="1.5"
-            strokeMiterlimit="10"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M18 22C20.2091 22 22 20.2091 22 18C22 15.7909 20.2091 14 18 14C15.7909 14 14 15.7909 14 18C14 20.2091 15.7909 22 18 22Z"
-            stroke="white"
-            strokeWidth="1.5"
-            strokeMiterlimit="10"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <Category2 size="24" color="#ffffff" />
       ),
     },
     {
       title: "Active Cities",
-      value: "3",
+      value: loading ? "..." : (dashboardData?.totalCities || "0"),
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z"
-            stroke="white"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M7.75 11.9999L10.58 14.8299L16.25 9.16992"
-            stroke="white"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <TickCircle size="24" color="#FFFFFF" />
       ),
     },
   ];
@@ -158,6 +91,12 @@ const AdminDashboard = () => {
       priceMin: 1,
       priceMax: 1000,
     });
+  };
+
+  // Filter tours but preserve original design
+  const getDisplayTours = () => {
+    if (!dashboardData?.recentTours) return [];
+    return dashboardData.recentTours;
   };
 
   const StatCard = ({ title, value, icon }) => (
@@ -195,7 +134,7 @@ const AdminDashboard = () => {
   return (
     <AdminLayout activeItem="Dashboard">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Stats Cards */}
+        {/* Stats Cards - DESIGN PRESERVED */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {statsData.map((stat, index) => (
             <StatCard
@@ -207,7 +146,7 @@ const AdminDashboard = () => {
           ))}
         </div>
 
-        {/* Add New Tour Button */}
+        {/* Add New Tour Button - DESIGN PRESERVED */}
         <div className="flex justify-end">
           <button
             onClick={() => (window.location.href = "/admin/tours/add")}
@@ -239,10 +178,10 @@ const AdminDashboard = () => {
           </button>
         </div>
 
-        {/* Main Content */}
+        {/* Main Content - DESIGN PRESERVED */}
         <div className="relative">
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-            {/* Header */}
+            {/* Header - DESIGN PRESERVED */}
             <div className="p-4">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2.5 h-10">
@@ -256,30 +195,9 @@ const AdminDashboard = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  {/* Search */}
+                  {/* Search - DESIGN PRESERVED */}
                   <div className="flex items-center border border-gray-300 rounded-lg px-4 py-3 bg-white w-96">
-                    <svg
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      className="mr-2"
-                    >
-                      <path
-                        d="M11.5 21C16.7467 21 21 16.7467 21 11.5C21 6.25329 16.7467 2 11.5 2C6.25329 2 2 6.25329 2 11.5C2 16.7467 6.25329 21 11.5 21Z"
-                        stroke="#B3B3B3"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M22 22L20 20"
-                        stroke="#B3B3B3"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    <SearchNormal1 size="24" color="#B3B3B3" className="mr-2"/>
                     <input
                       type="text"
                       placeholder="Search"
@@ -288,37 +206,19 @@ const AdminDashboard = () => {
                       className="flex-1 outline-none text-gray-400 text-base"
                     />
                   </div>
-
-                  {/* Filter Button */}
+                  {/* Filter Button - DESIGN PRESERVED */}
                   <button
                     onClick={() => setShowFilter(!showFilter)}
                     className="flex items-center gap-2 px-4 py-3 border border-gray-200 rounded-md bg-white shadow-sm w-24"
                   >
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <path
-                        d="M4.49967 1.75H15.4997C16.4163 1.75 17.1663 2.5 17.1663 3.41667V5.25C17.1663 5.91667 16.7497 6.75 16.333 7.16667L12.7497 10.3333C12.2497 10.75 11.9163 11.5833 11.9163 12.25V15.8333C11.9163 16.3333 11.583 17 11.1663 17.25L9.99966 18C8.91633 18.6667 7.41633 17.9167 7.41633 16.5833V12.1667C7.41633 11.5833 7.083 10.8333 6.74967 10.4167L3.58301 7.08333C3.16634 6.66667 2.83301 5.91667 2.83301 5.41667V3.5C2.83301 2.5 3.58301 1.75 4.49967 1.75Z"
-                        stroke="#9E939A"
-                        strokeWidth="1.5"
-                        strokeMiterlimit="10"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M9.10833 1.75L5 8.33333"
-                        stroke="#9E939A"
-                        strokeWidth="1.5"
-                        strokeMiterlimit="10"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    <Filter size="20" color="#9E939A" />
                     <span className="text-gray-600 text-base">Filiter</span>
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Table */}
+            {/* Table - DESIGN PRESERVED, ONLY DATA CHANGED */}
             <div className="overflow-hidden">
               <table className="w-full">
                 <thead style={{ backgroundColor: "#ECEFF7" }}>
@@ -345,7 +245,7 @@ const AdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {mockAdminTours.map((tour) => (
+                  {getDisplayTours().map((tour) => (
                     <tr key={tour.id} className="hover:bg-gray-50">
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-4">
@@ -353,44 +253,35 @@ const AdminDashboard = () => {
                             className="w-24 h-16 rounded flex items-center justify-center"
                             style={{ backgroundColor: "#ECEFF7" }}
                           >
-                            <svg
-                              width="24"
-                              height="25"
-                              viewBox="0 0 25 25"
-                              fill="none"
-                            >
-                              <path
-                                d="M22.1799 17.2936L19.0499 9.98362C17.9899 7.50362 16.0399 7.40362 14.7299 9.76362L12.8399 13.1736C11.8799 14.9036 10.0899 15.0536 8.84993 13.5036L8.62993 13.2236C7.33993 11.6036 5.51993 11.8036 4.58993 13.6536L2.86993 17.1036C1.65993 19.5036 3.40993 22.3336 6.08993 22.3336H18.8499C21.4499 22.3336 23.1999 19.6836 22.1799 17.2936Z"
-                                stroke="#0B101A"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
+                            {tour.cover_image_url ? (
+                              <img 
+                                src={tour.cover_image_url} 
+                                alt="Tour"
+                                className="w-full h-full object-cover rounded"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.nextSibling.style.display = 'flex';
+                                }}
                               />
-                              <path
-                                d="M7.47021 8.3335C9.12707 8.3335 10.4702 6.99035 10.4702 5.3335C10.4702 3.67664 9.12707 2.3335 7.47021 2.3335C5.81336 2.3335 4.47021 3.67664 4.47021 5.3335C4.47021 6.99035 5.81336 8.3335 7.47021 8.3335Z"
-                                stroke="#0B101A"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
+                            ) : null}
+                            <Image size="24" color="#0B101A" style={{display: tour.cover_image_url ? 'none' : 'block'}} />
                           </div>
                           <span className="text-gray-600 text-base">
-                            {tour.title}
+                            {tour.title || `Tour #${tour.id}`}
                           </span>
                         </div>
                       </td>
                       <td className="px-4 py-4 text-gray-600 text-base">
-                        {tour.city}
+                        {tour.city_name}
                       </td>
                       <td className="px-4 py-4 text-gray-600 text-base">
-                        {tour.type}
+                        {tour.category_name}
                       </td>
                       <td className="px-4 py-4 text-gray-600 text-base">
-                        {tour.priceAdult} $
+                        {tour.price_adult} $
                       </td>
                       <td className="px-4 py-4 text-gray-600 text-base">
-                        {tour.priceChild} $
+                        {tour.price_child} $
                       </td>
                       <td className="px-4 py-4">
                         <span
@@ -406,81 +297,10 @@ const AdminDashboard = () => {
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-4">
                           <button className="p-1">
-                            <svg
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                            >
-                              <path
-                                d="M13.2603 3.60022L5.05034 12.2902C4.74034 12.6202 4.44034 13.2702 4.38034 13.7202L4.01034 16.9602C3.88034 18.1302 4.72034 18.9302 5.88034 18.7302L9.10034 18.1802C9.55034 18.1002 10.1803 17.7702 10.4903 17.4302L18.7003 8.74022C20.1203 7.24022 20.7603 5.53022 18.5503 3.44022C16.3503 1.37022 14.6803 2.10022 13.2603 3.60022Z"
-                                stroke="#8A8D95"
-                                strokeWidth="1.5"
-                                strokeMiterlimit="10"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M11.8896 5.0498C12.3196 7.8098 14.5596 9.9198 17.3396 10.1998"
-                                stroke="#8A8D95"
-                                strokeWidth="1.5"
-                                strokeMiterlimit="10"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M3 22H21"
-                                stroke="#8A8D95"
-                                strokeWidth="1.5"
-                                strokeMiterlimit="10"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
+                            <Edit2 size="24" color="#8A8D95" />
                           </button>
                           <button className="p-1">
-                            <svg
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                            >
-                              <path
-                                d="M21 5.97998C17.67 5.64998 14.32 5.47998 10.98 5.47998C9 5.47998 7.02 5.57998 5.04 5.77998L3 5.97998"
-                                stroke="#8A8D95"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
-                                stroke="#8A8D95"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M18.8504 9.14014L18.2004 19.2101C18.0904 20.7801 18.0004 22.0001 15.2104 22.0001H8.79039C6.00039 22.0001 5.91039 20.7801 5.80039 19.2101L5.15039 9.14014"
-                                stroke="#8A8D95"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M10.3301 16.5H13.6601"
-                                stroke="#8A8D95"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M9.5 12.5H14.5"
-                                stroke="#8A8D95"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
+                            <Trash size="24" color="#8A8D95" />
                           </button>
                         </div>
                       </td>
@@ -490,7 +310,7 @@ const AdminDashboard = () => {
               </table>
             </div>
 
-            {/* Pagination */}
+            {/* Pagination - DESIGN PRESERVED */}
             <div className="border-t border-gray-200">
               <div className="flex items-center justify-between px-4 py-3">
                 <span className="text-gray-900 text-base">
@@ -534,10 +354,10 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* Filter Panel */}
+          {/* Filter Panel - EXACT ORIGINAL DESIGN PRESERVED */}
           {showFilter && (
             <div className="absolute right-0 top-0 w-52 bg-white border border-gray-200 rounded-md shadow-sm">
-              {/* Filter Header */}
+              {/* Filter Header - ORIGINAL DESIGN */}
               <div className="flex items-center justify-between px-2 py-1 bg-white shadow-sm h-10">
                 <span className="text-gray-500 text-sm">Filiter</span>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -551,9 +371,8 @@ const AdminDashboard = () => {
                   />
                 </svg>
               </div>
-
               <div className="bg-white">
-                {/* City Filter */}
+                {/* City Filter - ORIGINAL DESIGN */}
                 <div>
                   <div
                     className="flex items-center justify-between px-2 py-1 h-7"
@@ -572,7 +391,7 @@ const AdminDashboard = () => {
                     </svg>
                   </div>
                   <div className="py-2">
-                    {mockFilterOptions.cities.map((city) => (
+                    {filterOptions.cities.map((city) => (
                       <div
                         key={city}
                         className="flex items-center gap-2 px-4 py-2"
@@ -590,7 +409,7 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                {/* Type Filter */}
+                {/* Type Filter - ORIGINAL DESIGN */}
                 <div>
                   <div
                     className="flex items-center justify-between px-2 py-1 h-7"
@@ -609,7 +428,7 @@ const AdminDashboard = () => {
                     </svg>
                   </div>
                   <div className="py-2">
-                    {mockFilterOptions.types.map((type) => (
+                    {filterOptions.types.map((type) => (
                       <div
                         key={type}
                         className="flex items-center gap-2 px-4 py-2"
@@ -627,7 +446,7 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                {/* Price Filter */}
+                {/* Price Filter - ORIGINAL DESIGN */}
                 <div
                   className="flex items-center justify-between px-2 py-1 h-7"
                   style={{ backgroundColor: "#F3F3EE" }}
@@ -645,7 +464,7 @@ const AdminDashboard = () => {
                   </svg>
                 </div>
 
-                {/* Price Range Slider */}
+                {/* Price Range Slider - ORIGINAL DESIGN */}
                 <div className="p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-gray-600 text-xs">1</span>
@@ -707,7 +526,7 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                {/* Filter Actions */}
+                {/* Filter Actions - ORIGINAL DESIGN */}
                 <div className="p-2 space-y-2.5">
                   <button
                     className="w-full h-10 px-3 rounded text-white font-semibold text-base"

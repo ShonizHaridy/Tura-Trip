@@ -278,3 +278,22 @@ CREATE TABLE password_resets (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (admin_id) REFERENCES admin_users(id) ON DELETE CASCADE
 );
+
+-- =============================================
+-- CITY-CATEGORY RELATIONSHIP TABLE (Many-to-Many)
+-- =============================================
+CREATE TABLE city_categories (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    city_id INT NOT NULL,
+    category_id INT NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (city_id) REFERENCES cities(id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES tour_categories(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_city_category (city_id, category_id),
+    
+    INDEX idx_city (city_id),
+    INDEX idx_category (category_id),
+    INDEX idx_active (is_active)
+);

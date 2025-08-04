@@ -32,7 +32,9 @@ import SearchResults from "./pages/SearchResults";
 
 import ScrollToTop from "./components/ScrollToTop";
 
-import EdgeSocialMedia from "./components/EdgeScoialMedia"; // Add this import
+import EdgeSocialMedia from "./components/EdgeScoialMedia"; 
+import LeftScrollToTop from "./components/LeftScrollToTop";
+import CommissionSettings from "./pages/admin/CommissionSettings";
 
 // Admin route wrapper that redirects to login or dashboard
 const AdminRoute = () => {
@@ -120,6 +122,31 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          <Route 
+            path="/admin/commission" 
+            element={
+              <ProtectedRoute>
+                <CommissionSettings />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/admin/*" 
+            element={
+              <ProtectedRoute>
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                  <div className="text-center">
+                    <h1 className="text-2xl font-bold text-gray-900">Page Not Found</h1>
+                    <p className="text-gray-600 mt-2">The admin page you're looking for doesn't exist.</p>
+                    <a href="/admin/dashboard" className="text-teal-600 hover:text-teal-700 mt-4 inline-block">
+                      Go to Dashboard
+                    </a>
+                  </div>
+                </div>
+              </ProtectedRoute>
+            } 
+          />
 
           {/* Public Routes - With Header/Footer */}
           <Route
@@ -152,6 +179,7 @@ function App() {
                 </main>
                 <Footer />
                 <EdgeSocialMedia />
+                <LeftScrollToTop />
               </div>
             }
           />

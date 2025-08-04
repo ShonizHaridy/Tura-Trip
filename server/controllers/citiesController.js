@@ -1,17 +1,21 @@
 const { pool } = require('../config/database');
 const fs = require('fs').promises;
 
+const imageHelper = require('../utils/imageHelper');
+
 class CitiesController {
+  
   // Get all cities
   async getAllCities(req, res) {
     try {
-      const { active_only = false, include_stats = false } = req.query;
+      const { active_only = false } = req.query;
 
+      // Always include stats for admin panel
       let query = `
-        SELECT c.*${include_stats === 'true' ? `, 
+        SELECT c.*,
           (SELECT COUNT(*) FROM tours t WHERE t.city_id = c.id AND t.status = 'active') as active_tours_count,
-          (SELECT COUNT(*) FROM tours t WHERE t.city_id = c.id) as total_tours_count
-        ` : ''}
+          (SELECT COUNT(*) FROM tours t WHERE t.city_id = c.id) as total_tours_count,
+          c.name as original_name
         FROM cities c
       `;
 
@@ -24,8 +28,16 @@ class CitiesController {
       query += ' ORDER BY c.name ASC';
 
       const [cities] = await pool.execute(query, queryParams);
-      const processedCities = imageHelper.processArrayImages(cities, 'city');
+      
+      // Process images and add computed fields
+      let processedCities = cities.map(city => ({
+        ...city,
+        tours_count: city.active_tours_count, // Add this for frontend compatibility
+        slug: city.slug || city.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') // Generate slug if missing
+      }));
 
+      // Process images
+      processedCities = imageHelper.processArrayImages(processedCities, 'city');
 
       res.json({
         success: true,

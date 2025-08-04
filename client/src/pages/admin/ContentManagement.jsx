@@ -1,8 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Edit2, Trash, Add, SearchNormal1, User, Refresh, Logout, ArrowLeft2, ArrowRight2 } from 'iconsax-react';
 import AdminLayout from "../../components/admin/AdminLayout";
 
 const ContentManagement = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("FAQs");
+
+  // Handle URL params to set active tab
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const tab = searchParams.get('tab');
+    
+    if (tab === 'reviews') {
+      setActiveTab('Reviews');
+    } else {
+      setActiveTab('FAQs'); // Default to FAQs
+    }
+  }, [location.search]);
+
+  // Update URL when tab changes
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (tab === 'Reviews') {
+      navigate('/admin/content?tab=reviews');
+    } else {
+      navigate('/admin/content?tab=faqs');
+    }
+  };
 
   const faqs = [
     {
@@ -43,6 +69,52 @@ const ContentManagement = () => {
     },
   ];
 
+  // Sample reviews data
+  const [reviews, setReviews] = useState([
+    {
+      id: 1,
+      screenshot: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=100",
+      review: "I had an amazing experience with Tura Trip during my vacation in Sharm El-Sheikh. Everything was well-organized, from airport pickup to the daily excursions.",
+      clientName: "Hunery Abounab",
+      date: "16/08/2013",
+    },
+    {
+      id: 2,
+      screenshot: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=100",
+      review: "During my vacation in Sharm El-Sheikh. Everything was well-organized, from airport pickup to the daily excursions. The guides were excellent.",
+      clientName: "Mina Younan",
+      date: "12/06/2020",
+    },
+    {
+      id: 3,
+      screenshot: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=100",
+      review: "Breathtaking nature and amazing I had an amazing experience with Tura Trip during my vacation in Sharm El-Sheikh. Everything was perfect.",
+      clientName: "Marco Malak",
+      date: "18/09/2016",
+    },
+    {
+      id: 4,
+      screenshot: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=100",
+      review: "Unforgettable moments with dolphins I had an amazing experience with Tura Trip during my vacation in Sharm El-Sheikh.",
+      clientName: "Alexander",
+      date: "28/10/2012",
+    },
+    {
+      id: 5,
+      screenshot: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=100",
+      review: "Fun and family-friendly sea tour I had an amazing experience with Tura Trip during my vacation in Sharm El-Sheikh. Everything was well-organized.",
+      clientName: "Ahmed",
+      date: "15/08/2017",
+    },
+    {
+      id: 6,
+      screenshot: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=100",
+      review: "Peaceful beach with sea turtles I had an amazing experience with Tura Trip during my vacation in Sharm El-Sheikh. Everything was well-organized.",
+      clientName: "Bedo",
+      date: "07/05/2016",
+    },
+  ]);
+
   const handleEdit = (faqId) => {
     console.log("Edit FAQ:", faqId);
   };
@@ -51,13 +123,17 @@ const ContentManagement = () => {
     console.log("Delete FAQ:", faqId);
   };
 
+  const handleDeleteReview = (id) => {
+    setReviews(reviews.filter(review => review.id !== id));
+  };
+
   return (
     <AdminLayout activeItem="Content">
       {/* Content Navigation */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
         <div className="flex border-b border-gray-200">
           <button
-            onClick={() => setActiveTab("FAQs")}
+            onClick={() => handleTabChange("FAQs")}
             className={`px-8 py-4 text-sm font-medium border-b-2 transition-colors ${
               activeTab === "FAQs"
                 ? "border-teal-600 text-teal-600 bg-gray-100"
@@ -67,7 +143,7 @@ const ContentManagement = () => {
             FAQs
           </button>
           <button
-            onClick={() => setActiveTab("Reviews")}
+            onClick={() => handleTabChange("Reviews")}
             className={`px-8 py-4 text-sm font-medium border-b-2 transition-colors ${
               activeTab === "Reviews"
                 ? "border-teal-600 text-teal-600 bg-gray-100"
@@ -79,33 +155,13 @@ const ContentManagement = () => {
         </div>
       </div>
 
+      {/* Rest of the component remains the same... */}
       {activeTab === "FAQs" && (
         <>
           {/* Add New Question Button */}
           <div className="flex justify-end mb-6">
             <button className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md flex items-center space-x-2 transition-colors">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M4 8H12"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M8 12V4"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <Add size="16" color="#ffffff" />
               <span>Add New Question</span>
             </button>
           </div>
@@ -121,19 +177,7 @@ const ContentManagement = () => {
                     placeholder="Search"
                     className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent w-96"
                   />
-                  <svg
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
+                  <SearchNormal1 size="16" color="#9ca3af" className="absolute left-3 top-1/2 transform -translate-y-1/2" />
                 </div>
               </div>
             </div>
@@ -171,86 +215,13 @@ const ContentManagement = () => {
                             onClick={() => handleEdit(faq.id)}
                             className="text-gray-400 hover:text-gray-600 transition-colors"
                           >
-                            <svg
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M13.2603 3.59997L5.05034 12.29C4.74034 12.62 4.44034 13.27 4.38034 13.72L4.01034 16.96C3.88034 18.13 4.72034 18.93 5.88034 18.73L9.10034 18.18C9.55034 18.1 10.1803 17.77 10.4903 17.43L18.7003 8.73997C20.1203 7.23997 20.7603 5.52997 18.5503 3.43997C16.3503 1.36997 14.6803 2.09997 13.2603 3.59997Z"
-                                stroke="currentColor"
-                                strokeWidth="1.5"
-                                strokeMiterlimit="10"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M11.8896 5.05005C12.3196 7.81005 14.5596 9.92005 17.3396 10.2"
-                                stroke="currentColor"
-                                strokeWidth="1.5"
-                                strokeMiterlimit="10"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M3 22H21"
-                                stroke="currentColor"
-                                strokeWidth="1.5"
-                                strokeMiterlimit="10"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
+                            <Edit2 size="20" color="currentColor" />
                           </button>
                           <button
                             onClick={() => handleDelete(faq.id)}
                             className="text-gray-400 hover:text-red-600 transition-colors"
                           >
-                            <svg
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M21 5.97998C17.67 5.64998 14.32 5.47998 10.98 5.47998C9 5.47998 7.02 5.57998 5.04 5.77998L3 5.97998"
-                                stroke="currentColor"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
-                                stroke="currentColor"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M18.8504 9.13989L18.2004 19.2099C18.0904 20.7799 18.0004 21.9999 15.2104 21.9999H8.79039C6.00039 21.9999 5.91039 20.7799 5.80039 19.2099L5.15039 9.13989"
-                                stroke="currentColor"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M10.3301 16.5H13.6601"
-                                stroke="currentColor"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M9.5 12.5H14.5"
-                                stroke="currentColor"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
+                            <Trash size="20" color="currentColor" />
                           </button>
                         </div>
                       </td>
@@ -265,20 +236,7 @@ const ContentManagement = () => {
               <div className="text-sm text-gray-700">Showing 1 to 10 of 99</div>
               <div className="flex items-center space-x-1">
                 <button className="px-3 py-1 border border-gray-300 rounded-l-md bg-white text-gray-500 hover:bg-gray-50">
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M12.7071 5.29289C13.0976 5.68342 13.0976 6.31658 12.7071 6.70711L9.41421 10L12.7071 13.2929C13.0976 13.6834 13.0976 14.3166 12.7071 14.7071C12.3166 15.0976 11.6834 15.0976 11.2929 14.7071L7.29289 10.7071C6.90237 10.3166 6.90237 9.68342 7.29289 9.29289L11.2929 5.29289C11.6834 4.90237 12.3166 4.90237 12.7071 5.29289Z"
-                      fill="currentColor"
-                    />
-                  </svg>
+                  <ArrowLeft2 size="20" color="#6b7280" />
                 </button>
                 <button className="px-3 py-1 border-t border-b border-teal-600 bg-teal-100 text-teal-700">
                   1
@@ -302,20 +260,7 @@ const ContentManagement = () => {
                   10
                 </button>
                 <button className="px-3 py-1 border border-gray-300 rounded-r-md bg-white text-gray-500 hover:bg-gray-50">
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M7.29289 14.7071C6.90237 14.3166 6.90237 13.6834 7.29289 13.2929L10.5858 10L7.29289 6.70711C6.90237 6.31658 6.90237 5.68342 7.29289 5.29289C7.68342 4.90237 8.31658 4.90237 8.70711 5.29289L12.7071 9.29289C13.0976 9.68342 13.0976 10.3166 12.7071 10.7071L8.70711 14.7071C8.31658 15.0976 7.68342 15.0976 7.29289 14.7071Z"
-                      fill="currentColor"
-                    />
-                  </svg>
+                  <ArrowRight2 size="20" color="#6b7280" />
                 </button>
               </div>
             </div>
@@ -324,14 +269,135 @@ const ContentManagement = () => {
       )}
 
       {activeTab === "Reviews" && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Reviews Management
-          </h3>
-          <p className="text-gray-600">
-            Reviews management functionality will be implemented here.
-          </p>
-        </div>
+        <>
+          {/* Add New Review Button */}
+          <div className="flex justify-end mb-6">
+            <button className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md flex items-center space-x-2 transition-colors">
+              <Add size="16" color="#ffffff" />
+              <span>Add New Review</span>
+            </button>
+          </div>
+
+          {/* Reviews Section */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h2 className="text-xl font-medium text-teal-800">Recent Reviews</h2>
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search"
+                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent w-96"
+                  />
+                  <SearchNormal1 size="16" color="#9ca3af" className="absolute left-3 top-1/2 transform -translate-y-1/2" />
+                </div>
+              </div>
+            </div>
+
+            {/* Reviews Table */}
+            <div className="overflow-hidden">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-blue-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-900">
+                      Screen shot
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-900">
+                      Review
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-900">
+                      Client's name
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-900">
+                      Date
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-900 w-20"></th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {reviews.map((review) => (
+                    <tr key={review.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 align-top">
+                        <div className="w-16 h-10 bg-gray-200 rounded border overflow-hidden">
+                          <img
+                            src={review.screenshot}
+                            alt="Review screenshot"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 align-top">
+                        <div className="text-sm text-gray-800 max-w-md">
+                          {review.review.length > 100
+                            ? `${review.review.substring(0, 100)}...`
+                            : review.review
+                          }
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 align-top">
+                        <div className="text-sm font-medium text-gray-800">
+                          {review.clientName}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 align-top">
+                        <div className="text-sm text-gray-600">
+                          {review.date}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 align-top">
+                        <div className="flex items-center space-x-3">
+                          <button className="text-gray-400 hover:text-gray-600 transition-colors">
+                            <Edit2 size="20" color="currentColor" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteReview(review.id)}
+                            className="text-gray-400 hover:text-red-600 transition-colors"
+                          >
+                            <Trash size="20" color="currentColor" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+              <div className="text-sm text-gray-700">Showing 1 to 10 of 99</div>
+              <div className="flex items-center space-x-1">
+                <button className="px-3 py-1 border border-gray-300 rounded-l-md bg-white text-gray-500 hover:bg-gray-50">
+                  <ArrowLeft2 size="20" color="#6b7280" />
+                </button>
+                <button className="px-3 py-1 border-t border-b border-teal-600 bg-teal-100 text-teal-700">
+                  1
+                </button>
+                <button className="px-3 py-1 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                  2
+                </button>
+                <button className="px-3 py-1 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                  3
+                </button>
+                <button className="px-3 py-1 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                  ...
+                </button>
+                <button className="px-3 py-1 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                  8
+                </button>
+                <button className="px-3 py-1 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                  9
+                </button>
+                <button className="px-3 py-1 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                  10
+                </button>
+                <button className="px-3 py-1 border border-gray-300 rounded-r-md bg-white text-gray-500 hover:bg-gray-50">
+                  <ArrowRight2 size="20" color="#6b7280" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </AdminLayout>
   );

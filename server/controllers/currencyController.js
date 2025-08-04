@@ -3,32 +3,34 @@ const currencyService = require('../services/currencyService');
 
 class CurrencyController {
   // Get all currencies
-  async getAllCurrencies(req, res) {
-    try {
-      const { active_only = false } = req.query;
+  // In CurrencyController.js - update getAllCurrencies
+async getAllCurrencies(req, res) {
+  try {
+    const { active_only = false } = req.query;
 
-      let query = 'SELECT * FROM currencies';
-      
-      if (active_only === 'true') {
-        query += ' WHERE is_active = true';
-      }
-      
-      query += ' ORDER BY code ASC';
-
-      const [currencies] = await pool.execute(query);
-
-      res.json({
-        success: true,
-        data: currencies
-      });
-    } catch (error) {
-      console.error('Get all currencies error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Internal server error'
-      });
+    let query = `SELECT * FROM currencies 
+                 WHERE code NOT IN ('USD', 'EUR')`;
+    
+    if (active_only === 'true') {
+      query += ' AND is_active = true';
     }
+    
+    query += ' ORDER BY code ASC';
+
+    const [currencies] = await pool.execute(query);
+
+    res.json({
+      success: true,
+      data: currencies
+    });
+  } catch (error) {
+    console.error('Get all currencies error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
   }
+}
 
   // Get exchange rates
   async getExchangeRates(req, res) {

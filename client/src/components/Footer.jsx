@@ -30,7 +30,7 @@ const Footer = () => {
               <p className="text-gray-400 text-sm mb-2 leading-relaxed">
                 {t("footer.contact.description")}
               </p>
-              <p className="text-gray-400 text-sm mb-6">{t("footer.contact.email")} : infot@turatrip.com</p>
+              <p className="text-gray-400 text-sm mb-6">{t("footer.contact.email")} : info@turatrip.com</p>
               
               <a 
                 href="https://wa.me/2001055957451" 

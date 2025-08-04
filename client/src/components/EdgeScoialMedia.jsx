@@ -148,7 +148,7 @@ const EdgeSocialMedia = () => {
   }, [isMobile]);
 
   return (
-    <div className="fixed right-0 top-1/2 transform -translate-y-1/2 z-50 flex flex-col space-y-2" data-social-container>
+    <div className="fixed right-0 top-[80%] lg:top-[60%] transform -translate-y-1/2 z-50 flex flex-col space-y-2" data-social-container>
       
       {/* WhatsApp Button */}
       <div 
