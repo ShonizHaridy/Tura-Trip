@@ -116,6 +116,12 @@ class AdminService {
       return response.data;
     } catch (error) {
       console.error('Error creating tour:', error);
+      
+      // Return the error response for better error handling
+      if (error.response) {
+        return error.response.data;
+      }
+      
       throw error;
     }
   }
@@ -165,25 +171,51 @@ class AdminService {
     }
   }
 
-  async createCity(cityData) {
-    try {
-      const response = await api.post('/admin/cities', cityData);
-      return response.data;
-    } catch (error) {
-      console.error('Error creating city:', error);
-      throw error;
-    }
+  async getCityById(id) {
+  try {
+    const response = await api.get(`/admin/cities/${id}?include_translations=true`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching city:', error);
+    throw error;
   }
+}
 
-  async updateCity(id, cityData) {
-    try {
-      const response = await api.put(`/admin/cities/${id}`, cityData);
-      return response.data;
-    } catch (error) {
-      console.error('Error updating city:', error);
-      throw error;
+
+async createCity(formData) {
+  try {
+    const response = await api.post('/admin/cities', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating city:', error);
+    if (error.response) {
+      return error.response.data;
     }
+    throw error;
   }
+}
+
+// Update updateCity method
+async updateCity(id, formData) {
+  try {
+    const response = await api.put(`/admin/cities/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating city:', error);
+    if (error.response) {
+      return error.response.data;
+    }
+    throw error;
+  }
+}
 
   async toggleCityStatus(id) {
     try {
@@ -207,8 +239,44 @@ class AdminService {
   }
 
   // Categories management
-  // Replace your existing getCategories method with this:
-  async getCategories(params = {}) {
+// Categories management - Updated methods
+async createCategory(categoryData) {
+  try {
+    const response = await api.post('/admin/categories', categoryData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating category:', error);
+    if (error.response) {
+      return error.response.data;
+    }
+    throw error;
+  }
+}
+
+async updateCategory(id, categoryData) {
+  try {
+    const response = await api.put(`/admin/categories/${id}`, categoryData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating category:', error);
+    if (error.response) {
+      return error.response.data;
+    }
+    throw error;
+  }
+}
+
+async getCategoryById(id) {
+  try {
+    const response = await api.get(`/admin/categories/${id}?include_translations=true`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching category:', error);
+    throw error;
+  }
+}
+
+async getCategories(params = {}) {
     try {
       const queryString = new URLSearchParams(params).toString();
       const response = await api.get(`/admin/categories${queryString ? `?${queryString}` : ''}`);

@@ -1,6 +1,7 @@
 const { pool } = require('../config/database');
 const fs = require('fs').promises;
 const imageHelper = require('../utils/imageHelper');
+const helpers = require('../utils/helpers'); // Import your helpers
 
 class ToursController {
   // Get all tours with filters and pagination
@@ -278,50 +279,270 @@ async getTourById(req, res) {
     });
   }
 }
-  // Create new tour
-  async createTour(req, res) {
-    const connection = await pool.getConnection();
-    
-    try {
-      await connection.beginTransaction();
 
-      const {
-        city_id,
-        category_id,
-        location,
-        price_adult,
-        price_child,
-        featured_tag = null,
-        discount_percentage = 0,
-        status = 'active',
-        content = {},
-        images = []
-      } = req.body;
+// Create new tour
+async createTour(req, res) {
+  const connection = await pool.getConnection();
+  
+  try {
+    await connection.beginTransaction();
 
-      // Insert tour
-      const [tourResult] = await connection.execute(`
-        INSERT INTO tours (
-          city_id, category_id, location, price_adult, price_child,
-          featured_tag, discount_percentage, status, cover_image
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `, [
+    console.log('📥 Create tour request body:', req.body);
+    console.log('📥 Create tour files:', req.files);
+
+    const {
+      city_id,
+      category_id,
+      location,
+      price_adult,
+      price_child,
+      featured_tag = null,
+      discount_percentage = 0,
+      status = 'active',
+      content
+    } = req.body;
+    console.log("This is req.body", req.body)
+
+    // Validation
+    if (!city_id || !category_id || !location || !price_adult || !price_child) {
+      await connection.rollback();
+      return res.status(400).json(
+        helpers.apiResponse(false, null, 'City, category, location, and prices are required')
+      );
+    }
+
+    // Parse content JSON string
+    const parsedContent = helpers.safeJSONParse(content, {});
+    if (!parsedContent || Object.keys(parsedContent).length === 0) {
+      await connection.rollback();
+      return res.status(400).json(
+        helpers.apiResponse(false, null, 'Tour content is required for at least one language')
+      );
+    }
+
+    // ✅ FIXED - Handle cover image (correct field name)
+    const coverImage = req.files?.coverImage?.[0]?.filename || null;
+
+    // Insert tour
+    const [tourResult] = await connection.execute(`
+      INSERT INTO tours (
         city_id, category_id, location, price_adult, price_child,
-        featured_tag, discount_percentage, status, req.file?.filename || null
-      ]);
+        featured_tag, discount_percentage, status, cover_image, views
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+    `, [
+      parseInt(city_id), 
+      parseInt(category_id), 
+      location, 
+      parseFloat(price_adult), 
+      parseFloat(price_child),
+      featured_tag || null, 
+      parseFloat(discount_percentage) || 0, 
+      status, 
+      coverImage
+    ]);
 
-      const tourId = tourResult.insertId;
+    const tourId = tourResult.insertId;
 
-      // Insert content for each language
-      for (const [langCode, langContent] of Object.entries(content)) {
-        if (langContent.title) { // Only insert if title exists
+    // Insert content for each language
+    for (const [langCode, langContent] of Object.entries(parsedContent)) {
+      if (langContent && langContent.title && langContent.title.trim()) {
+        console.log(`📝 Inserting content for language: ${langCode}`);
+        
+        await connection.execute(`
+          INSERT INTO tour_content (
+            tour_id, language_code, title, category, duration, 
+            availability, description, included, not_included, 
+            trip_program, take_with_you
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [
+          tourId, 
+          langCode, 
+          langContent.title.trim(), 
+          langContent.category || '',
+          langContent.duration || '', 
+          langContent.availability || '', 
+          langContent.description || '',
+          JSON.stringify(langContent.included || []),
+          JSON.stringify(langContent.not_included || []),
+          JSON.stringify(langContent.trip_program || []),
+          JSON.stringify(langContent.take_with_you || [])
+        ]);
+      }
+    }
+
+    // ✅ FIXED - Handle tour images (correct field name)
+    if (req.files?.tourImages) {
+      console.log('📸 Processing tour images:', req.files.tourImages.length);
+      
+      for (const file of req.files.tourImages) {
+        await connection.execute(
+          'INSERT INTO tour_images (tour_id, image_url) VALUES (?, ?)',
+          [tourId, file.filename]
+        );
+      }
+    }
+
+    await connection.commit();
+    console.log('✅ Tour created successfully with ID:', tourId);
+
+    res.status(201).json(
+      helpers.apiResponse(true, { id: tourId }, 'Tour created successfully')
+    );
+
+  } catch (error) {
+    await connection.rollback();
+    console.error('❌ Create tour error:', error);
+    
+    res.status(500).json(
+      helpers.apiResponse(false, null, 'Internal server error', error.message)
+    );
+  } finally {
+    connection.release();
+  }
+}
+
+
+// Update tour
+async updateTour(req, res) {
+  const connection = await pool.getConnection();
+  
+  try {
+    await connection.beginTransaction();
+
+    const { id } = req.params;
+    let {
+      city_id,
+      category_id,
+      location,
+      price_adult,
+      price_child,
+      featured_tag,
+      discount_percentage,
+      status,
+      content = '{}',
+      removeImages = '[]'
+    } = req.body;
+
+    console.log("This is the data for the update", req.body);
+
+
+    
+    const parsedContent = typeof content === 'string' 
+      ? helpers.safeJSONParse(content, {}) 
+      : (content || {});
+
+    const parsedRemoveImages = typeof removeImages === 'string' 
+      ? helpers.safeJSONParse(removeImages, []) 
+      : (removeImages || []);
+
+    console.log("Parsed content:", parsedContent);
+    console.log("Parsed removeImages:", parsedRemoveImages);
+
+    // 
+
+    // Check if tour exists
+    const [existingTour] = await connection.execute(
+      'SELECT * FROM tours WHERE id = ?',
+      [id]
+    );
+
+    if (existingTour.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({
+        success: false,
+        message: 'Tour not found'
+      });
+    }
+
+    // Update tour basic info
+    const updateFields = [];
+    const updateValues = [];
+
+    if (city_id !== undefined) {
+      updateFields.push('city_id = ?');
+      updateValues.push(city_id);
+    }
+    if (category_id !== undefined) {
+      updateFields.push('category_id = ?');
+      updateValues.push(category_id);
+    }
+    if (location !== undefined) {
+      updateFields.push('location = ?');
+      updateValues.push(location);
+    }
+    if (price_adult !== undefined) {
+      updateFields.push('price_adult = ?');
+      updateValues.push(price_adult);
+    }
+    if (price_child !== undefined) {
+      updateFields.push('price_child = ?');
+      updateValues.push(price_child);
+    }
+    if (featured_tag !== undefined) {
+      updateFields.push('featured_tag = ?');
+      updateValues.push(featured_tag);
+    }
+    if (discount_percentage !== undefined) {
+      updateFields.push('discount_percentage = ?');
+      updateValues.push(discount_percentage);
+    }
+    if (status !== undefined) {
+      updateFields.push('status = ?');
+      updateValues.push(status);
+    }
+
+    // Handle cover image - check for coverImage field
+    if (req.files && req.files.coverImage && req.files.coverImage[0]) {
+      updateFields.push('cover_image = ?');
+      updateValues.push(req.files.coverImage[0].filename);
+    }
+
+    if (updateFields.length > 0) {
+      updateFields.push('updated_at = CURRENT_TIMESTAMP');
+      updateValues.push(id);
+
+      await connection.execute(
+        `UPDATE tours SET ${updateFields.join(', ')} WHERE id = ?`,
+        updateValues
+      );
+    }
+
+    // Update content for each language
+    for (const [langCode, langContent] of Object.entries(parsedContent)) {
+      if (langContent.title) {
+        // Check if content exists
+        const [existingContent] = await connection.execute(
+          'SELECT id FROM tour_content WHERE tour_id = ? AND language_code = ?',
+          [id, langCode]
+        );
+
+        if (existingContent.length > 0) {
+          // Update existing content
+          await connection.execute(`
+            UPDATE tour_content SET
+              title = ?, category = ?, duration = ?, availability = ?,
+              description = ?, included = ?, not_included = ?,
+              trip_program = ?, take_with_you = ?
+            WHERE tour_id = ? AND language_code = ?
+          `, [
+            langContent.title, langContent.category, langContent.duration,
+            langContent.availability, langContent.description,
+            JSON.stringify(langContent.included || []),
+            JSON.stringify(langContent.not_included || []),
+            JSON.stringify(langContent.trip_program || []),
+            JSON.stringify(langContent.take_with_you || []),
+            id, langCode
+          ]);
+        } else {
+          // Insert new content
           await connection.execute(`
             INSERT INTO tour_content (
-              tour_id, language_code, title, category, duration, 
-              availability, description, included, not_included, 
+              tour_id, language_code, title, category, duration,
+              availability, description, included, not_included,
               trip_program, take_with_you
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `, [
-            tourId, langCode, langContent.title, langContent.category,
+            id, langCode, langContent.title, langContent.category,
             langContent.duration, langContent.availability, langContent.description,
             JSON.stringify(langContent.included || []),
             JSON.stringify(langContent.not_included || []),
@@ -330,221 +551,61 @@ async getTourById(req, res) {
           ]);
         }
       }
-
-      // Insert additional images if provided
-      if (req.files?.length > 0) {
-        for (const file of req.files) {
-          await connection.execute(
-            'INSERT INTO tour_images (tour_id, image_url) VALUES (?, ?)',
-            [tourId, file.filename]
-          );
-        }
-      }
-
-      await connection.commit();
-
-      res.status(201).json({
-        success: true,
-        message: 'Tour created successfully',
-        data: { id: tourId }
-      });
-    } catch (error) {
-      await connection.rollback();
-      console.error('Create tour error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Internal server error'
-      });
-    } finally {
-      connection.release();
     }
-  }
 
-  // Update tour
-  async updateTour(req, res) {
-    const connection = await pool.getConnection();
-    
-    try {
-      await connection.beginTransaction();
-
-      const { id } = req.params;
-      const {
-        city_id,
-        category_id,
-        location,
-        price_adult,
-        price_child,
-        featured_tag,
-        discount_percentage,
-        status,
-        content = {},
-        removeImages = []
-      } = req.body;
-
-      // Check if tour exists
-      const [existingTour] = await connection.execute(
-        'SELECT * FROM tours WHERE id = ?',
-        [id]
-      );
-
-      if (existingTour.length === 0) {
-        await connection.rollback();
-        return res.status(404).json({
-          success: false,
-          message: 'Tour not found'
-        });
-      }
-
-      // Update tour basic info
-      const updateFields = [];
-      const updateValues = [];
-
-      if (city_id !== undefined) {
-        updateFields.push('city_id = ?');
-        updateValues.push(city_id);
-      }
-      if (category_id !== undefined) {
-        updateFields.push('category_id = ?');
-        updateValues.push(category_id);
-      }
-      if (location !== undefined) {
-        updateFields.push('location = ?');
-        updateValues.push(location);
-      }
-      if (price_adult !== undefined) {
-        updateFields.push('price_adult = ?');
-        updateValues.push(price_adult);
-      }
-      if (price_child !== undefined) {
-        updateFields.push('price_child = ?');
-        updateValues.push(price_child);
-      }
-      if (featured_tag !== undefined) {
-        updateFields.push('featured_tag = ?');
-        updateValues.push(featured_tag);
-      }
-      if (discount_percentage !== undefined) {
-        updateFields.push('discount_percentage = ?');
-        updateValues.push(discount_percentage);
-      }
-      if (status !== undefined) {
-        updateFields.push('status = ?');
-        updateValues.push(status);
-      }
-      if (req.file) {
-        updateFields.push('cover_image = ?');
-        updateValues.push(req.file.filename);
-      }
-
-      if (updateFields.length > 0) {
-        updateFields.push('updated_at = CURRENT_TIMESTAMP');
-        updateValues.push(id);
-
-        await connection.execute(
-          `UPDATE tours SET ${updateFields.join(', ')} WHERE id = ?`,
-          updateValues
+    // Handle image removal
+    if (parsedRemoveImages.length > 0) {
+      for (const imageId of parsedRemoveImages) {
+        // Get image filename before deletion
+        const [imageRow] = await connection.execute(
+          'SELECT image_url FROM tour_images WHERE id = ? AND tour_id = ?',
+          [imageId, id]
         );
-      }
 
-      // Update content for each language
-      for (const [langCode, langContent] of Object.entries(content)) {
-        if (langContent.title) {
-          // Check if content exists
-          const [existingContent] = await connection.execute(
-            'SELECT id FROM tour_content WHERE tour_id = ? AND language_code = ?',
-            [id, langCode]
-          );
-
-          if (existingContent.length > 0) {
-            // Update existing content
-            await connection.execute(`
-              UPDATE tour_content SET
-                title = ?, category = ?, duration = ?, availability = ?,
-                description = ?, included = ?, not_included = ?,
-                trip_program = ?, take_with_you = ?
-              WHERE tour_id = ? AND language_code = ?
-            `, [
-              langContent.title, langContent.category, langContent.duration,
-              langContent.availability, langContent.description,
-              JSON.stringify(langContent.included || []),
-              JSON.stringify(langContent.not_included || []),
-              JSON.stringify(langContent.trip_program || []),
-              JSON.stringify(langContent.take_with_you || []),
-              id, langCode
-            ]);
-          } else {
-            // Insert new content
-            await connection.execute(`
-              INSERT INTO tour_content (
-                tour_id, language_code, title, category, duration,
-                availability, description, included, not_included,
-                trip_program, take_with_you
-              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `, [
-              id, langCode, langContent.title, langContent.category,
-              langContent.duration, langContent.availability, langContent.description,
-              JSON.stringify(langContent.included || []),
-              JSON.stringify(langContent.not_included || []),
-              JSON.stringify(langContent.trip_program || []),
-              JSON.stringify(langContent.take_with_you || [])
-            ]);
+        if (imageRow.length > 0) {
+          // Delete file from filesystem
+          try {
+            await fs.unlink(`./uploads/${imageRow[0].image_url}`);
+          } catch (fileError) {
+            console.error('Error deleting file:', fileError);
           }
-        }
-      }
 
-      // Handle image removal
-      if (removeImages.length > 0) {
-        for (const imageId of removeImages) {
-          // Get image filename before deletion
-          const [imageRow] = await connection.execute(
-            'SELECT image_url FROM tour_images WHERE id = ? AND tour_id = ?',
+          // Delete from database
+          await connection.execute(
+            'DELETE FROM tour_images WHERE id = ? AND tour_id = ?',
             [imageId, id]
           );
-
-          if (imageRow.length > 0) {
-            // Delete file from filesystem
-            try {
-              await fs.unlink(`./uploads/${imageRow[0].image_url}`);
-            } catch (fileError) {
-              console.error('Error deleting file:', fileError);
-            }
-
-            // Delete from database
-            await connection.execute(
-              'DELETE FROM tour_images WHERE id = ? AND tour_id = ?',
-              [imageId, id]
-            );
-          }
         }
       }
-
-      // Add new images
-      if (req.files?.length > 0) {
-        for (const file of req.files) {
-          await connection.execute(
-            'INSERT INTO tour_images (tour_id, image_url) VALUES (?, ?)',
-            [id, file.filename]
-          );
-        }
-      }
-
-      await connection.commit();
-
-      res.json({
-        success: true,
-        message: 'Tour updated successfully'
-      });
-    } catch (error) {
-      await connection.rollback();
-      console.error('Update tour error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Internal server error'
-      });
-    } finally {
-      connection.release();
     }
+
+    // Add new tour images - check for tourImages field
+    if (req.files && req.files.tourImages && req.files.tourImages.length > 0) {
+      for (const file of req.files.tourImages) {
+        await connection.execute(
+          'INSERT INTO tour_images (tour_id, image_url) VALUES (?, ?)',
+          [id, file.filename]
+        );
+      }
+    }
+
+    await connection.commit();
+
+    res.json({
+      success: true,
+      message: 'Tour updated successfully'
+    });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Update tour error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  } finally {
+    connection.release();
   }
+}
 
   // Delete tour
   async deleteTour(req, res) {

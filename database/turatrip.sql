@@ -109,7 +109,7 @@ CREATE TABLE tour_content (
     included JSON,
     not_included JSON,
     trip_program JSON,
-    take_with_you jSON,
+    take_with_you JSON,
     
     FOREIGN KEY (tour_id) REFERENCES tours(id) ON DELETE CASCADE,
     UNIQUE KEY unique_tour_language (tour_id, language_code),

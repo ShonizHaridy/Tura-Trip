@@ -66,7 +66,7 @@ const AdminSidebar = ({ activeItem = "Dashboard" }) => {
     },
     {
       id: "commission",
-      label: "Commission Settings",
+      label: "Commission",
       path: "/admin/commission",
       icon: <MoneyRecive size="24" color="currentColor" />,
     },
@@ -100,7 +100,7 @@ const AdminSidebar = ({ activeItem = "Dashboard" }) => {
 
   return (
     <div
-      className="bg-[#F9F9F7] flex flex-col w-60 h-screen border-r border-gray-200"
+      className="bg-[#F9F9F7] fixed flex flex-col w-60 h-screen border-r border-gray-200"
       style={{ paddingTop: "68px" }}
     >
       {/* Navigation */}

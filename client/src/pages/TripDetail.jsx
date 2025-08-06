@@ -34,6 +34,19 @@ const TripDetail = () => {
     fetchTripData();
   }, [cityName, tripId, i18n.language]);
 
+  // // Combine cover image with gallery images
+  // const allImages = useMemo(() => {
+  //   const coverImageObj = {
+  //     id: 'cover',
+  //     image_url: tour?.cover_image_url,
+  //     is_cover: true
+  //   };
+    
+  //   return tour?.cover_image_url 
+  //     ? [coverImageObj, ...(images || [])]
+  //     : (images || []);
+  // }, [tour?.cover_image_url, images]);
+
   const fetchTripData = async () => {
     try {
       setLoading(true);

@@ -1,16 +1,15 @@
-// src/components/admin/AdminLayout.jsx
 import React from "react";
 import AdminSidebar from "./AdminSidebar";
 import AdminTopBar from "./AdminTopBar";
 
 const AdminLayout = ({ children, activeItem = "Dashboard" }) => {
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-isabeline-50 flex">
       {/* Sidebar */}
       <AdminSidebar activeItem={activeItem} />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col lg:ml-[272px]">
         {/* Top Bar */}
         <AdminTopBar />
 

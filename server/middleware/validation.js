@@ -1,5 +1,20 @@
 const { body, param, query, validationResult } = require('express-validator');
 
+const debugRequest = (label) => (req, res, next) => {
+  console.log(`\n=== ${label} ===`);
+  console.log('Body:', req.body);
+  console.log('File:', req.file);
+  console.log('Content-Type:', req.headers['content-type']);
+  
+  if (req.body.translations) {
+    console.log('Translations type:', typeof req.body.translations);
+    console.log('Translations value:', req.body.translations);
+  }
+  
+  console.log(`=== END ${label} ===\n`);
+  next();
+};
+
 // Helper function to handle validation results
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
@@ -73,17 +88,135 @@ const tourValidation = {
 };
 
 // City validation rules
+// City validation rules
 const cityValidation = {
   create: [
-    body('name').notEmpty().withMessage('City name is required'),
-    body('description').optional().isLength({ max: 1000 }).withMessage('Description too long'),
+
+    debugRequest('CITY CREATE'),
+
+    // Validate the translations object structure
+    body('translations').custom((value) => {
+      // Handle both string (from FormData) and object
+      let translations;
+      try {
+        translations = typeof value === 'string' ? JSON.parse(value) : value;
+      } catch (error) {
+        throw new Error('Invalid translations format');
+      }
+      
+      if (!translations || typeof translations !== 'object') {
+        throw new Error('Translations object is required');
+      }
+      
+      return true;
+    }),
+    
+    // Validate each required language - at least English name is required
+    body('translations').custom((value) => {
+      let translations = typeof value === 'string' ? JSON.parse(value) : value;
+      
+      // Check required languages exist
+      const requiredLanguages = ['en', 'ru', 'it', 'de'];
+      for (const lang of requiredLanguages) {
+        if (!translations[lang]) {
+          throw new Error(`Translation for ${lang} is required`);
+        }
+      }
+      
+      // English name is mandatory
+      if (!translations.en.name || translations.en.name.trim() === '') {
+        throw new Error('English city name is required');
+      }
+      
+      // Validate field lengths for all languages
+      for (const lang of requiredLanguages) {
+        const translation = translations[lang];
+        
+        if (translation.name && translation.name.length > 100) {
+          throw new Error(`${lang.toUpperCase()} city name cannot exceed 100 characters`);
+        }
+        
+        if (translation.tagline && translation.tagline.length > 255) {
+          throw new Error(`${lang.toUpperCase()} tagline cannot exceed 255 characters`);
+        }
+        
+        if (translation.description && translation.description.length > 1000) {
+          throw new Error(`${lang.toUpperCase()} description cannot exceed 1000 characters`);
+        }
+        
+        // If name is provided for non-English, it cannot be empty
+        if (lang !== 'en' && translation.name && translation.name.trim() === '') {
+          throw new Error(`${lang.toUpperCase()} city name cannot be empty if provided`);
+        }
+      }
+      
+      return true;
+    }),
+    
+    // Validate is_active field
+    body('is_active').optional().isBoolean().withMessage('Status must be boolean'),
+    
     handleValidationErrors
   ],
   
   update: [
     param('id').isInt({ min: 1 }).withMessage('Valid city ID is required'),
-    body('name').optional().notEmpty().withMessage('City name cannot be empty'),
-    body('description').optional().isLength({ max: 1000 }).withMessage('Description too long'),
+    
+    // For updates, translations are optional but if provided, should be valid
+    body('translations').optional().custom((value) => {
+      let translations;
+      try {
+        translations = typeof value === 'string' ? JSON.parse(value) : value;
+      } catch (error) {
+        throw new Error('Invalid translations format');
+      }
+      
+      if (translations && typeof translations !== 'object') {
+        throw new Error('Translations must be an object');
+      }
+      
+      return true;
+    }),
+    
+    // If translations are provided, validate structure and content
+    body('translations').optional().custom((value) => {
+      if (!value) return true; // Skip if not provided
+      
+      let translations = typeof value === 'string' ? JSON.parse(value) : value;
+      const requiredLanguages = ['en', 'ru', 'it', 'de'];
+      
+      for (const lang of requiredLanguages) {
+        if (translations[lang]) {
+          const translation = translations[lang];
+          
+          // If name is provided, validate it
+          if (translation.name !== undefined) {
+            if (translation.name.trim() === '') {
+              throw new Error(`${lang.toUpperCase()} city name cannot be empty`);
+            }
+            if (translation.name.length > 100) {
+              throw new Error(`${lang.toUpperCase()} city name cannot exceed 100 characters`);
+            }
+          }
+          
+          // Validate tagline length
+          if (translation.tagline && translation.tagline.length > 255) {
+            throw new Error(`${lang.toUpperCase()} tagline cannot exceed 255 characters`);
+          }
+          
+          // Validate description length
+          if (translation.description && translation.description.length > 1000) {
+            throw new Error(`${lang.toUpperCase()} description cannot exceed 1000 characters`);
+          }
+        }
+      }
+      
+      return true;
+    }),
+    
+    // Validate is_active field
+    body('is_active').optional().isBoolean().withMessage('Status must be boolean'),
+    
     handleValidationErrors
   ]
 };
@@ -91,15 +224,34 @@ const cityValidation = {
 // Category validation rules
 const categoryValidation = {
   create: [
-    body('name').notEmpty().withMessage('Category name is required'),
-    body('description').optional().isLength({ max: 500 }).withMessage('Description too long'),
+    // Validate the translations object structure
+    body('translations').isObject().withMessage('Translations object is required'),
+    
+    // Validate each required language
+    body('translations.en.name').notEmpty().withMessage('English category name is required'),
+    body('translations.ru.name').notEmpty().withMessage('Russian category name is required'),
+    body('translations.it.name').notEmpty().withMessage('Italian category name is required'),
+    body('translations.de.name').notEmpty().withMessage('German category name is required'),
+    
+    // Optional description validation for each language
+    body('translations.*.description').optional().isLength({ max: 1000 }).withMessage('Description too long'),
+    
     handleValidationErrors
   ],
   
   update: [
     param('id').isInt({ min: 1 }).withMessage('Valid category ID is required'),
-    body('name').optional().notEmpty().withMessage('Category name cannot be empty'),
-    body('description').optional().isLength({ max: 500 }).withMessage('Description too long'),
+    
+    // For updates, translations are optional but if provided, should be valid
+    body('translations').optional().isObject().withMessage('Translations must be an object'),
+    
+    // If any translation is provided, validate its structure
+    body('translations.*.name').optional().notEmpty().withMessage('Translation name cannot be empty'),
+    body('translations.*.description').optional().isLength({ max: 1000 }).withMessage('Description too long'),
+    
+    // Optional status validation
+    body('is_active').optional().isBoolean().withMessage('Status must be boolean'),
+    
     handleValidationErrors
   ]
 };

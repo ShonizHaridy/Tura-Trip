@@ -29,17 +29,27 @@ body {
   --color-sea-green-500: #2ca6a4;
   --color-sea-green-600: #289795;
   --color-sea-green-700: #1f7674;
+  --color-sea-green-800: #185B5A;
   --color-sea-green-900: #124645;
   --color-danim: #3f62ae;
   --color-danim-50: #ECEFF7;
   --color-danim-700: #2d467c;
   --color-danim-800: #233660;
+  --color-danim-900: #1A2949;
+  --color-rose-black-200: #8A8D95;
   --color-rose-black-300: #555a64;
   --color-rose-black-400: #343946;
   --color-rose-black-500: #010818;
+  
+  
 
   --color-isabelline: #f3f3ee;
+  --color-isabeline-50: #FEFEFD;
   --color-isabelline-600: #DDDDD9;
+
+  --color-dark-blue-50: #E8E7EA;
+  --color-white-300: #B3B3B3;
+
 
   --color-blue-900: #1a2949;
   --color-blue-800: #233660;

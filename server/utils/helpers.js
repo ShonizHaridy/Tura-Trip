@@ -98,8 +98,20 @@ const apiResponse = (success, data = null, message = '', errors = null) => {
 // Parse JSON safely
 const safeJSONParse = (str, defaultValue = null) => {
   try {
-    return JSON.parse(str);
+    // If it's already an object, return it
+    if (typeof str === 'object' && str !== null) {
+      return str;
+    }
+    
+    // If it's a string, try to parse it
+    if (typeof str === 'string') {
+      return JSON.parse(str);
+    }
+    
+    // If it's neither, return default
+    return defaultValue;
   } catch (error) {
+    console.error('JSON Parse Error:', error.message);
     return defaultValue;
   }
 };

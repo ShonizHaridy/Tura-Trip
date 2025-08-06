@@ -12,7 +12,7 @@ router.use(authMiddleware);
 router.get('/', citiesController.getAllCities);
 router.get('/:id', citiesController.getCityById);
 router.post('/', 
-  upload.single('image'),
+  upload.single('hero_image'), // CHANGED: from 'image' to 'hero_image'
   processImage,
   cityValidation.create,
   citiesController.createCity

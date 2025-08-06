@@ -1,35 +1,185 @@
 // src/components/admin/EditCategoryModal.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import enFlag from "../../assets/flags/en.png";
+import ruFlag from "../../assets/flags/ru.png";
+import itFlag from "../../assets/flags/it.png";
+import deFlag from "../../assets/flags/de.png";
+import adminService from "../../services/adminService";
 
 const EditCategoryModal = ({ category, onClose, onSave }) => {
-  const [formData, setFormData] = useState({
-    title: category?.name || "Historical Cities",
-    status: category?.status || "Active",
-    cities: ["hurghada"], // Default to Hurghada checked based on design
-  });
-
-  const cities = [
-    { id: "hurghada", name: "Hurgada" },
-    { id: "sharm", name: "Sharm El Shiekh" },
-    { id: "marsa", name: "Marsa Alam" },
+  const languages = [
+    { code: "en", name: "English", flag: enFlag },
+    { code: "ru", name: "Russian", flag: ruFlag },
+    { code: "it", name: "Italian", flag: itFlag },
+    { code: "de", name: "German", flag: deFlag },
   ];
 
-  const handleCityToggle = (cityId) => {
-    setFormData((prev) => ({
-      ...prev,
-      cities: prev.cities.includes(cityId)
-        ? prev.cities.filter((id) => id !== cityId)
-        : [...prev.cities, cityId],
-    }));
+  const [activeLanguage, setActiveLanguage] = useState("en");
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [initialData, setInitialData] = useState(null);
+  const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const statusDropdownRef = useRef(null);
+  
+  const [formData, setFormData] = useState({
+    translations: {
+      en: { name: "", description: "" },
+      ru: { name: "", description: "" },
+      it: { name: "", description: "" },
+      de: { name: "", description: "" },
+    },
+    is_active: true,
+    // Comment out cities relationship for now
+    // cities: ["hurghada"],
+  });
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsLanguageDropdownOpen(false);
+      }
+      if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target)) {
+        setIsStatusDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (category) {
+      // If category has translations, use them; otherwise, use the main name/description
+      const translations = {};
+      languages.forEach(lang => {
+        translations[lang.code] = {
+          name: category.translations?.[lang.code]?.name || category.name || "",
+          description: category.translations?.[lang.code]?.description || category.description || "",
+        };
+      });
+
+      const initialFormData = {
+        translations,
+        is_active: category.is_active ?? true,
+        // Comment out cities for now
+        // cities: category.cities || ["hurghada"],
+      };
+
+      setFormData(initialFormData);
+      setInitialData(initialFormData);
+    }
+  }, [category]);
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    // Check if all languages have required fields filled
+    languages.forEach(lang => {
+      if (!formData.translations[lang.code].name.trim()) {
+        if (!newErrors[lang.code]) newErrors[lang.code] = {};
+        newErrors[lang.code].name = `${lang.name} category name is required`;
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const hasChanges = () => {
+    if (!initialData) return false;
+    return JSON.stringify(formData) !== JSON.stringify(initialData);
+  };
+
+  const getChangedLanguages = () => {
+    if (!initialData) return [];
+    
+    const changedLangs = [];
+    languages.forEach(lang => {
+      const current = formData.translations[lang.code];
+      const initial = initialData.translations[lang.code];
+      
+      if (current.name !== initial.name || current.description !== initial.description) {
+        changedLangs.push(lang.name);
+      }
+    });
+    
+    return changedLangs;
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      translations: {
+        ...prev.translations,
+        [activeLanguage]: {
+          ...prev.translations[activeLanguage],
+          [field]: value
+        }
+      }
+    }));
+
+    // Clear error for current field and language
+    if (errors[activeLanguage]?.[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [activeLanguage]: {
+          ...prev[activeLanguage],
+          [field]: undefined
+        }
+      }));
+    }
+  };
+
+  const handleLanguageSelect = (languageCode) => {
+    setActiveLanguage(languageCode);
+    setIsLanguageDropdownOpen(false);
+  };
+
+  const handleStatusChange = (newStatus) => {
+    setFormData(prev => ({ ...prev, is_active: newStatus }));
+    setIsStatusDropdownOpen(false);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave({ ...category, ...formData });
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    // Warn if only some languages were changed
+    const changedLanguages = getChangedLanguages();
+    if (changedLanguages.length > 0 && changedLanguages.length < languages.length) {
+      const confirmMessage = `You've only updated ${changedLanguages.join(', ')}. Are you sure you want to save without updating all languages?`;
+      if (!window.confirm(confirmMessage)) {
+        return;
+      }
+    }
+
+    setLoading(true);
+    try {
+      const response = await adminService.updateCategory(category.id, formData);
+      
+      if (response.success) {
+        onSave({ ...category, ...formData });
+      } else {
+        setErrors({ submit: response.message || "Failed to update category" });
+      }
+    } catch (error) {
+      console.error('Update category error:', error);
+      setErrors({ submit: "An error occurred while updating the category" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="flex flex-col items-center gap-4 w-full max-w-2xl bg-white rounded-xl shadow-lg p-4">
         {/* Header */}
         <div className="flex justify-end items-center gap-2 w-full border-b border-gray-300 pb-2">
@@ -80,48 +230,90 @@ const EditCategoryModal = ({ category, onClose, onSave }) => {
             </div>
           </div>
 
-          {/* Language Selector */}
-          <div className="flex h-12 py-3 items-center gap-2">
-            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
-              <g clipPath="url(#clip0_4222_25880)">
-                <path
-                  d="M12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24Z"
-                  fill="#F0F0F0"
-                />
-                <path
-                  d="M11.4775 12.0001H23.9993C23.9993 10.917 23.8549 9.86774 23.5859 8.86963H11.4775V12.0001Z"
-                  fill="#D80027"
-                />
-                <path
-                  d="M11.4775 5.7391H22.238C21.5034 4.54041 20.5642 3.48089 19.4691 2.60864H11.4775V5.7391Z"
-                  fill="#D80027"
-                />
-                <path
-                  d="M12.0001 23.9998C14.8243 23.9998 17.4201 23.0237 19.4699 21.3911H4.53027C6.58012 23.0237 9.17591 23.9998 12.0001 23.9998Z"
-                  fill="#D80027"
-                />
-                <path
-                  d="M1.76098 18.2608H22.2384C22.8281 17.2985 23.2855 16.2467 23.5863 15.1304H0.413086C0.713883 16.2467 1.17124 17.2985 1.76098 18.2608Z"
-                  fill="#D80027"
-                />
-                <path
-                  d="M5.55863 1.87397H6.65217L5.63498 2.61295L6.02353 3.80869L5.00639 3.0697L3.98925 3.80869L4.32487 2.7757C3.42928 3.52172 2.64431 4.39575 1.99744 5.36963H2.34783L1.70034 5.84002C1.59947 6.0083 1.50272 6.17925 1.41 6.35273L1.71919 7.30434L1.14234 6.88523C0.998953 7.18903 0.867797 7.49967 0.749906 7.81678L1.09055 8.86528H2.34783L1.33064 9.60427L1.71919 10.8L0.702047 10.061L0.0927656 10.5037C0.0317812 10.9939 0 11.4932 0 12H12C12 5.37262 12 4.59131 12 0C9.62944 0 7.41961 0.687656 5.55863 1.87397ZM6.02353 10.8L5.00639 10.061L3.98925 10.8L4.3778 9.60427L3.36061 8.86528H4.61789L5.00639 7.66955L5.39489 8.86528H6.65217L5.63498 9.60427L6.02353 10.8ZM5.63498 6.10861L6.02353 7.30434L5.00639 6.56536L3.98925 7.30434L4.3778 6.10861L3.36061 5.36963H4.61789L5.00639 4.17389L5.39489 5.36963H6.65217L5.63498 6.10861ZM10.3279 10.8L9.31073 10.061L8.29359 10.8L8.68214 9.60427L7.66495 8.86528H8.92223L9.31073 7.66955L9.69923 8.86528H10.9565L9.93933 9.60427L10.3279 10.8ZM9.93933 6.10861L10.3279 7.30434L9.31073 6.56536L8.29359 7.30434L8.68214 6.10861L7.66495 5.36963H8.92223L9.31073 4.17389L9.69923 5.36963H10.9565L9.93933 6.10861ZM9.93933 2.61295L10.3279 3.80869L9.31073 3.0697L8.29359 3.80869L8.68214 2.61295L7.66495 1.87397H8.92223L9.31073 0.678234L9.69923 1.87397H10.9565L9.93933 2.61295Z"
-                  fill="#0052B4"
-                />
-              </g>
-            </svg>
-            <span className="text-gray-900 text-xl font-medium">English</span>
-            <svg
-              className="w-4 h-4 text-gray-900"
-              viewBox="0 0 16 16"
-              fill="none"
+          {/* Language Selector with Dropdown */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              type="button"
+              onClick={() => setIsLanguageDropdownOpen(!isLanguageDropdownOpen)}
+              className="flex h-12 py-3 items-center gap-2 hover:bg-gray-50 rounded-md px-2 transition-colors"
             >
-              <path
-                d="M11.9465 5.45337H7.79316H4.05317C3.41317 5.45337 3.09317 6.2267 3.5465 6.68004L6.99983 10.1334C7.55317 10.6867 8.45317 10.6867 9.0065 10.1334L10.3198 8.82004L12.4598 6.68004C12.9065 6.2267 12.5865 5.45337 11.9465 5.45337Z"
-                fill="currentColor"
+              <img 
+                src={languages.find(lang => lang.code === activeLanguage)?.flag} 
+                alt={activeLanguage}
+                className="w-6 h-6 rounded-sm"
               />
-            </svg>
+              <span className="text-gray-900 text-xl font-medium">
+                {languages.find(lang => lang.code === activeLanguage)?.name}
+              </span>
+              <svg
+                className={`w-4 h-4 text-gray-900 transition-transform ${
+                  isLanguageDropdownOpen ? 'rotate-180' : ''
+                }`}
+                viewBox="0 0 16 16"
+                fill="none"
+              >
+                <path
+                  d="M11.9465 5.45337H7.79316H4.05317C3.41317 5.45337 3.09317 6.2267 3.5465 6.68004L6.99983 10.1334C7.55317 10.6867 8.45317 10.6867 9.0065 10.1334L10.3198 8.82004L12.4598 6.68004C12.9065 6.2267 12.5865 5.45337 11.9465 5.45337Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+
+            {/* Language Dropdown */}
+            {isLanguageDropdownOpen && (
+              <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                <div className="py-1">
+                  {languages.map((language) => (
+                    <button
+                      key={language.code}
+                      type="button"
+                      onClick={() => handleLanguageSelect(language.code)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors ${
+                        activeLanguage === language.code ? 'bg-teal-50 text-teal-700' : 'text-gray-700'
+                      }`}
+                    >
+                      <img 
+                        src={language.flag} 
+                        alt={language.code} 
+                        className="w-5 h-5 rounded-sm" 
+                      />
+                      <span className="text-base font-medium">{language.name}</span>
+                      {errors[language.code] && (
+                        <div className="ml-auto w-2 h-2 bg-red-500 rounded-full"></div>
+                      )}
+                      {activeLanguage === language.code && (
+                        <svg className="ml-auto w-4 h-4 text-teal-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
+        </div>
+
+        {/* Language Tabs */}
+        <div className="flex items-center gap-2 w-full border-b border-gray-200">
+          {languages.map((language) => (
+            <button
+              key={language.code}
+              type="button"
+              onClick={() => setActiveLanguage(language.code)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-t-lg border-b-2 transition-colors ${
+                activeLanguage === language.code
+                  ? 'border-teal-700 bg-teal-50 text-teal-700'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <img src={language.flag} alt={language.code} className="w-4 h-4 rounded-sm" />
+              <span className="text-sm font-medium">{language.name}</span>
+              {errors[language.code] && (
+                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              )}
+            </button>
+          ))}
         </div>
 
         <form
@@ -136,41 +328,75 @@ const EditCategoryModal = ({ category, onClose, onSave }) => {
                   className="w-full text-xl font-normal"
                   style={{ color: "#222E50" }}
                 >
-                  Tour Category Title
+                  Tour Category Title ({languages.find(lang => lang.code === activeLanguage)?.name})
                 </label>
-                <div className="flex h-9 px-4 py-3 justify-end items-center gap-2 w-full border border-gray-200 rounded-lg bg-white">
+                <div className={`flex h-9 px-4 py-3 justify-end items-center gap-2 w-full border rounded-md bg-white ${
+                  errors[activeLanguage]?.name ? 'border-red-500' : 'border-gray-200'
+                }`}>
                   <input
                     type="text"
-                    value={formData.title}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        title: e.target.value,
-                      }))
-                    }
-                    className="flex-1 text-gray-400 text-base font-normal outline-none border-none"
+                    value={formData.translations[activeLanguage].name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    className="flex-1 text-rose-black-200 text-base font-normal outline-none border-none"
                     required
                   />
                 </div>
+                {errors[activeLanguage]?.name && (
+                  <span className="text-red-500 text-sm w-full">
+                    {errors[activeLanguage].name}
+                  </span>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Status */}
+          {/* Description */}
+          {/* <div className="flex flex-col items-start gap-4 w-full">
+            <div className="flex items-center gap-6 w-full">
+              <div className="flex flex-col items-end gap-1 flex-1">
+                <label
+                  className="w-full text-xl font-normal"
+                  style={{ color: "#222E50" }}
+                >
+                  Description ({languages.find(lang => lang.code === activeLanguage)?.name})
+                </label>
+                <div className="flex px-4 py-3 justify-end items-start gap-2 w-full border border-gray-200 rounded-md bg-white">
+                  <textarea
+                    value={formData.translations[activeLanguage].description}
+                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    className="flex-1 text-rose-black-200 text-base font-normal outline-none border-none resize-none"
+                    rows="3"
+                  />
+                </div>
+              </div>
+            </div>
+          </div> */}
+
+          {/* Status - Interactive Dropdown */}
           <div className="flex items-center gap-6 w-full max-w-2xl">
             <span className="text-xl font-normal" style={{ color: "#222E50" }}>
               Tour Category Status
             </span>
-            <div className="flex p-1 flex-col items-start gap-2.5 rounded border border-gray-300">
-              <div className="flex items-center gap-2 w-full">
-                <div className="flex justify-center items-center rounded bg-green-100 px-3 py-0.5">
-                  <span className="text-center text-xs font-normal text-green-800">
-                    Active
+            <div className="relative" ref={statusDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
+                className="flex p-1 items-center gap-2.5 rounded border border-gray-300 hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                <div className={`flex justify-center items-center rounded px-3 py-0.5 ${
+                  formData.is_active ? 'bg-green-100' : 'bg-red-100'
+                }`}>
+                  <span className={`text-center text-xs font-normal ${
+                    formData.is_active ? 'text-green-800' : 'text-red-800'
+                  }`}>
+                    {formData.is_active ? 'Active' : 'Inactive'}
                   </span>
                 </div>
                 <div className="flex p-0.5 items-center gap-2.5 rounded">
                   <svg
-                    className="w-4 h-4 text-gray-400"
+                    className={`w-4 h-4 text-gray-400 transition-transform ${
+                      isStatusDropdownOpen ? 'rotate-180' : ''
+                    }`}
                     viewBox="0 0 16 16"
                     fill="none"
                   >
@@ -184,63 +410,103 @@ const EditCategoryModal = ({ category, onClose, onSave }) => {
                     />
                   </svg>
                 </div>
-              </div>
+              </button>
+
+              {/* Status Dropdown */}
+              {isStatusDropdownOpen && (
+                <div className="absolute left-0 top-full mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                  <div className="py-1">
+                    <button
+                      type="button"
+                      onClick={() => handleStatusChange(true)}
+                      className={`w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors ${
+                        formData.is_active ? 'bg-green-50 text-green-700' : 'text-gray-700'
+                      }`}
+                    >
+                      <div className="flex justify-center items-center rounded px-2 py-0.5 bg-green-100">
+                        <span className="text-center text-xs font-normal text-green-800">
+                          Active
+                        </span>
+                      </div>
+                      {formData.is_active && (
+                        <svg className="ml-auto w-4 h-4 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleStatusChange(false)}
+                      className={`w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors ${
+                        !formData.is_active ? 'bg-red-50 text-red-700' : 'text-gray-700'
+                      }`}
+                    >
+                      <div className="flex justify-center items-center rounded px-2 py-0.5 bg-red-100">
+                        <span className="text-center text-xs font-normal text-red-800">
+                          Inactive
+                        </span>
+                      </div>
+                      {!formData.is_active && (
+                        <svg className="ml-auto w-4 h-4 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Cities */}
-          <div className="flex flex-col items-start gap-4 w-full">
-            <div className="flex flex-col justify-center items-end gap-6 w-full">
-              <div className="flex items-center gap-6 w-full">
-                <div className="flex flex-col items-end gap-1 w-full max-w-lg">
-                  <label
-                    className="w-full text-xl font-normal"
-                    style={{ color: "#222E50" }}
-                  >
-                    Cities
-                  </label>
-                  <div className="flex flex-col items-start gap-2 w-full">
-                    {cities.map((city) => (
-                      <div key={city.id} className="flex items-center gap-1">
-                        <div className="relative w-4 h-4">
-                          <input
-                            type="checkbox"
-                            checked={formData.cities.includes(city.id)}
-                            onChange={() => handleCityToggle(city.id)}
-                            className="w-4 h-4 rounded border border-teal-700 bg-white appearance-none checked:bg-teal-700 checked:border-teal-700"
-                          />
-                          {formData.cities.includes(city.id) && (
-                            <svg
-                              className="absolute top-0 left-0 w-4 h-4 text-white pointer-events-none"
-                              viewBox="0 0 16 16"
-                              fill="none"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                clipRule="evenodd"
-                                d="M13.7799 4.22007C13.9203 4.36069 13.9992 4.55132 13.9992 4.75007C13.9992 4.94882 13.9203 5.13944 13.7799 5.28007L6.52985 12.5301C6.38922 12.6705 6.1986 12.7494 5.99985 12.7494C5.8011 12.7494 5.61047 12.6705 5.46985 12.5301L2.21985 9.28007C2.08737 9.13789 2.01525 8.94985 2.01867 8.75554C2.0221 8.56124 2.10081 8.37586 2.23823 8.23844C2.37564 8.10103 2.56103 8.02232 2.75533 8.01889C2.94963 8.01546 3.13767 8.08759 3.27985 8.22007L5.99985 10.9401L12.7199 4.22007C12.8605 4.07962 13.0511 4.00073 13.2499 4.00073C13.4486 4.00073 13.6393 4.07962 13.7799 4.22007Z"
-                                fill="#F3F3EE"
-                              />
-                            </svg>
-                          )}
-                        </div>
-                        <span className="text-gray-400 text-center text-sm font-normal">
-                          {city.name}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+          {/* Error Messages */}
+          {errors.submit && (
+            <div className="text-red-500 text-sm w-full text-center">
+              {errors.submit}
+            </div>
+          )}
+
+          {/* Changes Warning */}
+          {hasChanges() && (
+            <div className="w-full p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+              <div className="text-sm text-yellow-800">
+                <strong>Changes detected:</strong> You've modified the category. Make sure all language versions are updated for consistency.
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Validation Summary */}
+          {/* <div className="w-full">
+            <div className="text-sm text-gray-600 mb-2">
+              Translation Status:
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {languages.map((language) => {
+                const isComplete = formData.translations[language.code].name.trim();
+                return (
+                  <div
+                    key={language.code}
+                    className={`flex items-center gap-2 p-2 rounded-md ${
+                      isComplete ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+                    }`}
+                  >
+                    <img src={language.flag} alt={language.code} className="w-4 h-4 rounded-sm" />
+                    <span className="text-xs font-medium">{language.name}</span>
+                    <div className={`w-2 h-2 rounded-full ${
+                      isComplete ? 'bg-green-500' : 'bg-red-500'
+                    }`}></div>
+                  </div>
+                );
+              })}
+            </div>
+          </div> */}
 
           {/* Buttons */}
           <div className="flex px-0 py-4 items-center gap-4 w-full">
             <button
               type="button"
               onClick={onClose}
-              className="flex px-4 py-2 justify-center items-center gap-3 flex-1 rounded border border-teal-700 bg-white hover:bg-gray-50 transition-colors"
+              disabled={loading}
+              className="flex px-4 py-2 justify-center items-center gap-3 flex-1 rounded border border-teal-700 bg-white hover:bg-gray-50 transition-colors disabled:opacity-50"
               style={{ backgroundColor: "#F3F3EE" }}
             >
               <span
@@ -252,13 +518,14 @@ const EditCategoryModal = ({ category, onClose, onSave }) => {
             </button>
             <button
               type="submit"
-              className="flex px-4 py-2 justify-center items-center gap-3 flex-1 rounded bg-teal-700 hover:bg-teal-800 transition-colors"
+              disabled={loading}
+              className="flex px-4 py-2 justify-center items-center gap-3 flex-1 rounded bg-teal-700 hover:bg-teal-800 transition-colors disabled:opacity-50"
             >
               <span
                 className="text-xl font-semibold"
                 style={{ color: "#EAF6F6" }}
               >
-                Save
+                {loading ? "Saving..." : "Save"}
               </span>
             </button>
           </div>

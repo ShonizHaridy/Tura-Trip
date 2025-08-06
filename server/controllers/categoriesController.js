@@ -86,115 +86,219 @@ class CategoriesController {
     }
   }
 
-  // Create category
-  async createCategory(req, res) {
+ async createCategory(req, res) {
+    const connection = await pool.getConnection();
+    
     try {
-      const { name, description } = req.body;
-
-      const [existingCategory] = await pool.execute(
-        'SELECT id FROM tour_categories WHERE name = ?',
-        [name]
-      );
-
-      if (existingCategory.length > 0) {
+      await connection.beginTransaction();
+      
+      const { translations, is_active = true } = req.body;
+      
+      if (!translations || typeof translations !== 'object') {
         return res.status(400).json({
           success: false,
-          message: 'Category already exists'
+          message: 'Translations are required for all languages'
         });
       }
 
-      const [result] = await pool.execute(`
-        INSERT INTO tour_categories (name, description, is_active) 
-        VALUES (?, ?, true)
-      `, [name, description]);
+      // Validate that all required languages are provided
+      const requiredLanguages = ['en', 'ru', 'it', 'de'];
+      for (const lang of requiredLanguages) {
+        if (!translations[lang] || !translations[lang].name || !translations[lang].name.trim()) {
+          return res.status(400).json({
+            success: false,
+            message: `${lang.toUpperCase()} translation name is required`
+          });
+        }
+      }
+
+      // Check if English name already exists in main table
+      const [existingEnCategory] = await connection.execute(
+        'SELECT id FROM tour_categories WHERE name = ?',
+        [translations.en.name.trim()]
+      );
+
+      if (existingEnCategory.length > 0) {
+        await connection.rollback();
+        return res.status(400).json({
+          success: false,
+          message: `Category name "${translations.en.name}" already exists`
+        });
+      }
+
+      // Check if other language names already exist in translations table
+      for (const lang of ['ru', 'it', 'de']) {
+        const [existingTranslation] = await connection.execute(
+          'SELECT category_id FROM tour_category_translations WHERE name = ? AND language_code = ?',
+          [translations[lang].name.trim(), lang]
+        );
+
+        if (existingTranslation.length > 0) {
+          await connection.rollback();
+          return res.status(400).json({
+            success: false,
+            message: `Category name "${translations[lang].name}" already exists in ${lang.toUpperCase()}`
+          });
+        }
+      }
+
+      // Create main category record with English data
+      const [categoryResult] = await connection.execute(
+        'INSERT INTO tour_categories (name, description, is_active) VALUES (?, ?, ?)',
+        [
+          translations.en.name.trim(),
+          translations.en.description || '',
+          is_active
+        ]
+      );
+
+      const categoryId = categoryResult.insertId;
+
+      // Create translations for other languages (ru, it, de)
+      for (const lang of ['ru', 'it', 'de']) {
+        await connection.execute(
+          `INSERT INTO tour_category_translations (category_id, language_code, name, description) 
+           VALUES (?, ?, ?, ?)`,
+          [
+            categoryId,
+            lang,
+            translations[lang].name.trim(),
+            translations[lang].description || ''
+          ]
+        );
+      }
+
+      await connection.commit();
 
       res.status(201).json({
         success: true,
         message: 'Category created successfully',
-        data: { id: result.insertId }
+        data: { id: categoryId }
       });
+
     } catch (error) {
+      await connection.rollback();
       console.error('Create category error:', error);
       res.status(500).json({
         success: false,
         message: 'Internal server error'
       });
+    } finally {
+      connection.release();
     }
   }
 
-  // Update category
   async updateCategory(req, res) {
+    const connection = await pool.getConnection();
+    
     try {
+      await connection.beginTransaction();
+      
       const { id } = req.params;
-      const { name, description, is_active } = req.body;
+      const { translations, is_active } = req.body;
 
-      const [existingCategory] = await pool.execute(
+      // Check if category exists
+      const [existingCategory] = await connection.execute(
         'SELECT * FROM tour_categories WHERE id = ?',
         [id]
       );
 
       if (existingCategory.length === 0) {
+        await connection.rollback();
         return res.status(404).json({
           success: false,
           message: 'Category not found'
         });
       }
 
-      const updateFields = [];
-      const updateValues = [];
+      // Update translations if provided
+      if (translations && typeof translations === 'object') {
+        // Update English in main table
+        if (translations.en && translations.en.name && translations.en.name.trim()) {
+          // Check if English name already exists for other categories
+          const [existingEnName] = await connection.execute(
+            'SELECT id FROM tour_categories WHERE name = ? AND id != ?',
+            [translations.en.name.trim(), id]
+          );
 
-      if (name !== undefined) {
-        const [nameExists] = await pool.execute(
-          'SELECT id FROM tour_categories WHERE name = ? AND id != ?',
-          [name, id]
-        );
+          if (existingEnName.length > 0) {
+            await connection.rollback();
+            return res.status(400).json({
+              success: false,
+              message: `Category name "${translations.en.name}" already exists`
+            });
+          }
 
-        if (nameExists.length > 0) {
-          return res.status(400).json({
-            success: false,
-            message: 'Category name already exists'
-          });
+          // Update main table with English data
+          await connection.execute(
+            'UPDATE tour_categories SET name = ?, description = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+            [
+              translations.en.name.trim(),
+              translations.en.description || '',
+              id
+            ]
+          );
         }
 
-        updateFields.push('name = ?');
-        updateValues.push(name);
+        // Update other languages in translations table
+        for (const lang of ['ru', 'it', 'de']) {
+          if (translations[lang] && translations[lang].name && translations[lang].name.trim()) {
+            // Check if translation name already exists for other categories
+            const [existingTranslation] = await connection.execute(
+              'SELECT category_id FROM tour_category_translations WHERE name = ? AND language_code = ? AND category_id != ?',
+              [translations[lang].name.trim(), lang, id]
+            );
+
+            if (existingTranslation.length > 0) {
+              await connection.rollback();
+              return res.status(400).json({
+                success: false,
+                message: `Category name "${translations[lang].name}" already exists in ${lang.toUpperCase()}`
+              });
+            }
+
+            // Update or insert translation
+            await connection.execute(
+              `INSERT INTO tour_category_translations (category_id, language_code, name, description) 
+               VALUES (?, ?, ?, ?) 
+               ON DUPLICATE KEY UPDATE 
+               name = VALUES(name), 
+               description = VALUES(description)`,
+              [
+                id,
+                lang,
+                translations[lang].name.trim(),
+                translations[lang].description || ''
+              ]
+            );
+          }
+        }
       }
 
-      if (description !== undefined) {
-        updateFields.push('description = ?');
-        updateValues.push(description);
-      }
-
+      // Update is_active if provided
       if (is_active !== undefined) {
-        updateFields.push('is_active = ?');
-        updateValues.push(is_active);
+        await connection.execute(
+          'UPDATE tour_categories SET is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+          [is_active, id]
+        );
       }
 
-      if (updateFields.length === 0) {
-        return res.status(400).json({
-          success: false,
-          message: 'No fields to update'
-        });
-      }
-
-      updateFields.push('updated_at = CURRENT_TIMESTAMP');
-      updateValues.push(id);
-
-      await pool.execute(
-        `UPDATE tour_categories SET ${updateFields.join(', ')} WHERE id = ?`,
-        updateValues
-      );
+      await connection.commit();
 
       res.json({
         success: true,
         message: 'Category updated successfully'
       });
+
     } catch (error) {
+      await connection.rollback();
       console.error('Update category error:', error);
       res.status(500).json({
         success: false,
         message: 'Internal server error'
       });
+    } finally {
+      connection.release();
     }
   }
 

@@ -52,170 +52,217 @@ class CitiesController {
     }
   }
 
-  // Get city by ID
-  async getCityById(req, res) {
-    try {
-      const { id } = req.params;
-      const { include_tours = false } = req.query;
+async getCityById(req, res) {
+  try {
+    const { id } = req.params;
+    const { include_translations = false } = req.query;
 
-      const [cityRows] = await pool.execute(
-        'SELECT * FROM cities WHERE id = ?',
-        [id]
-      );
+    const [cityRows] = await pool.execute(
+      'SELECT * FROM cities WHERE id = ?',
+      [id]
+    );
 
-      if (cityRows.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: 'City not found'
-        });
-      }
-
-      const city = cityRows[0];
-
-      if (include_tours === 'true') {
-        // Get tours for this city
-        const [tours] = await pool.execute(`
-          SELECT 
-            t.*,
-            tc.title,
-            tc.category,
-            tc.duration,
-            cat.name as category_type,
-            (SELECT AVG(rating) FROM reviews r WHERE r.tour_id = t.id AND r.is_active = true) as avg_rating,
-            (SELECT COUNT(*) FROM reviews r WHERE r.tour_id = t.id AND r.is_active = true) as reviews_count
-          FROM tours t
-          LEFT JOIN tour_content tc ON t.id = tc.tour_id AND tc.language_code = 'en'
-          LEFT JOIN tour_categories cat ON t.category_id = cat.id
-          WHERE t.city_id = ? AND t.status = 'active'
-          ORDER BY t.created_at DESC
-        `, [id]);
-
-        city.tours = tours;
-      }
-
-      res.json({
-        success: true,
-        data: city
-      });
-    } catch (error) {
-      console.error('Get city by ID error:', error);
-      res.status(500).json({
+    if (cityRows.length === 0) {
+      return res.status(404).json({
         success: false,
-        message: 'Internal server error'
+        message: 'City not found'
       });
     }
-  }
 
-  // Create city
-  async createCity(req, res) {
-    try {
-      const { name, description } = req.body;
-      const image = req.file?.filename || null;
+    const city = cityRows[0];
 
-      // Check if city already exists
-      const [existingCity] = await pool.execute(
-        'SELECT id FROM cities WHERE name = ?',
-        [name]
-      );
+    // Process image - FIX: Use consistent base URL
+    if (city.image) {
+      city.image_url = `${process.env.BASE_URL || 'http://localhost:5000'}/uploads/${city.image}`;
+    }
 
-      if (existingCity.length > 0) {
-        return res.status(400).json({
-          success: false,
-          message: 'City already exists'
-        });
-      }
+    if (include_translations === 'true') {
+      // Get translations for this city
+      const [translations] = await pool.execute(`
+        SELECT language_code, name, tagline, description
+        FROM city_translations 
+        WHERE city_id = ?
+      `, [id]);
 
-      const [result] = await pool.execute(`
-        INSERT INTO cities (name, description, image, is_active) 
-        VALUES (?, ?, ?, true)
-      `, [name, description, image]);
-
-      res.status(201).json({
-        success: true,
-        message: 'City created successfully',
-        data: { id: result.insertId }
-      });
-    } catch (error) {
-      console.error('Create city error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Internal server error'
+      city.translations = {};
+      translations.forEach(translation => {
+        city.translations[translation.language_code] = {
+          name: translation.name,
+          tagline: translation.tagline,
+          description: translation.description
+        };
       });
     }
-  }
 
+    res.json({
+      success: true,
+      data: city
+    });
+  } catch (error) {
+    console.error('Get city by ID error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+}
+
+// Update createCity method
+async createCity(req, res) {
+  try {
+    const { is_active, translations } = req.body;
+    const image = req.file?.filename || null;
+
+    // Parse translations
+    let translationsData;
+    try {
+      translationsData = typeof translations === 'string' ? JSON.parse(translations) : translations;
+    } catch (parseError) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid translations format'
+      });
+    }
+
+    // Validate that English translation has a name
+    if (!translationsData?.en?.name?.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'English city name is required'
+      });
+    }
+
+    // Get English name for main cities table
+    const englishName = translationsData.en.name.trim();
+    const englishDescription = translationsData.en.description || '';
+
+    // Check if city already exists (English name)
+    const [existingCity] = await pool.execute(
+      'SELECT id FROM cities WHERE name = ?',
+      [englishName]
+    );
+
+    if (existingCity.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'City already exists'
+      });
+    }
+
+    // Convert is_active to boolean
+    const isActive = is_active === 'true' || is_active === true;
+
+    // Insert city with English name as primary name
+    const [cityResult] = await pool.execute(`
+      INSERT INTO cities (name, description, image, is_active) 
+      VALUES (?, ?, ?, ?)
+    `, [englishName, englishDescription, image, isActive]);
+
+    const cityId = cityResult.insertId;
+
+    // Insert ALL language translations (including English)
+    for (const [langCode, langData] of Object.entries(translationsData)) {
+      if (langData.name && langData.name.trim()) {
+        await pool.execute(`
+          INSERT INTO city_translations (city_id, language_code, name, tagline, description)
+          VALUES (?, ?, ?, ?, ?)
+        `, [cityId, langCode, langData.name.trim(), langData.tagline || '', langData.description || '']);
+      }
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'City created successfully',
+      data: { id: cityId }
+    });
+  } catch (error) {
+    console.error('Create city error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+}
   // Update city
-  async updateCity(req, res) {
-    try {
-      const { id } = req.params;
-      const { name, description, is_active } = req.body;
+// Update updateCity method
+async updateCity(req, res) {
+  try {
+    const { id } = req.params;
+    const { is_active, translations } = req.body;
 
-      // Check if city exists
-      const [existingCity] = await pool.execute(
-        'SELECT * FROM cities WHERE id = ?',
-        [id]
-      );
+    // Check if city exists
+    const [existingCity] = await pool.execute(
+      'SELECT * FROM cities WHERE id = ?',
+      [id]
+    );
 
-      if (existingCity.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: 'City not found'
-        });
-      }
+    if (existingCity.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'City not found'
+      });
+    }
 
-      // Build update query
-      const updateFields = [];
-      const updateValues = [];
-
-      if (name !== undefined) {
-        // Check if name is already taken by another city
-        const [nameExists] = await pool.execute(
-          'SELECT id FROM cities WHERE name = ? AND id != ?',
-          [name, id]
-        );
-
-        if (nameExists.length > 0) {
-          return res.status(400).json({
-            success: false,
-            message: 'City name already exists'
-          });
-        }
-
-        updateFields.push('name = ?');
-        updateValues.push(name);
-      }
-
-      if (description !== undefined) {
-        updateFields.push('description = ?');
-        updateValues.push(description);
-      }
-
-      if (is_active !== undefined) {
-        updateFields.push('is_active = ?');
-        updateValues.push(is_active);
-      }
-
-      if (req.file) {
-        updateFields.push('image = ?');
-        updateValues.push(req.file.filename);
-
-        // Delete old image if exists
-        if (existingCity[0].image) {
-          try {
-            await fs.unlink(`./uploads/${existingCity[0].image}`);
-          } catch (fileError) {
-            console.error('Error deleting old image:', fileError);
-          }
-        }
-      }
-
-      if (updateFields.length === 0) {
+    // Parse translations if provided
+    let translationsData;
+    if (translations) {
+      try {
+        translationsData = typeof translations === 'string' ? JSON.parse(translations) : translations;
+      } catch (parseError) {
         return res.status(400).json({
           success: false,
-          message: 'No fields to update'
+          message: 'Invalid translations format'
+        });
+      }
+    }
+
+    // Update city basic info
+    const updateFields = [];
+    const updateValues = [];
+
+    // Update English name as primary name if provided
+    if (translationsData?.en?.name?.trim()) {
+      const englishName = translationsData.en.name.trim();
+      const englishDescription = translationsData.en.description || '';
+      
+      // Check if new English name conflicts with another city
+      const [nameExists] = await pool.execute(
+        'SELECT id FROM cities WHERE name = ? AND id != ?',
+        [englishName, id]
+      );
+
+      if (nameExists.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'City name already exists'
         });
       }
 
+      updateFields.push('name = ?', 'description = ?');
+      updateValues.push(englishName, englishDescription);
+    }
+
+    if (is_active !== undefined) {
+      const isActive = is_active === 'true' || is_active === true;
+      updateFields.push('is_active = ?');
+      updateValues.push(isActive);
+    }
+
+    if (req.file) {
+      updateFields.push('image = ?');
+      updateValues.push(req.file.filename);
+
+      // Delete old image if exists
+      if (existingCity[0].image) {
+        try {
+          await fs.unlink(`./uploads/${existingCity[0].image}`);
+        } catch (fileError) {
+          console.error('Error deleting old image:', fileError);
+        }
+      }
+    }
+
+    if (updateFields.length > 0) {
       updateFields.push('updated_at = CURRENT_TIMESTAMP');
       updateValues.push(id);
 
@@ -223,19 +270,36 @@ class CitiesController {
         `UPDATE cities SET ${updateFields.join(', ')} WHERE id = ?`,
         updateValues
       );
-
-      res.json({
-        success: true,
-        message: 'City updated successfully'
-      });
-    } catch (error) {
-      console.error('Update city error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Internal server error'
-      });
     }
+
+    // Update translations if provided
+    if (translationsData) {
+      for (const [langCode, langData] of Object.entries(translationsData)) {
+        if (langData.name && langData.name.trim()) {
+          await pool.execute(`
+            INSERT INTO city_translations (city_id, language_code, name, tagline, description)
+            VALUES (?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+            name = VALUES(name),
+            tagline = VALUES(tagline),
+            description = VALUES(description)
+          `, [id, langCode, langData.name.trim(), langData.tagline || '', langData.description || '']);
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'City updated successfully'
+    });
+  } catch (error) {
+    console.error('Update city error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
   }
+}
 
   // Delete city
   async deleteCity(req, res) {

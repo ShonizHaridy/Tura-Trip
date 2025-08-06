@@ -2,7 +2,7 @@
 
 export const mockAdminUser = {
   id: "admin001",
-  name: "Ahmed Ashraf",
+  name: "Admin",
   email: "ahmed.ashraf@turatrip.com",
   avatar: "/src/assets/admin-avatar.jpg",
   role: "Admin",
