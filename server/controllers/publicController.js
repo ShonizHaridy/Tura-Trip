@@ -171,8 +171,38 @@ class PublicController {
         LIMIT 6
       `, [language]);
 
+      const [promotionalCount] = await pool.execute(`
+        SELECT COUNT(DISTINCT pr.id) as total_promotional_reviews
+        FROM promotional_reviews pr
+        INNER JOIN promotional_review_translations prt ON pr.id = prt.review_id
+        WHERE pr.is_active = true AND prt.language_code = ?
+      `, [language]);
+
+      // COMMENTED CODE - Alternative calculation (promotional + tour reviews combined)
+      /*
+      const [totalReviewsCount] = await pool.execute(`
+        SELECT 
+          (
+            SELECT COUNT(DISTINCT pr.id) 
+            FROM promotional_reviews pr
+            INNER JOIN promotional_review_translations prt ON pr.id = prt.review_id
+            WHERE pr.is_active = true AND prt.language_code = ?
+          ) +
+          (
+            SELECT COUNT(*) 
+            FROM reviews r
+            INNER JOIN tours t ON r.tour_id = t.id
+            WHERE r.is_active = true AND t.status = 'active'
+          ) as total_all_reviews
+      `, [language]);
+      */
+
+      const actualCount = promotionalCount[0].total_promotional_reviews;
+      const displayCount = actualCount < 200 ? 200 : actualCount;
+
       // Process promotional reviews with images
       const processedPromotionalReviews = imageHelper.processArrayImages(promotionalReviews, 'review');
+      
 
       res.json({
         success: true,
@@ -183,7 +213,8 @@ class PublicController {
           todaysPrices: processedCitiesWithPrices,
           promotionalReviews: processedPromotionalReviews,
           hasMoreFeatured: featuredCount[0].total > 6, // For view more button logic
-          serverDate: new Date().toISOString().split('T')[0]
+          serverDate: new Date().toISOString().split('T')[0],
+          totalPromotionalReviews: displayCount
         }
       });
     } catch (error) {
@@ -759,138 +790,144 @@ class PublicController {
   }
 
 
-  async getBrowseToursData(req, res) {
-    try {
-      const { language = 'en', limit = 50 } = req.query;
-      const safeLimit = Math.min(parseInt(limit), 100); // Max 100 for performance
 
-      // Get all active cities with their tours
-      const [citiesWithTours] = await pool.execute(`
-        SELECT
-          c.id as city_id,
-          c.name as original_name,
-          COALESCE(ct.name, c.name) as city_name,
-          COALESCE(ct.tagline, c.tagline) as city_tagline,
-          COALESCE(ct.description, c.description) as city_description,
-          c.image as city_image,
-          COUNT(DISTINCT t.id) as total_tours,
-          MIN(t.price_adult) as min_price,
-          MAX(t.price_adult) as max_price,
-          AVG(t.price_adult) as avg_price,
-          GROUP_CONCAT(
-            DISTINCT CONCAT(
-              t.id, '|',
-              COALESCE(tc.title, 'Tour'), '|',
-              t.price_adult, '|',
-              t.price_child, '|',
-              t.cover_image, '|',
-              COALESCE(tc.duration, 'Full Day'), '|',
-              COALESCE(tc.category, cat.name), '|',
-              t.featured_tag, '|',
-              t.discount_percentage, '|',
-              (SELECT COUNT(*) FROM reviews r WHERE r.tour_id = t.id AND r.is_active = true)
-            )
-            ORDER BY 
-              CASE WHEN t.featured_tag IS NOT NULL THEN 0 ELSE 1 END,
-              t.views DESC
-            SEPARATOR ';;'
-          ) as tours_data
-        FROM cities c
-        LEFT JOIN city_translations ct ON c.id = ct.city_id AND ct.language_code = ?
-        LEFT JOIN tours t ON c.id = t.city_id AND t.status = 'active'
-        LEFT JOIN tour_content tc ON t.id = tc.tour_id AND tc.language_code = ?
-        LEFT JOIN tour_categories cat ON t.category_id = cat.id
-        WHERE c.is_active = true
-        GROUP BY c.id, c.name, COALESCE(ct.name, c.name), COALESCE(ct.tagline, c.tagline), COALESCE(ct.description, c.description), c.image
-        HAVING total_tours > 0
-        ORDER BY total_tours DESC, COALESCE(ct.name, c.name) ASC
-      `, [language, language]);
+async getBrowseToursData(req, res) {
+  try {
+    const { language = 'en', limit = 50, include_all_tours = 'false' } = req.query;
+    const safeLimit = Math.min(parseInt(limit), 100);
+    const includeAllTours = include_all_tours === 'true';
 
-      // Process the data
-      const processedCities = citiesWithTours.map(city => {
-        const tours = [];
-        
-        if (city.tours_data) {
-          const toursArray = city.tours_data.split(';;');
-          toursArray.forEach(tourStr => {
-            const [
-              id, title, price_adult, price_child, cover_image, 
-              duration, category, featured_tag, discount_percentage, reviews_count
-            ] = tourStr.split('|');
-            
-            tours.push({
-              id: parseInt(id),
-              title,
-              price_adult: parseFloat(price_adult),
-              price_child: parseFloat(price_child),
-              cover_image,
-              duration,
-              category,
-              featured_tag: featured_tag !== 'null' ? featured_tag : null,
-              discount_percentage: parseFloat(discount_percentage) || 0,
-              reviews_count: parseInt(reviews_count) || 0,
-              city_id: city.city_id,
-              city_name: city.city_name
-            });
-          });
-        }
+    // Determine how many tours to show per city
+    const toursPerCity = includeAllTours ? 50 : 6; // Show up to 50 tours per city if all tours requested
 
-        console.log('Tours for city:', city.city_name, 'Count:', tours.length);
+    // Get all active cities with their tours
+    const [citiesWithTours] = await pool.execute(`
+      SELECT
+        c.id as city_id,
+        c.name as original_name,
+        COALESCE(ct.name, c.name) as city_name,
+        COALESCE(ct.tagline, c.tagline) as city_tagline,
+        COALESCE(ct.description, c.description) as city_description,
+        c.image as city_image,
+        COUNT(DISTINCT t.id) as total_tours,
+        MIN(t.price_adult) as min_price,
+        MAX(t.price_adult) as max_price,
+        AVG(t.price_adult) as avg_price,
+        GROUP_CONCAT(
+          DISTINCT CONCAT(
+            t.id, '|',
+            COALESCE(tc.title, 'Tour'), '|',
+            t.price_adult, '|',
+            t.price_child, '|',
+            t.cover_image, '|',
+            COALESCE(tc.duration, 'Full Day'), '|',
+            COALESCE(tc.category, cat.name), '|',
+            t.featured_tag, '|',
+            t.discount_percentage, '|',
+            (SELECT COUNT(*) FROM reviews r WHERE r.tour_id = t.id AND r.is_active = true), '|',
+            COALESCE(tc.availability, 'Daily')
+          )
+          ORDER BY 
+            CASE WHEN t.featured_tag IS NOT NULL THEN 0 ELSE 1 END,
+            t.views DESC
+          SEPARATOR ';;'
+        ) as tours_data
+      FROM cities c
+      LEFT JOIN city_translations ct ON c.id = ct.city_id AND ct.language_code = ?
+      LEFT JOIN tours t ON c.id = t.city_id AND t.status = 'active'
+      LEFT JOIN tour_content tc ON t.id = tc.tour_id AND tc.language_code = ?
+      LEFT JOIN tour_categories cat ON t.category_id = cat.id
+      WHERE c.is_active = true
+      GROUP BY c.id, c.name, COALESCE(ct.name, c.name), COALESCE(ct.tagline, c.tagline), COALESCE(ct.description, c.description), c.image
+      HAVING total_tours > 0
+      ORDER BY total_tours DESC, COALESCE(ct.name, c.name) ASC
+    `, [language, language]);
 
-        return {
-          city_id: city.city_id,
-          original_name: city.original_name,
-          city_name: city.city_name,
-          city_tagline: city.city_tagline,
-          city_description: city.city_description,
-          city_image: city.city_image,
-          total_tours: city.total_tours,
-          min_price: parseFloat(city.min_price),
-          max_price: parseFloat(city.max_price),
-          avg_price: parseFloat(city.avg_price),
-          tours: tours.slice(0, 6), // Show max 6 tours per city initially
-          all_tours_count: tours.length,
-          slug: SlugHelper.generateCitySlug(city.city_id, city.original_name)
-        };
-      });
-
-      // Process images
-      const citiesWithImages = imageHelper.processArrayImages(processedCities, 'city');
+    // Process the data
+    const processedCities = citiesWithTours.map(city => {
+      const tours = [];
       
-      // Process tour images
-      citiesWithImages.forEach(city => {
-        city.tours = imageHelper.processArrayImages(city.tours, 'tour');
-      });
+      if (city.tours_data) {
+        const toursArray = city.tours_data.split(';;');
+        toursArray.forEach(tourStr => {
+          const [
+            id, title, price_adult, price_child, cover_image, 
+            duration, category, featured_tag, discount_percentage, reviews_count, availability
+          ] = tourStr.split('|');
+          
+          tours.push({
+            id: parseInt(id),
+            title,
+            price_adult: parseFloat(price_adult),
+            price_child: parseFloat(price_child),
+            cover_image,
+            duration,
+            category,
+            availability: availability || 'Daily',
+            featured_tag: featured_tag !== 'null' ? featured_tag : null,
+            discount_percentage: parseFloat(discount_percentage) || 0,
+            reviews_count: parseInt(reviews_count) || 0,
+            city_id: city.city_id,
+            city_name: city.city_name
+          });
+        });
+      }
 
-      // Get some statistics
-      const totalCities = citiesWithImages.length;
-      const totalTours = citiesWithImages.reduce((sum, city) => sum + city.total_tours, 0);
-      const overallMinPrice = Math.min(...citiesWithImages.map(city => city.min_price));
-      const overallMaxPrice = Math.max(...citiesWithImages.map(city => city.max_price));
+      return {
+        city_id: city.city_id,
+        original_name: city.original_name,
+        city_name: city.city_name,
+        city_tagline: city.city_tagline,
+        city_description: city.city_description,
+        city_image: city.city_image,
+        total_tours: city.total_tours,
+        min_price: parseFloat(city.min_price),
+        max_price: parseFloat(city.max_price),
+        avg_price: parseFloat(city.avg_price),
+        tours: tours.slice(0, toursPerCity), // Limit tours per city based on request
+        all_tours_count: tours.length,
+        slug: SlugHelper.generateCitySlug(city.city_id, city.original_name)
+      };
+    });
 
-      res.json({
-        success: true,
-        data: {
-          cities: citiesWithImages,
-          statistics: {
-            total_cities: totalCities,
-            total_tours: totalTours,
-            price_range: {
-              min: overallMinPrice,
-              max: overallMaxPrice
-            }
+    // Process images
+    const citiesWithImages = imageHelper.processArrayImages(processedCities, 'city');
+    
+    // Process tour images
+    citiesWithImages.forEach(city => {
+      city.tours = imageHelper.processArrayImages(city.tours, 'tour');
+    });
+
+    // Get some statistics
+    const totalCities = citiesWithImages.length;
+    const totalTours = citiesWithImages.reduce((sum, city) => sum + city.all_tours_count, 0); // Use all_tours_count for accurate total
+    const overallMinPrice = Math.min(...citiesWithImages.map(city => city.min_price));
+    const overallMaxPrice = Math.max(...citiesWithImages.map(city => city.max_price));
+
+    res.json({
+      success: true,
+      data: {
+        cities: citiesWithImages,
+        statistics: {
+          total_cities: totalCities,
+          total_tours: totalTours,
+          price_range: {
+            min: overallMinPrice,
+            max: overallMaxPrice
           }
-        }
-      });
+        },
+        showing_all_tours: includeAllTours
+      }
+    });
 
-    } catch (error) {
-      console.error('❌ Get browse tours data error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Internal server error'
-      });
-    }
+  } catch (error) {
+    console.error('❌ Get browse tours data error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
   }
+}
 
   // Get FAQs for public (UPDATED for new structure)
   async getPublicFAQs(req, res) {
@@ -1656,6 +1693,84 @@ async getSearchSuggestions(req, res) {
     });
   }
 }
+
+// Get organizer commission rates
+async getCommissionRates(req, res) {
+  try {
+    const [commissions] = await pool.execute(`
+      SELECT 
+        oc.currency_code,
+        oc.commission_amount,
+        c.name,
+        c.symbol
+      FROM organizer_commission oc
+      INNER JOIN currencies c ON oc.currency_code = c.code
+      WHERE oc.is_active = true AND c.is_active = true
+      ORDER BY oc.currency_code
+    `);
+
+    res.json({
+      success: true,
+      data: commissions
+    });
+  } catch (error) {
+    console.error('❌ Get commission rates error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+}
+
+  async getReviewsCount(req, res) {
+    try {
+      const { language = 'en' } = req.query;
+
+      // Get total promotional reviews count (only what we need)
+      const [promotionalCount] = await pool.execute(`
+        SELECT COUNT(DISTINCT pr.id) as total_promotional_reviews
+        FROM promotional_reviews pr
+        INNER JOIN promotional_review_translations prt ON pr.id = prt.review_id
+        WHERE pr.is_active = true AND prt.language_code = ?
+      `, [language]);
+
+      // COMMENTED CODE - Alternative calculation (promotional + tour reviews combined)
+      /*
+      const [totalReviewsCount] = await pool.execute(`
+        SELECT 
+          (
+            SELECT COUNT(DISTINCT pr.id) 
+            FROM promotional_reviews pr
+            INNER JOIN promotional_review_translations prt ON pr.id = prt.review_id
+            WHERE pr.is_active = true AND prt.language_code = ?
+          ) +
+          (
+            SELECT COUNT(*) 
+            FROM reviews r
+            INNER JOIN tours t ON r.tour_id = t.id
+            WHERE r.is_active = true AND t.status = 'active'
+          ) as total_all_reviews
+      `, [language]);
+      */
+
+      const actualCount = promotionalCount[0].total_promotional_reviews;
+      const displayCount = actualCount < 200 ? 200 : actualCount;
+
+      res.json({
+        success: true,
+        data: {
+          totalPromotionalReviews: displayCount
+          // Alternative: totalAllReviews: totalReviewsCount[0].total_all_reviews
+        }
+      });
+    } catch (error) {
+      console.error('Get about page data error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error'
+      });
+    }
+  }
 
 }
 

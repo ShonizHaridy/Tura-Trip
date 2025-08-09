@@ -80,7 +80,7 @@
     "englishGuides": "Guide che parlano italiano",
     "personalManager": "Manager personale",
     "insuranceValid": "Assicurazione valida",
-    "happyCustomers": "2400 clienti felici",
+    "happyCustomers": "{{count}} clienti soddisfatti",
     "realPhotos": "Foto reali delle escursioni",
     "noHiddenExtra": "Nessun extra nascosto"
   },
@@ -140,7 +140,7 @@
     },
     "testimonials": {
       "title": "Recensioni reali",
-      "subtitle": "Già 2400 recensioni, tutte con conferma screenshot"
+      "subtitle": "Oltre {{count}} recensioni, tutte con conferma screenshot"
     },
     "faq":{
       "title": "Domande frequenti"
@@ -178,7 +178,7 @@
     "features": {
       "booking3Min": "Prenotazione in 3 min.",
       "hotelPickup": "Ritiro in hotel",
-      "multilingualGuide": "Guida che parla italiano",
+      "multilingualGuide": "Guida multilingue",
       "personalManager": "Manager personale",
       "realPhotos": "Foto e recensioni reali",
       "noPrepayment": "Nessun pagamento anticipato",
@@ -244,7 +244,7 @@
       "personalManager": "Manager personale",
       "englishGuides": "Guide che parlano italiano",
       "quickReservation": "Prenotazione in 3 minuti",
-      "happyCustomers": "2400 clienti soddisfatti",
+      "happyCustomers": "{{count}} clienti soddisfatti",
       "realPhotos": "Foto reali delle escursioni",
       "noHiddenExtra": "Nessun costo nascosto"
     },

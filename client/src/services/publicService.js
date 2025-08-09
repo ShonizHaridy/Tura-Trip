@@ -85,9 +85,14 @@ class PublicService {
 
 
   // Get browse tours data
-  async getBrowseToursData(language = 'en') {
+  async getBrowseToursData(language = 'en', includeAllTours = false) {
     try {
-      const response = await api.get(`/public/browse-tours?language=${language}`);
+      const params = new URLSearchParams({
+        language,
+        include_all_tours: includeAllTours.toString()
+      });
+      
+      const response = await api.get(`/public/browse-tours?${params}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching browse tours data:', error);
@@ -190,6 +195,28 @@ class PublicService {
       return response.data;
     } catch (error) {
       console.error('Error submitting review:', error);
+      throw error;
+    }
+  }
+
+  // Get commission rates
+  async getCommissionRates() {
+    try {
+      const response = await api.get('/public/commission-rates');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching commission rates:', error);
+      throw error;
+    }
+  }
+
+  // Get about page data (lightweight)
+  async getReviewsCount(language = 'en') {
+    try {
+      const response = await api.get(`/public/reviews-count?language=${language}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching about page data:', error);
       throw error;
     }
   }

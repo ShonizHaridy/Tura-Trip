@@ -1,5 +1,5 @@
 // src/pages/About.jsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -16,8 +16,10 @@ import {
   WalletCheck,
 } from "iconsax-react";
 
+import publicService from '../services/publicService';
+
 const About = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const features = [
     { icon: WalletRemove, key: "noPrepayment" },
@@ -38,6 +40,8 @@ const About = () => {
     { name: "transportation", bgUrl: "/images/services5.png" },
     { name: "individualTours", bgUrl: "/images/services6.png" }
   ];
+
+  const [reviewsCount, setReviewsCount] = useState(200)
 
   const teamMembers = [
     {
@@ -73,6 +77,23 @@ const About = () => {
     { icon: ShieldTick, key: "safetyFirst" }
   ];
 
+  useEffect(() => {
+    const fetchAboutData = async () => {
+      try {
+        const response = await publicService.getReviewsCount(i18n.language);
+        if (response.success) {
+          setReviewsCount(response.data.totalPromotionalReviews);
+        }
+      } catch (error) {
+        console.error('Error fetching about data:', error);
+        // Fallback to 0 or default value
+        setReviewsCount(0);
+      }
+    };
+    
+    fetchAboutData();
+  }, [i18n.language]);
+
   return (
     <div>
       {/* Hero Section */}
@@ -91,7 +112,7 @@ const About = () => {
       </section>
 
       {/* Plan Your Trip Section */}
-      <section className="flex flex-col gap-10 lg:gap-[186px] lg:flex-row py-10 lg:py-20 px-4 lg:px-[72px] pb-18 justify-between items-center w-full  bg-white">
+      <section className="flex flex-col gap-10 lg:gap-[186px] lg:flex-row py-10 lg:py-20 px-4 lg:px-[72px] pb-18 justify-between items-center w-full bg-white">
         <div className="flex flex-col lg:items-start gap-[60px]">
           <div className="flex flex-col justify-center items-start gap-6 w-full">
             <div className="flex flex-col items-start gap-8 w-full">
@@ -109,12 +130,12 @@ const About = () => {
 
           {/* Features Grid */}
           <div className="flex items-start lg:gap-6 font-family-primary">
-            <div className="flex flex-1 flex-col items-start gap-1 lg:gap-6">
+            <div className="flex flex-col items-start gap-1 lg:gap-6">
               {features.slice(0, 4).map((feature, index) => {
                 const IconComponent = feature.icon;
                 return (
                   <div key={index} className="flex items-center gap-1 lg:gap-2">
-                    <div className="flex w-8 h-8 lg:w-10 lg:h-10 p-2 justify-center items-center gap-2 rounded-[50px]">
+                    <div className="flex w-8 h-8 lg:w-10 lg:h-10 p-1 justify-center items-center gap-2">
                       <IconComponent
                         variant="Bulk"
                         color="#3F62AE"
@@ -122,7 +143,7 @@ const About = () => {
                       />
                     </div>
                     <div className="flex flex-col items-start gap-2">
-                      <span className="text-[#2D467C] font-roboto text-[11px] lg:text-[18px] font-semibold lg:font-bold">
+                      <span className="text-[#2D467C] font-family-primary text-[11px] lg:text-[18px] font-semibold lg:font-bold">
                         {t(`about.features.${feature.key}`)}
                       </span>
                     </div>
@@ -130,12 +151,12 @@ const About = () => {
                 );
               })}
             </div>
-            <div className="flex flex-1 flex-col items-start gap-1 lg:gap-6">
+            <div className="flex flex-col items-start gap-1 lg:gap-6">
               {features.slice(4, 8).map((feature, index) => {
                 const IconComponent = feature.icon;
                 return (
                   <div key={index} className="flex items-center gap-1 lg:gap-2">
-                    <div className="flex w-8 h-8 lg:w-10 lg:h-10 p-2 justify-center items-center gap-2 rounded-[50px]">
+                    <div className="flex w-8 h-8 lg:w-10 lg:h-10 p-1 justify-center items-start gap-2">
                       <IconComponent
                         variant="Bulk"
                         color="#3F62AE"
@@ -143,8 +164,11 @@ const About = () => {
                       />
                     </div>
                     <div className="flex flex-col items-start gap-2">
-                      <span className="text-[#2D467C] font-roboto text-[11px] lg:text-[18px] font-semibold lg:font-bold">
-                        {t(`about.features.${feature.key}`)}
+                      <span className="text-[#2D467C] font-family-primary text-[11px] lg:text-[18px] font-semibold lg:font-bold">
+                        {feature.key === 'happyCustomers' 
+                          ? t(`about.features.${feature.key}`, { count: reviewsCount || 0 })
+                          : t(`about.features.${feature.key}`)
+                        }
                       </span>
                     </div>
                   </div>

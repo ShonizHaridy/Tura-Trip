@@ -9,6 +9,8 @@ const CurrencyConverter = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [exchangeRates, setExchangeRates] = useState({});
+  const [commissionRates, setCommissionRates] = useState({});
+
   
   // Move window width check outside of render
   const isMobile = useMemo(() => typeof window !== 'undefined' && window.innerWidth < 768, []);
@@ -18,29 +20,33 @@ const CurrencyConverter = ({ isOpen, onClose }) => {
     { 
       currency: "₽", 
       key: "RUB", 
-      name: { desktop: "rubles", mobile: "rub" }, 
-      commission: 7 // Flat amount added to exchange rate
+      name: { desktop: "rubles", mobile: "rub" }
     },
     { 
       currency: "₸", 
       key: "KZT", 
-      name: { desktop: "tenge", mobile: "tng" }, 
-      commission: 10 // Flat amount added to exchange rate
+      name: { desktop: "tenge", mobile: "tng" }
     },
     { 
       currency: "₴", 
       key: "UAH", 
-      name: { desktop: "UHA", mobile: "uah" }, 
-      commission: 3 // Flat amount added to exchange rate
+      name: { desktop: "UHA", mobile: "uah" }
     }
   ], []);
 
-  // Fetch exchange rates when component mounts or when isOpen changes
-  useEffect(() => {
-    if (isOpen) {
-      fetchExchangeRates();
-    }
-  }, [isOpen]);
+
+  const fetchCommissionRates = useCallback(async () => {
+      try {
+        const response = await publicService.getCommissionRates();
+        const ratesObj = response.data.reduce((acc, commission) => ({
+          ...acc,
+          [commission.currency_code]: parseFloat(commission.commission_amount)
+        }), {});
+        setCommissionRates(ratesObj);
+      } catch (err) {
+        console.error('Error fetching commission rates:', err);
+      }
+    }, []);
 
   // Fetch current exchange rates from API
   const fetchExchangeRates = useCallback(async () => {
@@ -72,19 +78,35 @@ const CurrencyConverter = ({ isOpen, onClose }) => {
     }
   }, [currencies]);
 
+
+  // Fetch exchange rates when component mounts or when isOpen changes
+  useEffect(() => {
+    if (isOpen) {
+      fetchExchangeRates();
+      fetchCommissionRates();
+    }
+  }, [isOpen, fetchExchangeRates, fetchCommissionRates]);
+
+
+
+
   // Calculate amount using API rate + commission (same as original logic)
   const calculateAmount = useCallback((usdAmount, currencyData) => {
     if (!usdAmount || isNaN(usdAmount) || parseFloat(usdAmount) <= 0) return '0';
     
     const rateData = exchangeRates[currencyData.key];
+    const commission = commissionRates[currencyData.key] || 0; // ✅ Dynamic commission
+    
     if (!rateData) return '0';
     
-    // Original logic: multiply USD amount by (exchange rate + commission)
-    const result = parseFloat(usdAmount) * (rateData.rate + currencyData.commission);
-    
-    // Round to nearest 10 as in original logic
+    const result = parseFloat(usdAmount) * (rateData.rate + commission);
     return Math.round(result / 10) * 10;
-  }, [exchangeRates]);
+  }, [exchangeRates, commissionRates]);
+
+  // ✅ Update commission display
+  const getCommissionAmount = useCallback((currencyKey) => {
+    return commissionRates[currencyKey] || 0;
+  }, [commissionRates]);
 
   // Handle calculation when button is clicked
   const handleCalculate = useCallback(() => {
@@ -269,7 +291,7 @@ const CurrencyConverter = ({ isOpen, onClose }) => {
                       placeholder="USD"
                       value={usdAmounts[index]}
                       onChange={(e) => handleUsdChange(index, e.target.value)}
-                      className="w-[45px] md:w-20 lg:w-[100px] h-[28px] md:h-8 lg:h-[38px] px-1 md:px-3 lg:px-4 py-1 md:py-2 lg:py-3 text-[9px] md:text-sm lg:text-base text-center"
+                      className="text-black w-[45px] md:w-20 lg:w-[100px] h-[28px] md:h-8 lg:h-[38px] px-1 md:px-3 lg:px-4 py-1 md:py-2 lg:py-3 text-[9px] md:text-sm lg:text-base text-center"
                       disabled={loading}
                     />
                   </div>
@@ -289,7 +311,7 @@ const CurrencyConverter = ({ isOpen, onClose }) => {
                     <InputField
                       value={`${getDisplayRate(currencyData.key)}${window.innerWidth < 768 ? '' : ` ${currencyData.currency}`}`}
                       readOnly
-                      className="w-[40px] md:w-20 lg:w-[100px] h-[28px] md:h-8 lg:h-[38px] px-1 md:px-3 lg:px-4 py-1 md:py-2 lg:py-3 text-[8px] md:text-sm lg:text-base text-center"
+                      className="text-rose-black-400 w-[40px] md:w-20 lg:w-[100px] h-[28px] md:h-8 lg:h-[38px] px-1 md:px-3 lg:px-4 py-1 md:py-2 lg:py-3 text-[8px] md:text-sm lg:text-base text-center"
                     />
                     <span className="text-[#2D467C] text-[9px] md:hidden flex-shrink-0" 
                           style={{ fontFamily: 'Roboto, -apple-system, Roboto, Helvetica, sans-serif' }}>
@@ -308,9 +330,9 @@ const CurrencyConverter = ({ isOpen, onClose }) => {
                 <TableCell className="px-1 md:px-3 lg:px-4 py-2 md:py-3 lg:py-4 h-14 md:h-16 lg:h-[70.667px] flex-1">
                   <div className="flex items-center gap-1">
                     <InputField
-                      value={`${currencyData.commission}${window.innerWidth >= 768 ? ` ${currencyData.name.desktop}` : ''}`}
+                      value={`${getCommissionAmount(currencyData.key)}${window.innerWidth >= 768 ? ` ${currencyData.name.desktop}` : ''}`}
                       readOnly
-                      className="w-[35px] md:w-20 lg:w-[100px] h-[28px] md:h-8 lg:h-[38px] px-1 md:px-3 lg:px-4 py-1 md:py-2 lg:py-3 text-[8px] md:text-sm lg:text-base text-center"
+                      className="text-rose-black-400 w-[35px] md:w-20 lg:w-[100px] h-[28px] md:h-8 lg:h-[38px] px-1 md:px-3 lg:px-4 py-1 md:py-2 lg:py-3 text-[8px] md:text-sm lg:text-base text-center"
                     />
                     <span className="text-[#2D467C] text-[9px] md:text-sm lg:text-xl lg:leading-[28.8px] flex-shrink-0" 
                           style={{ fontFamily: 'Roboto, -apple-system, Roboto, Helvetica, sans-serif' }}>)</span>
@@ -329,7 +351,7 @@ const CurrencyConverter = ({ isOpen, onClose }) => {
                     <InputField
                       value={calculatedAmounts[index]}
                       readOnly
-                      className="w-[40px] md:flex-1 lg:w-[100px] h-[28px] md:h-8 lg:h-[38px] px-1 md:px-3 lg:px-4 py-1 md:py-2 lg:py-3 text-[7px] md:text-sm lg:text-base text-center min-w-0"
+                      className="text-danim-900 font-bold w-[40px] md:flex-1 lg:w-[100px] h-[28px] md:h-8 lg:h-[38px] px-1 md:px-3 lg:px-4 py-1 md:py-2 lg:py-3 text-[7px] md:text-sm lg:text-base text-center min-w-0"
                     />
                     <span className="text-[#2D467C] text-[9px] md:text-sm lg:text-base lg:leading-[19.2px] flex-shrink-0" 
                           style={{ fontFamily: 'Roboto, -apple-system, Roboto, Helvetica, sans-serif' }}>

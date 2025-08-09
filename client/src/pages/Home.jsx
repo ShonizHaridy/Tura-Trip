@@ -296,7 +296,7 @@ const handleSuggestionClick = (suggestion) => {
                   <input
                     type="text"
                     placeholder={selectedCity ? selectedCity.name : t("homepage.hero.searchDestination")}
-                    className="bg-transparent text-white placeholder:text-white outline-none w-full text-sm lg:text-base font-semibold font-family-primary cursor-pointer"
+                    className="bg-transparent text-white placeholder:text-white outline-none w-full text-[12px] lg:text-base font-semibold font-family-primary cursor-pointer"
                     readOnly
                     onClick={() => setShowCityDropdown(!showCityDropdown)}
                   />
@@ -345,7 +345,7 @@ const handleSuggestionClick = (suggestion) => {
                   <input
                     type="text"
                     placeholder={selectedCategory ? selectedCategory.name : t("homepage.hero.searchCategory")}
-                    className="bg-transparent text-white placeholder:text-white outline-none w-full text-sm lg:text-base font-semibold font-family-primary cursor-pointer"
+                    className="bg-transparent text-white placeholder:text-white outline-none w-full text-[12px] lg:text-base font-semibold font-family-primary cursor-pointer"
                     readOnly
                     onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
                   />
@@ -386,7 +386,7 @@ const handleSuggestionClick = (suggestion) => {
                       handleQuickSearch(e.target.value);
                     }}
                     onFocus={() => searchQuery && setShowSuggestions(true)}
-                    className="bg-transparent text-white placeholder:text-white outline-none w-full text-sm lg:text-base font-semibold font-family-primary"
+                    className="bg-transparent text-white placeholder:text-white outline-none w-full text-[12px] lg:text-base font-semibold font-family-primary"
                   />
                   
                   {/* Quick Search Suggestions */}
@@ -513,7 +513,7 @@ const handleSuggestionClick = (suggestion) => {
 
         {/* Hero Features - positioned at very bottom of hero section */}
         <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full px-4 z-10">
-          <FeaturesGrid section="hero" position="bottom" />
+          <FeaturesGrid section="hero" position="bottom" reviewsCount={homepageData?.totalPromotionalReviews || 200} />
         </div>
       </section>
 
@@ -521,7 +521,7 @@ const handleSuggestionClick = (suggestion) => {
       <section className="relative min-h-screen bg-[url('/src/assets/explore-bg.png')] bg-cover bg-center">
         {/* Next Features - positioned at very top */}
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-full px-4 z-10">
-          <FeaturesGrid section="explore" position="top" />
+          <FeaturesGrid section="explore" position="top" reviewsCount={homepageData?.totalPromotionalReviews || 200} />
         </div>
 
         {/* Main Content */}
@@ -536,7 +536,7 @@ const handleSuggestionClick = (suggestion) => {
           </div>
 
           {/* Content Layout */}
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 xl:gap-24">
+          <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 xl:gap-24 lg:justify-between">
 
             {/* Left Content - Text */}
             <div className="flex flex-col gap-6 lg:gap-8 lg:flex-shrink-0 lg:w-80 xl:w-96">
@@ -556,7 +556,7 @@ const handleSuggestionClick = (suggestion) => {
             </div>
 
             {/* Right Content - Cards with Real API Data */}
-            <div className="flex-1 min-w-0">
+            <div className="min-w-0 justify-center">
 
               {/* Desktop: Regular flex wrap */}
               <div className="hidden lg:flex gap-6 xl:gap-8">
@@ -566,7 +566,7 @@ const handleSuggestionClick = (suggestion) => {
                   to={`/destination/${city.slug}`}
                   className="flex flex-col gap-4 flex-shrink-0"
                 >
-                    <div className="w-56 xl:w-64 h-72 xl:h-80 rounded-lg overflow-hidden">
+                    <div className="w-56 h-72 rounded-lg overflow-hidden">
                       <img
                         src={city.image_url}
                         alt={city.name}
@@ -580,7 +580,7 @@ const handleSuggestionClick = (suggestion) => {
                         }}
                       />
                     </div>
-                    <h3 className="text-2xl xl:text-3xl font-normal text-danim-800 text-center">
+                    <h3 className="text-2xl xl:text-3xl font-normal text-danim-800 text-start">
                       {city.name.toUpperCase()}
                     </h3>
                   </Link>
@@ -623,64 +623,102 @@ const handleSuggestionClick = (suggestion) => {
       </section>
 
       {/* Best Deals Section with Real API Data */}
-      <section className="relative min-h-screen bg-[url('/src/assets/explore-bg.png')] bg-cover bg-center">
-        <div className="container mx-auto pt-10 px-6 lg:px-8 xl:px-12">
+      <section className="relative min-h-screen bg-[#F3F3EE]">
+        {/* Background image with 50% opacity */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-50"
+          style={{ backgroundImage: "url('/images/bg-bestdeals.png')" }}
+        />
+        
+        {/* Linear gradient overlay (from Figma) */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(180deg, #F3F3EE 3.37%, rgba(243, 243, 238, 0.2) 48.56%, #F3F3EE 83.65%)'
+          }}
+        />
 
-          {/* Header text - centered and constrained */}
-          <div className="text-center mb-10">
-            <h2 className="font-great-vibes font-normal text-[32px] lg:text-4xl leading-[44px] tracking-[-0.02em] text-center text-gray-800 mb-4">
-              {t("homepage.bestDeals.title")}
-            </h2>
-            <p className="text-lg text-gray-600 font-family-primary">
-              {t("homepage.bestDeals.subtitle")}
-            </p>
-          </div>
+        {/* Content */}
+        <div className="relative z-10">
+          <div className="container mx-auto pt-10 px-6 lg:px-8 xl:px-12">
+            {/* Header text - centered and constrained */}
+      <div className="text-center mb-10">
+        <h2 className="font-great-vibes font-normal text-[32px] lg:text-[60px] leading-[44px] tracking-[-0.02em] text-center text-[#233660] mb-4">
+          {t("homepage.bestDeals.title")}
+        </h2>
+        <p className="text-lg lg:text-[20px] lg:leading-[25px] text-center text-[#233660] font-family-primary">
+          {t("homepage.bestDeals.subtitle")}
+        </p>
+      </div>
 
-          {/* Cards grid - responsive layout using real featured tours */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-10">
-            {featuredTours.map((tour) => (
-              <Link
-                key={tour.id}
-                to={`/destination/${tour.city_slug}/${tour.id}`}
-              >
-                <ExcursionCard
-                  id={tour.id}
-                  title={tour.title || "Tour Title Not Available"}
-                  image={tour.cover_image_url || "/src/assets/luxor.png"}
-                  category={tour.category || tour.category_type}
-                  duration={tour.duration || "Full Day"}
-                  durationUnit=""
-                  transportation={tour.availability || "Daily"}
-                  daysOfWeek={tour.days_of_week}
-                  reviews={tour.reviews_count || 0}
-                  price={parseFloat(tour.price_adult)}
-                  originalPrice={getOriginalPrice(parseFloat(tour.price_adult), parseFloat(tour.discount_percentage))}
-                  priceUnit={t("common.perPerson")}
-                  isFeatured={tour.featured_tag != null}
-                  featuredLabel={getFeaturedLabel(tour.featured_tag)}
-                />
-              </Link>
-            ))}
-          </div>
+      {/* Cards grid - responsive layout using real featured tours */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-10 mb-12">
+        {featuredTours.map((tour) => (
+          // <Link
+          //   key={tour.id}
+          //   to={`/destination/${tour.city_slug}/${tour.id}`}
+          //   className='bg-red-500'
+          // >
+            <ExcursionCard
+              key={tour.id} 
+              id={tour.id}
+              title={tour.title || "Tour Title Not Available"}
+              image={tour.cover_image_url || "/src/assets/luxor.png"}
+              category={tour.category || tour.category_type}
+              duration={tour.duration || "Full Day"}
+              durationUnit=""
+              transportation={tour.availability || "Daily"}
+              daysOfWeek={tour.days_of_week}
+              reviews={tour.reviews_count || 0}
+              price={parseFloat(tour.price_adult)}
+              originalPrice={getOriginalPrice(parseFloat(tour.price_adult), parseFloat(tour.discount_percentage))}
+              priceUnit={t("common.perPerson")}
+              isFeatured={tour.featured_tag != null}
+              featuredLabel={getFeaturedLabel(tour.featured_tag)} 
+              onNavigate={() => navigate(`/destination/${tour.city_slug}/${tour.id}`)}
+            />
+          // </Link>
+        ))}
+      </div>
 
-          {/* View More Button */}
-          {hasMoreTours && (
-            <div className="flex justify-center mt-8">
-              <button 
-                onClick={loadMoreTours}
-                disabled={loadingMore}
-                className="px-6 py-3 text-[20px] text-sea-green-700 bg-white font-semibold border-white rounded-[6px] lg:rounded-md hover:bg-[#B0B2B7] hover:border-[#868683] hover:text-[#343946] transition-colors disabled:opacity-50"
-              >
-                {loadingMore ? t("common.loading") : t("common.viewMore")}
-              </button>
-            </div>
-          )}
-
+      {/* View More Button - Exact Figma Design + Loading Spinner */}
+      {/* {hasMoreTours && (
+        <div className="flex justify-center mt-8">
+          <button 
+            onClick={loadMoreTours}
+            disabled={loadingMore}
+            className="px-6 lg:px-8 py-2 lg:py-3 text-[20px] lg:text-[24px] border-1 font-family-primary text-sea-green-700 bg-white font-semibold border-white rounded-[6px] lg:rounded-md hover:bg-[#B0B2B7] hover:border-[#868683] hover:text-[#343946] transition-colors disabled:opacity-50"
+          >
+            {loadingMore ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-sea-green-700"></div>
+                {t("common.loading")}
+              </div>
+            ) : (
+              t("common.viewMore")
+            )}
+          </button>
         </div>
-      </section>
+      )} */}
 
-      {/* Payment Section */}
-      <PaymentSection onOpenConverter={() => setIsCurrencyConverterOpen(true)} />
+      {/* View More Button - Change to navigate to browse tours */}
+      {hasMoreTours && (
+        <div className="flex justify-center mt-8">
+          <Link 
+            to="/browse-tours" 
+            state={{ viewMode: 'tours' }} 
+            className="px-6 lg:px-8 py-2 lg:py-3 text-[20px] lg:text-[24px] border-1 font-family-primary text-sea-green-700 bg-white font-semibold border-white rounded-[6px] lg:rounded-md hover:bg-[#B0B2B7] hover:border-[#868683] hover:text-[#343946] transition-colors"
+          >
+            {t("common.viewMore")} 
+          </Link>
+        </div>
+      )}
+    </div>
+
+    {/* Payment Section - Now inside Best Deals section */}
+    <PaymentSection onOpenConverter={() => setIsCurrencyConverterOpen(true)} />
+  </div>
+</section>
 
       {/* FAQ Section with Price Lists */}
       <PricesSection
@@ -689,7 +727,7 @@ const handleSuggestionClick = (suggestion) => {
       />
 
       {/* Testimonials Section with Real API Data */}
-      <TestimonialsSection reviews={homepageData?.promotionalReviews} />
+      <TestimonialsSection reviews={homepageData?.promotionalReviews} totalCount={homepageData?.totalPromotionalReviews || 200} />
 
       {/* Modals */}
       <CurrencyConverter

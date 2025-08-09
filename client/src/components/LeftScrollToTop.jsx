@@ -67,7 +67,7 @@ const LeftScrollToTop = () => {
           />
           
           {/* Mobile Top Text */}
-          <span 
+          {/* <span 
             className="text-[#2BA6A4]"
             style={{
               fontFamily: 'Roboto',
@@ -79,13 +79,13 @@ const LeftScrollToTop = () => {
             }}
           >
             Top
-          </span>
+          </span> */}
         </button>
       ) : (
         // Desktop version - 48x48px  
         <button
           onClick={scrollToTop}
-          className="relative flex flex-col justify-end items-center w-12 h-12 bg-white rounded-full border-2 border-[#2BA6A4] cursor-pointer transition-all duration-200 hover:scale-105"
+          className="relative flex flex-col justify-center items-center w-12 h-12 bg-white rounded-full border-2 border-[#2BA6A4] cursor-pointer transition-all duration-200 hover:scale-105"
           style={{
             padding: '8px 13px',
             boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.05)',
@@ -94,14 +94,14 @@ const LeftScrollToTop = () => {
         >
           {/* Desktop Arrow - 24px */}
           <ArrowUp2 
-            size="24" 
+            size="28" 
             color="#2BA6A4"
             // className="mb-1"
             variant="Bold"
           />
           
           {/* Desktop Top Text */}
-          <span 
+          {/* <span 
             className="text-[#2BA6A4]"
             style={{
               fontFamily: 'Roboto',
@@ -113,7 +113,7 @@ const LeftScrollToTop = () => {
             }}
           >
             Top
-          </span>
+          </span> */}
         </button>
       )}
     </div>

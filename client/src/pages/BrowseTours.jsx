@@ -1,7 +1,7 @@
 // src/pages/BrowseTours.jsx
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom'; // ← Add useLocation
 import { SlugHelper } from '../utils/slugHelper';
 import ExcursionCard from '../components/ExcursionCard';
 import publicService from '../services/publicService';
@@ -18,9 +18,10 @@ import { useTranslatedFeaturedLabel } from '../hooks/useTranslatedFeaturedLabel'
 
 const BrowseTours = () => {
   const { t, i18n } = useTranslation();
+  const location = useLocation(); 
   const [browseData, setBrowseData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState('cities'); // 'cities' or 'tours'
+  const [viewMode, setViewMode] = useState(location.state?.viewMode || 'cities'); // 'cities' or 'tours'
 
 const getTranslatedFeaturedLabel = useTranslatedFeaturedLabel();
 
@@ -29,19 +30,27 @@ const getTranslatedFeaturedLabel = useTranslatedFeaturedLabel();
     fetchBrowseData();
   }, [i18n.language]);
 
-  const fetchBrowseData = async () => {
+  const fetchBrowseData = async (includeAllTours = false) => {
     try {
-      setLoading(true);
-      const response = await publicService.getBrowseToursData(i18n.language);
+      const loadingState = includeAllTours ? setLoadingAllTours : setLoading;
+      loadingState(true);
+      
+      const response = await publicService.getBrowseToursData(i18n.language, includeAllTours);
       if (response.success) {
         setBrowseData(response.data);
+        if (includeAllTours) {
+          setAllToursLoaded(true);
+        }
+        console.log('Browse data loaded:', response.data);
       }
     } catch (error) {
       console.error('Error fetching browse data:', error);
     } finally {
-      setLoading(false);
+      const loadingState = includeAllTours ? setLoadingAllTours : setLoading;
+      loadingState(false);
     }
   };
+
 
 //   const getAllTours = () => {
 //     if (!browseData) return [];
@@ -49,10 +58,26 @@ const getTranslatedFeaturedLabel = useTranslatedFeaturedLabel();
 //       city.tours.map(tour => ({ ...tour, city_slug: city.slug }))
 //     );
 //   };
-const getAllTours = () => {
-  if (!browseData) return [];
-  return browseData.cities.flatMap(city => city.tours);
-};
+  const getAllTours = () => {
+    if (!browseData) return [];
+    
+    return browseData.cities.flatMap(city => 
+      city.tours.map(tour => ({
+        ...tour,
+        city_slug: city.slug, // Add city_slug from parent city
+        city_name: city.city_name // Ensure city_name is available
+      }))
+    );
+  };
+
+  const handleViewModeChange = async (mode) => {
+    setViewMode(mode);
+    
+    // If switching to "tours" view and we haven't loaded all tours yet
+    if (mode === 'tours' && !allToursLoaded && !loadingAllTours) {
+      await fetchBrowseData(true); // Fetch all tours
+    }
+  };
 
   if (loading) {
     return (
@@ -220,7 +245,7 @@ const getAllTours = () => {
                     {city.tours.map((tour) => (
                         <Link 
                         key={tour.id}
-                        to={`/destination/${tour.city_slug}/${tour.id}`}  // ✅ Use tour.city_slug
+                        to={`/destination/${city.slug}/${tour.id}`}  // ✅ Use tour.city_slug
                         className="block hover:transform hover:scale-105 transition-transform duration-300"
                         >
                         <ExcursionCard

@@ -9,6 +9,7 @@ import { RiShieldUserLine } from "react-icons/ri";
 
 
 const ExcursionCard = ({
+  onNavigate,
   id,
   title,
   image,
@@ -28,7 +29,8 @@ const ExcursionCard = ({
     <div className="relative w-full max-w-[298px] mx-auto">
       {/* Main card container */}
       <div 
-        className={`${isFeatured ? 'ml-2' : ''} bg-[#FEFEFD] ${isFeatured ? 'rounded-tr-xl rounded-br-xl rounded-tl-xl' : 'rounded-xl'} shadow-[0px_8px_28px_0px_rgba(20,20,43,0.10)] overflow-hidden cursor-pointer hover:shadow-xl transition-shadow duration-300 group`}
+        className={`${isFeatured ? 'ml-2' : ''} bg-[#FEFEFD] rounded-xl shadow-[0px_8px_28px_0px_rgba(20,20,43,0.10)] overflow-hidden cursor-pointer hover:shadow-xl transition-shadow duration-300 group`} 
+        onClick={onNavigate}
       >
         {/* Image container */}
         <div className="p-2.5 pt-[10px]">

@@ -1,13 +1,46 @@
-import React from 'react'
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Logo from '../assets/logo-icon.svg?react';
 import TripAdvisor from '../assets/trip_advisor.svg?react'
 import { IoLogoWhatsapp } from 'react-icons/io'
 import { FaFacebookF, FaInstagram, FaVk } from 'react-icons/fa'
+import publicService from '../services/publicService'; // Add this import
 
 const Footer = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const [destinations, setDestinations] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch cities for footer navigation
+  useEffect(() => {
+    fetchDestinations();
+  }, []);
+
+  // Refetch when language changes
+  useEffect(() => {
+    fetchDestinations();
+  }, [i18n.language]);
+
+  const fetchDestinations = async () => {
+    try {
+      setLoading(true);
+      const response = await publicService.getCitiesForHeader(i18n.language);
+      if (response.success) {
+        // Take first 3 cities for footer
+        setDestinations(response.data.slice(0, 3));
+      }
+    } catch (error) {
+      console.error('Error fetching footer destinations:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDestinationClick = (citySlug) => {
+    navigate(`/destination/${citySlug}`);
+  };
 
   return (
     <footer className="bg-rose-black-500 text-white pb-12">
@@ -54,22 +87,39 @@ const Footer = () => {
               </ul>
             </div>
 
-            {/* Column 3 - Explore Destinations */}
+            {/* Column 3 - Dynamic Explore Destinations */}
             <div>
               <h3 className="font-semibold text-lg mb-6">{t("footer.destinations.title")}</h3>
-              <ul className="space-y-3">
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">{t("footer.destinations.hurghada")}</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">{t("footer.destinations.sharmElsheikh")}</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">{t("footer.destinations.marsaAlam")}</a></li>
-              </ul>
+              {loading ? (
+                <div className="text-gray-400 text-sm">Loading destinations...</div>
+              ) : (
+                <ul className="space-y-3">
+                  {destinations.map((destination) => (
+                    <li key={destination.id}>
+                      <button
+                        onClick={() => handleDestinationClick(destination.slug)}
+                        className="text-gray-300 hover:text-white transition-colors text-left cursor-pointer"
+                      >
+                        {destination.name}
+                      </button>
+                    </li>
+                  ))}
+                  {/* Fallback to static links if no destinations loaded */}
+                  {destinations.length === 0 && !loading && (
+                    <>
+                      <li><a href="#" className="text-gray-300 hover:text-white transition-colors">{t("footer.destinations.hurghada")}</a></li>
+                      <li><a href="#" className="text-gray-300 hover:text-white transition-colors">{t("footer.destinations.sharmElsheikh")}</a></li>
+                      <li><a href="#" className="text-gray-300 hover:text-white transition-colors">{t("footer.destinations.marsaAlam")}</a></li>
+                    </>
+                  )}
+                </ul>
+              )}
             </div>
 
             {/* Column 4 - Terms and policies */}
             <div>
               <h3 className="font-semibold text-lg mb-6">{t("footer.legal.title")}</h3>
               <ul className="space-y-3">
-                {/* <li><a href="#" className="text-gray-300 hover:text-white transition-colors">{t("footer.legal.termsOfService")}</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">{t("footer.legal.privacyPolicy")}</a></li> */}
                 <li><Link to="/security" className="text-gray-300 hover:text-white transition-colors">
                   {t("footer.legal.security")}
                 </Link>   
@@ -103,7 +153,6 @@ const Footer = () => {
                   <FaVk className="w-6 h-6" />
                 </a>
               </div>
-
             </div>
 
             {/* Column 5 - TripAdvisor */}
@@ -117,8 +166,6 @@ const Footer = () => {
               </a>
             </div>
           </div>
-
-
         </div>
 
         {/* Mobile Layout */}
@@ -132,7 +179,7 @@ const Footer = () => {
               </Link>          
           </div>
 
-          {/* Two Columns - Sitemap and Explore Destinations */}
+          {/* Two Columns - Sitemap and Dynamic Explore Destinations */}
           <div className="grid grid-cols-2 gap-8 mb-8">
             {/* Sitemap */}
             <div>
@@ -145,18 +192,37 @@ const Footer = () => {
               </ul>
             </div>
 
-            {/* Explore Destinations */}
+            {/* Dynamic Explore Destinations */}
             <div>
               <h3 className="font-semibold text-base mb-4">{t("footer.destinations.title")}</h3>
-              <ul className="space-y-3 text-sm">
-                <li><a href="#" className="text-gray-300">{t("footer.destinations.hurghada")}</a></li>
-                <li><a href="#" className="text-gray-300">{t("footer.destinations.sharmElsheikh")}</a></li>
-                <li><a href="#" className="text-gray-300">{t("footer.destinations.marsaAlam")}</a></li>
-              </ul>
+              {loading ? (
+                <div className="text-gray-400 text-xs">Loading...</div>
+              ) : (
+                <ul className="space-y-3 text-sm">
+                  {destinations.map((destination) => (
+                    <li key={destination.id}>
+                      <button
+                        onClick={() => handleDestinationClick(destination.slug)}
+                        className="text-gray-300 text-left cursor-pointer"
+                      >
+                        {destination.name}
+                      </button>
+                    </li>
+                  ))}
+                  {/* Fallback for mobile */}
+                  {destinations.length === 0 && !loading && (
+                    <>
+                      <li><a href="#" className="text-gray-300">{t("footer.destinations.hurghada")}</a></li>
+                      <li><a href="#" className="text-gray-300">{t("footer.destinations.sharmElsheikh")}</a></li>
+                      <li><a href="#" className="text-gray-300">{t("footer.destinations.marsaAlam")}</a></li>
+                    </>
+                  )}
+                </ul>
+              )}
             </div>
           </div>
 
-          {/* Book Now Button */}
+          {/* Rest of mobile layout remains the same */}
           <a 
             href="https://wa.me/2001055957451" 
             target="_blank" 
@@ -167,10 +233,8 @@ const Footer = () => {
             {t("nav.bookNow")}
           </a>
 
-          {/* Divider */}
           <hr className="border-gray-700 mb-8" />
 
-          {/* Social Media Icons */}
           <div className="flex justify-center gap-6 mb-8">
             <a 
               href="https://www.facebook.com/profile.php?id=61578182916161&mibextid=ZbWKwL" 
@@ -198,13 +262,8 @@ const Footer = () => {
             </a>
           </div>
 
-          {/* Bottom Links and TripAdvisor */}
           <div className="flex items-center justify-between space-y-4">
             <div className="text-xs text-gray-300 text-center">
-              {/* <a href="#" className="hover:text-white">{t("footer.legal.termsOfService")}</a>
-              <span className="mx-2">|</span>
-              <a href="#" className="hover:text-white">{t("footer.legal.privacyPolicy")}</a>
-              <span className="mx-2">|</span> */}
               <Link to="/security" className="hover:text-white">{t("footer.legal.security")}</Link>
             </div>
             

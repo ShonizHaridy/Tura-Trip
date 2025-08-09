@@ -81,7 +81,7 @@
     "englishGuides": "Deutschsprachige Reiseführer",
     "personalManager": "Persönlicher Manager",
     "insuranceValid": "Versicherung ist gültig",
-    "happyCustomers": "2400 zufriedene Kunden",
+    "happyCustomers": "{{count}} zufriedene Kunden",
     "realPhotos": "Echte Fotos von Ausflügen",
     "noHiddenExtra": "Keine versteckten Extras"
   },
@@ -131,7 +131,7 @@
     },
     "payment": {
       "title": "Wir akzeptieren Zahlungen in Rubel, Tenge oder Griwna per Überweisung auf eine Karte:",
-      "rates": "$1 = Zentralbankkurs + {{rubCommission}} ₽ ; oder {{tengeCommission}} ₸ ; oder {{uahCommission}} ₴ ; auch Überweisung USD T auf eine Krypto-Wallet",
+      "rates": "$1 = Zentralbankkurs + {{rub}} <0>₽</0> ; oder {{tenge}} <1>₸</1> ; oder {{uah}} <2>₴</2> ; auch Überweisung USD T auf eine Krypto-Wallet",
       "converterButton": "Online-Währungsumrechner öffnen"
     },
     "PricesSection": {
@@ -141,7 +141,7 @@
     },
     "testimonials": {
       "title": "Echte Bewertungen",
-      "subtitle": "Bereits 2400 Bewertungen, alle mit Screenshot-Bestätigung"
+      "subtitle": "Über {{count}} Bewertungen, alle mit Screenshot-Bestätigung"
     },
     "faq": {
       "title": "Häufig gestellte Fragen"
@@ -179,7 +179,7 @@
     "features": {
       "booking3Min": "Buchung in 3 Min.",
       "hotelPickup": "Hotel-Abholung",
-      "multilingualGuide": "Deutschsprachiger Führer",
+      "multilingualGuide": "Mehrsprachiger Führer",
       "personalManager": "Persönlicher Manager",
       "realPhotos": "Echte Fotos und Bewertungen",
       "noPrepayment": "Keine Vorauszahlung",
@@ -245,7 +245,7 @@
       "personalManager": "Persönlicher Manager",
       "englishGuides": "Deutschsprachige Führer",
       "quickReservation": "Reservierung in 3 Minuten",
-      "happyCustomers": "2400 zufriedene Kunden",
+      "happyCustomers": "{{count}} zufriedene Kunden",
       "realPhotos": "Echte Fotos von Ausflügen",
       "noHiddenExtra": "Keine versteckten Kosten"
     },

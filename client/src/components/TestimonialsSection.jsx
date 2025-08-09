@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft2, ArrowRight2 } from "iconsax-react";
 
-const TestimonialsSection = ({ reviews = [] }) => {
+const TestimonialsSection = ({ reviews, totalCount = 200 }) => {
   const { t } = useTranslation();
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -58,7 +58,7 @@ const TestimonialsSection = ({ reviews = [] }) => {
             </h2>
           </div>
           <p className="text-[#233660] font-roboto text-lg md:text-[28px]">
-            {t("homepage.testimonials.subtitle")}
+            {t("homepage.testimonials.subtitle", { count: totalCount })}
           </p>
         </div>
 

@@ -284,17 +284,17 @@ const TripDetail = () => {
     );
   }
 
-
+  console.log("thesse are data", tripData)
   const { tour, content, images, reviews, avgRating, reviewsCount } = tripData;
 
-const tripProgramText = Array.isArray(content?.trip_program) ? content.trip_program.join(' ') : '';
+  const tripProgramText = Array.isArray(content?.trip_program) ? content.trip_program.join(' ') : '';
   const shouldShowReadMore = tripProgramText.length > 300;
 
   return (
     <div className="min-h-screen bg-white">
       <div className="mx-auto px-4 md:px-18 pt-32 pb-10 space-y-6">
         {/* Breadcrumb Navigation */}
-        <div className="flex items-center gap-4 text-sm">
+        <div className="flex items-center gap-2 lg:gap-4 text-sm flex-wrap">
           <div 
             className="flex items-center justify-center w-5 h-5 cursor-pointer hover:opacity-70"
             onClick={handleHomeClick}
@@ -350,7 +350,7 @@ const tripProgramText = Array.isArray(content?.trip_program) ? content.trip_prog
             className="text-rose-black-300 font-semibold cursor-pointer hover:text-[#1F7674]"
             onClick={handleCategoryClick}
           >
-            {content.category}
+            {tour.category_type}
           </span>
           <svg
             width="20"
@@ -695,7 +695,7 @@ const tripProgramText = Array.isArray(content?.trip_program) ? content.trip_prog
                   t('tripDetail.features.noPrepayment') || "No Prepayment",
                   t('tripDetail.features.hotelPickup') || "Hotel Pickup",
                   t('features.insuranceValid') || "Insurance is valid",
-                  t('tripDetail.features.russianGuide') || "Russian Speaking Guide",
+                  t('tripDetail.features.multilingualGuide') || "Multilingual Speaking Guide",
                   t('tripDetail.features.noHiddenCharges') || "No Hidden Extra",
                   t('tripDetail.features.personalManager') || "Personal Manager",
                   t('tripDetail.features.realPhotos') || "Real Photos and Reviews",
@@ -717,53 +717,83 @@ const tripProgramText = Array.isArray(content?.trip_program) ? content.trip_prog
                 <h3 className="text-3xl font-semibold text-danim-700">
                   {t('tripDetail.whatsIncluded') || "What's included"}
                 </h3>
-                <div className="text-xl text-rose-black-300 leading-relaxed font-family-primary font-medium">
+                <div className="font-family-primary font-medium space-y-2">
                   {content.included && content.included.length > 0 ? (
                     content.included.map((item, index) => (
-                      <div key={index}>• {item}<br /></div>
+                      <div key={index} className="flex items-start gap-2">
+                        <span className="text-xl text-rose-black-300 flex-shrink-0 mt-0.5 font-bold">•</span>
+                        <span className="text-xl text-rose-black-300 flex-1 leading-relaxed">{item}</span>
+                      </div>
                     ))
                   ) : (
-                    <div>{t('tripDetail.defaultIncluded') || 'Hotel Pick-up & Drop-off'}<br />
-                    {t('tripDetail.airConditioned') || 'Air-conditioned vehicle'}<br />
-                    {t('tripDetail.camelRide') || 'Camel Ride'}<br />
-                    {t('tripDetail.bedouinVillage') || 'Bedouin Village & Bedouin Tea'}<br />
-                    {t('tripDetail.quadBike') || 'Quad Bike Ride'}<br />
-                    {t('tripDetail.lunchDrinks') || 'Lunch & Drinks on Yacht'}</div>
+                    [
+                      t('tripDetail.defaultIncluded') || 'Hotel Pick-up & Drop-off',
+                      t('tripDetail.airConditioned') || 'Air-conditioned vehicle',
+                      t('tripDetail.camelRide') || 'Camel Ride',
+                      t('tripDetail.bedouinVillage') || 'Bedouin Village & Bedouin Tea',
+                      t('tripDetail.quadBike') || 'Quad Bike Ride',
+                      t('tripDetail.lunchDrinks') || 'Lunch & Drinks on Yacht'
+                    ].map((item, index) => (
+                      <div key={index} className="flex items-start gap-2">
+                        <span className="text-xl text-rose-black-300 flex-shrink-0 mt-0.5 font-bold">•</span>
+                        <span className="text-xl text-rose-black-300 flex-1 leading-relaxed">{item}</span>
+                      </div>
+                    ))
                   )}
                 </div>
               </div>
 
-              {/* What's Not Included */}
+              {/* What's Not Included - Same pattern */}
               <div className="space-y-2">
                 <h3 className="text-3xl font-semibold text-danim-700">
                   {t('tripDetail.whatsNotIncluded') || "What's Not included"}
                 </h3>
-                <div className="text-xl text-rose-black-300 leading-relaxed font-family-primary font-medium">
+                <div className="font-family-primary font-medium space-y-2">
                   {content.not_included && content.not_included.length > 0 ? (
                     content.not_included.map((item, index) => (
-                      <div key={index}>• {item}<br /></div>
+                      <div key={index} className="flex items-start gap-2">
+                        <span className="text-xl text-rose-black-300 flex-shrink-0 mt-0.5 font-bold">•</span>
+                        <span className="text-xl text-rose-black-300 flex-1 leading-relaxed">{item}</span>
+                      </div>
                     ))
                   ) : (
-                    <div>{t('tripDetail.masks') || 'Masks'}<br />
-                    {t('tripDetail.fins') || 'Fins'}<br />
-                    {t('tripDetail.divingSuits') || 'Diving Suits'}</div>
+                    [
+                      t('tripDetail.masks') || 'Masks',
+                      t('tripDetail.fins') || 'Fins', 
+                      t('tripDetail.divingSuits') || 'Diving Suits'
+                    ].map((item, index) => (
+                      <div key={index} className="flex items-start gap-2">
+                        <span className="text-xl text-rose-black-300 flex-shrink-0 mt-0.5 font-bold">•</span>
+                        <span className="text-xl text-rose-black-300 flex-1 leading-relaxed">{item}</span>
+                      </div>
+                    ))
                   )}
                 </div>
               </div>
 
-              {/* Take with you */}
+              {/* Take with you - Same pattern */}
               <div className="space-y-2">
                 <h3 className="text-3xl font-semibold text-danim-700">
                   {t('tripDetail.takeWithYou') || "Take with you"}
                 </h3>
-                <div className="text-xl text-rose-black-300 leading-relaxed font-family-primary font-medium">
+                <div className="font-family-primary font-medium space-y-2">
                   {content.take_with_you && content.take_with_you.length > 0 ? (
                     content.take_with_you.map((item, index) => (
-                      <div key={index}>• {item}<br /></div>
+                      <div key={index} className="flex items-start gap-2">
+                        <span className="text-xl text-rose-black-300 flex-shrink-0 mt-0.5 font-bold">•</span>
+                        <span className="text-xl text-rose-black-300 flex-1 leading-relaxed">{item}</span>
+                      </div>
                     ))
                   ) : (
-                    <div>{t('tripDetail.defaultTakeWith') || 'Swim Suit, Towel, Water, Sunscreen, Sunglasses'}<br />
-                    {t('tripDetail.rentAvailable') || 'Diving Suits and Snorkeling fins available to rent on site'}</div>
+                    [
+                      t('tripDetail.defaultTakeWith') || 'Swim Suit, Towel, Water, Sunscreen, Sunglasses',
+                      t('tripDetail.rentAvailable') || 'Diving Suits and Snorkeling fins available to rent on site'
+                    ].map((item, index) => (
+                      <div key={index} className="flex items-start gap-2">
+                        <span className="text-xl text-rose-black-300 flex-shrink-0 mt-0.5 font-bold">•</span>
+                        <span className="text-xl text-rose-black-300 flex-1 leading-relaxed">{item}</span>
+                      </div>
+                    ))
                   )}
                 </div>
               </div>

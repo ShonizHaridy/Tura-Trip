@@ -11,7 +11,7 @@ import {
 } from 'iconsax-react';
 import { useTranslation } from 'react-i18next';
 
-const FeaturesGrid = ({ section = "hero", position = "middle" }) => {
+const FeaturesGrid = ({ section = "hero", position = "middle", reviewsCount = 200 }) => {
 
   const { t, i18n } = useTranslation();
 
@@ -51,7 +51,7 @@ const FeaturesGrid = ({ section = "hero", position = "middle" }) => {
     {
       id: 6,
       icon: EmojiHappy,
-      title: t("features.happyCustomers"),
+      title: t("features.happyCustomers", { count: reviewsCount }),
       section: "explore"
     },
     {

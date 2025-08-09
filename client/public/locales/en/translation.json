@@ -81,7 +81,7 @@
     "englishGuides": "English Speaking Guides",
     "personalManager": "Personal Manager",
     "insuranceValid": "Insurance is Valid",
-    "happyCustomers": "2400 Happy Customers",
+    "happyCustomers": "{{count}} Happy Customers",
     "realPhotos": "Real Photos excursions",
     "noHiddenExtra": "No Hidden Extra"
   },
@@ -142,7 +142,7 @@
     },
     "testimonials": {
       "title": "Real Reviews",
-      "subtitle": "Already 2400 review, All have a screen shot-confirmation"
+      "subtitle": "Already {{count}} reviews, All have a screen shot-confirmation"
     },
     "faq":{
       "title": "Frequently Asked Questions"
@@ -180,7 +180,7 @@
     "features": {
       "booking3Min": "Booking in 3 Min.",
       "hotelPickup": "Hotel Pickup",
-      "multilingualGuide": "Russian Speaking Guide",
+      "multilingualGuide": "Multilingual Speaking Guide",
       "personalManager": "Personal Manager",
       "realPhotos": "Real Photos and Reviews",
       "noPrepayment": "No Prepayment",
@@ -247,7 +247,7 @@
       "personalManager": "Personal Manager",
       "englishGuides": "English Speaking Guides",
       "quickReservation": "Reservation in 3 minutes",
-      "happyCustomers": "2400 Happy Customers",
+      "happyCustomers": "{{count}} Happy Customers",
       "realPhotos": "Real Photos excursions",
       "noHiddenExtra": "No Hidden Extra"
     },

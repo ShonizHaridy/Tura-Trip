@@ -73,7 +73,7 @@ async getCityById(req, res) {
 
     // Process image - FIX: Use consistent base URL
     if (city.image) {
-      city.image_url = `${process.env.BASE_URL || 'http://localhost:5000'}/uploads/${city.image}`;
+      city.image_url = `${process.env.API_BASE_URL || 'http://localhost:5000'}/uploads/${city.image}`;
     }
 
     if (include_translations === 'true') {

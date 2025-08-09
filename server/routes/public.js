@@ -57,8 +57,14 @@ router.get('/currency/convert', publicController.getCurrencyConversion);
 
 router.get('/promotional-reviews', publicController.getPromotionalReviews);
 
+router.get('/commission-rates', publicController.getCommissionRates);
+
 router.post('/contact', publicController.submitContactForm);
 router.get('/client-country', publicController.getClientCountry);
+
+// About page data (lightweight)
+router.get('/reviews-count', publicController.getReviewsCount);
+
 
 
 module.exports = router;
