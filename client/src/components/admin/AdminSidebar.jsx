@@ -60,7 +60,7 @@ const AdminSidebar = ({ activeItem = "Dashboard" }) => {
         {
           id: "comments",
           label: "Trips Comments",
-          path: "/admin/trip-comments",
+          path: "/admin/content?tab=comments",
         },
       ],
     },
@@ -89,11 +89,15 @@ const AdminSidebar = ({ activeItem = "Dashboard" }) => {
   const isSubItemActive = (subItem) => {
     if (subItem.id === "faqs") {
       return location.pathname === "/admin/content" && 
-             (!location.search || location.search.includes("tab=faqs"));
+            (!location.search || location.search.includes("tab=faqs"));
     }
     if (subItem.id === "reviews") {
       return location.pathname === "/admin/content" && 
-             location.search.includes("tab=reviews");
+            location.search.includes("tab=reviews");
+    }
+    if (subItem.id === "comments") {
+      return location.pathname === "/admin/content" && 
+            location.search.includes("tab=comments");
     }
     return false;
   };

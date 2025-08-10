@@ -189,7 +189,7 @@ const AddTour = () => {
         location: locationRef.current?.value || "",
         price_adult: priceAdultRef.current?.value || "",
         price_child: priceChildRef.current?.value || "",
-        featured_tag: featuredTagRef.current?.value || "",
+        featured_tag: featuredTagRef.current?.value || null,
         discount_percentage: discountRef.current?.value || "",
       };
       

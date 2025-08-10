@@ -1,4 +1,5 @@
 const { pool } = require('../config/database');
+const imageHelper = require('../utils/imageHelper');
 
 class ContentController {
   // ==== FAQ MANAGEMENT ====
@@ -50,7 +51,7 @@ class ContentController {
           LIMIT ${safeLimit} OFFSET ${safeOffset}
         `;
 
-        console.log('🔍 FAQ Query (specific language):', query);
+        // console.log('🔍 FAQ Query (specific language):', query);
         console.log('🔍 FAQ Params:', queryParams);
 
         const [faqs] = await pool.execute(query, queryParams);
@@ -202,7 +203,7 @@ class ContentController {
       try {
         // Insert main FAQ
         const [faqResult] = await pool.execute(
-          'INSERT INTO faq (is_active, display_order) VALUES (?, ?)',
+          'INSERT INTO faqs (is_active, display_order) VALUES (?, ?)',
           [is_active, display_order]
         );
 
@@ -680,11 +681,12 @@ class ContentController {
       `;
 
       const [reviews] = await pool.execute(query, [language]);
-      processedReviews = imageHelper.processArrayImages(cities, 'review');
+      const processedReviews = imageHelper.processArrayImages(reviews, 'review');
 
+      console.log("These are the reviews:", processedReviews);
       res.json({
         success: true,
-        data: reviews
+        data: processedReviews
       });
     } catch (error) {
       console.error('❌ Get promotional reviews error:', error);
@@ -724,8 +726,8 @@ class ContentController {
         `;
 
         const [reviews] = await pool.execute(query, [language_code]);
-        processedReviews = imageHelper.processArrayImages(cities, 'review');
-
+        const processedReviews = imageHelper.processArrayImages(reviews, 'review');
+        console.log("These are the reviews:", processedReviews);
         res.json({
           success: true,
           data: processedReviews
@@ -768,6 +770,8 @@ class ContentController {
           });
         }
 
+        const processedReviewsWithTranslations = imageHelper.processArrayImages(reviewsWithTranslations, 'review');
+
         // Get total count
         const [countResult] = await pool.execute('SELECT COUNT(*) as total FROM promotional_reviews');
         const totalReviews = countResult[0].total;
@@ -775,7 +779,7 @@ class ContentController {
         res.json({
           success: true,
           data: {
-            reviews: reviewsWithTranslations,
+            reviews: processedReviewsWithTranslations,
             pagination: {
               currentPage: safePage,
               totalPages: Math.ceil(totalReviews / safeLimit),
@@ -796,148 +800,222 @@ class ContentController {
 
 
   // Create promotional review with translations
-  async createPromotionalReview(req, res) {
-    try {
-      const { client_name, translations, review_date, display_order = 0 } = req.body;
+// Create promotional review with translations
+async createPromotionalReview(req, res) {
+  const connection = await pool.getConnection();
+  try {
+    let { client_name, translations, review_date, display_order = 0 } = req.body;
 
-      if (!client_name || !translations || !review_date) {
+    // Parse translations if it's a string
+    if (typeof translations === 'string') {
+      try {
+        translations = JSON.parse(translations);
+      } catch (error) {
+        console.error('❌ JSON parse error for translations:', error);
         return res.status(400).json({
           success: false,
-          message: 'Client name, translations, and review date are required'
+          message: 'Invalid translations format'
         });
       }
+    }
 
-      // Handle screenshot image upload
-      const screenshot_image = req.files?.screenshot_image?.[0]?.filename || null;
-
-      // Use connection instead of pool for transactions
-      const connection = await pool.getConnection();
-      
-      try {
-        await connection.beginTransaction();
-
-        // Insert main promotional review
-        const [reviewResult] = await connection.execute(`
-          INSERT INTO promotional_reviews (client_name, screenshot_image, review_date, display_order)
-          VALUES (?, ?, ?, ?)
-        `, [client_name, screenshot_image, review_date, display_order]);
-
-        const reviewId = reviewResult.insertId;
-
-        // Insert translations
-        for (const [langCode, reviewText] of Object.entries(translations)) {
-          if (reviewText && reviewText.trim()) {
-            await connection.execute(
-              'INSERT INTO promotional_review_translations (review_id, language_code, review_text) VALUES (?, ?, ?)',
-              [reviewId, langCode, reviewText.trim()]
-            );
-          }
-        }
-
-        await connection.commit();
-
-        res.json({
-          success: true,
-          message: 'Promotional review created successfully',
-          data: { id: reviewId }
-        });
-      } catch (error) {
-        await connection.rollback();
-        throw error;
-      } finally {
-        connection.release();
-      }
-    } catch (error) {
-      console.error('❌ Create promotional review error:', error);
-      res.status(500).json({
+    if (!client_name || !translations || !review_date) {
+      return res.status(400).json({
         success: false,
-        message: 'Internal server error'
+        message: 'Client name, translations, and review date are required'
       });
     }
+
+    console.log('🔍 Creating review with translations:', translations);
+
+    // Handle screenshot image upload
+    const screenshot_image = req.files?.screenshot_image?.[0]?.filename || null;
+
+    await connection.beginTransaction();
+
+    // Insert main promotional review
+    const [reviewResult] = await connection.execute(`
+      INSERT INTO promotional_reviews (client_name, screenshot_image, review_date, display_order)
+      VALUES (?, ?, ?, ?)
+    `, [client_name, screenshot_image, review_date, display_order]);
+
+    const reviewId = reviewResult.insertId;
+
+    // Insert translations with validation
+    const validLanguages = ['en', 'ru', 'it', 'de'];
+    
+    for (const [langCode, reviewText] of Object.entries(translations)) {
+      // Clean and validate language code
+      const cleanLangCode = String(langCode).trim().toLowerCase();
+      
+      console.log(`🔍 Processing language: "${langCode}" -> cleaned: "${cleanLangCode}"`);
+      
+      // Validate language code
+      if (!validLanguages.includes(cleanLangCode)) {
+        console.error(`❌ Invalid language code: "${cleanLangCode}"`);
+        continue; // Skip invalid language codes
+      }
+      
+      // Only insert if reviewText is provided and not empty
+      if (reviewText && String(reviewText).trim()) {
+        const cleanReviewText = String(reviewText).trim();
+        
+        console.log(`✅ Inserting: ${cleanLangCode} -> "${cleanReviewText}"`);
+        
+        await connection.execute(
+          'INSERT INTO promotional_review_translations (review_id, language_code, review_text) VALUES (?, ?, ?)',
+          [reviewId, cleanLangCode, cleanReviewText]
+        );
+      }
+    }
+
+    await connection.commit();
+
+    res.json({
+      success: true,
+      message: 'Promotional review created successfully',
+      data: { id: reviewId }
+    });
+  } catch (error) {
+    await connection.rollback();
+    console.error('❌ Create promotional review error:', error);
+    console.error('❌ Error details:', {
+      message: error.message,
+      sql: error.sql,
+      sqlMessage: error.sqlMessage
+    });
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  } finally {
+    connection.release();
   }
+}
 
   // Update promotional review
-  async updatePromotionalReview(req, res) {
-    try {
-      const { id } = req.params;
-      const { client_name, translations, review_date, display_order, is_active } = req.body;
+// Update promotional review
+async updatePromotionalReview(req, res) {
+  const connection = await pool.getConnection();
+  try {
+    const { id } = req.params;
+    let { client_name, translations, review_date, display_order, is_active } = req.body;
 
-      await pool.execute('START TRANSACTION');
-
+    // Parse translations if it's a string
+    if (typeof translations === 'string') {
       try {
-        // Handle screenshot image upload
-        const screenshot_image = req.files?.screenshot_image?.[0]?.filename;
-
-        // Update main review
-        let updateFields = [];
-        let updateValues = [];
-
-        if (client_name !== undefined) {
-          updateFields.push('client_name = ?');
-          updateValues.push(client_name);
-        }
-
-        if (screenshot_image) {
-          updateFields.push('screenshot_image = ?');
-          updateValues.push(screenshot_image);
-        }
-
-        if (review_date !== undefined) {
-          updateFields.push('review_date = ?');
-          updateValues.push(review_date);
-        }
-
-        if (display_order !== undefined) {
-          updateFields.push('display_order = ?');
-          updateValues.push(display_order);
-        }
-
-        if (is_active !== undefined) {
-          updateFields.push('is_active = ?');
-          updateValues.push(is_active);
-        }
-
-        if (updateFields.length > 0) {
-          updateFields.push('updated_at = CURRENT_TIMESTAMP');
-          updateValues.push(id);
-
-          await pool.execute(
-            `UPDATE promotional_reviews SET ${updateFields.join(', ')} WHERE id = ?`,
-            updateValues
-          );
-        }
-
-        // Update translations if provided
-        if (translations) {
-          for (const [langCode, reviewText] of Object.entries(translations)) {
-            if (reviewText !== undefined) {
-              await pool.execute(`
-                INSERT INTO promotional_review_translations (review_id, language_code, review_text)
-                VALUES (?, ?, ?)
-                ON DUPLICATE KEY UPDATE review_text = VALUES(review_text)
-              `, [id, langCode, reviewText]);
-            }
-          }
-        }
-
-        await pool.execute('COMMIT');
-
-        res.json({
-          success: true,
-          message: 'Promotional review updated successfully'
-        });
+        translations = JSON.parse(translations);
       } catch (error) {
-        await pool.execute('ROLLBACK');
-        throw error;
+        console.error('❌ JSON parse error for translations:', error);
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid translations format'
+        });
       }
-    } catch (error) {
-      console.error('❌ Update promotional review error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Internal server error'
-      });
     }
+
+    console.log('🔍 Received translations:', translations);
+    console.log('🔍 Translations type:', typeof translations);
+
+    await connection.beginTransaction();
+
+    // Handle screenshot image upload
+    const screenshot_image = req.files?.screenshot_image?.[0]?.filename;
+
+    // Update main review
+    let updateFields = [];
+    let updateValues = [];
+
+    if (client_name !== undefined) {
+      updateFields.push('client_name = ?');
+      updateValues.push(client_name);
+    }
+
+    if (screenshot_image) {
+      updateFields.push('screenshot_image = ?');
+      updateValues.push(screenshot_image);
+    }
+
+    if (review_date !== undefined) {
+      updateFields.push('review_date = ?');
+      updateValues.push(review_date);
+    }
+
+    if (display_order !== undefined) {
+      updateFields.push('display_order = ?');
+      updateValues.push(display_order);
+    }
+
+    if (is_active !== undefined) {
+      updateFields.push('is_active = ?');
+      updateValues.push(is_active);
+    }
+
+    if (updateFields.length > 0) {
+      updateFields.push('updated_at = CURRENT_TIMESTAMP');
+      updateValues.push(id);
+
+      await connection.execute(
+        `UPDATE promotional_reviews SET ${updateFields.join(', ')} WHERE id = ?`,
+        updateValues
+      );
+    }
+
+    // Update translations if provided
+    if (translations && typeof translations === 'object') {
+      // Valid language codes
+      const validLanguages = ['en', 'ru', 'it', 'de'];
+      
+      for (const [langCode, reviewText] of Object.entries(translations)) {
+        // Clean and validate language code
+        const cleanLangCode = String(langCode).trim().toLowerCase();
+        
+        console.log(`🔍 Processing language: "${langCode}" -> cleaned: "${cleanLangCode}"`);
+        console.log(`🔍 Review text: "${reviewText}"`);
+        
+        // Validate language code
+        if (!validLanguages.includes(cleanLangCode)) {
+          console.error(`❌ Invalid language code: "${cleanLangCode}"`);
+          continue; // Skip invalid language codes
+        }
+        
+        // Only update if reviewText is provided and not empty
+        if (reviewText !== undefined && reviewText !== null && String(reviewText).trim() !== '') {
+          const cleanReviewText = String(reviewText).trim();
+          
+          console.log(`✅ Inserting: ${cleanLangCode} -> "${cleanReviewText}"`);
+          
+          await connection.execute(`
+            INSERT INTO promotional_review_translations (review_id, language_code, review_text)
+            VALUES (?, ?, ?)
+            ON DUPLICATE KEY UPDATE review_text = VALUES(review_text)
+          `, [id, cleanLangCode, cleanReviewText]);
+        }
+      }
+    }
+
+    await connection.commit();
+
+    res.json({
+      success: true,
+      message: 'Promotional review updated successfully'
+    });
+  } catch (error) {
+    await connection.rollback();
+    console.error('❌ Update promotional review error:', error);
+    console.error('❌ Error details:', {
+      message: error.message,
+      sql: error.sql,
+      sqlMessage: error.sqlMessage
+    });
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  } finally {
+    connection.release();
   }
+}
 }
 
 module.exports = new ContentController();

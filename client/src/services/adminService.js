@@ -299,12 +299,30 @@ async getCategories(params = {}) {
   }
 
   // Content Management - FAQs
-  async getFAQs(language = 'en') {
+  // FAQ Management - Updated methods
+  async getFAQs(language = null, params = {}) {
     try {
-      const response = await api.get(`/admin/content/faqs?language_code=${language}`);
+      const queryParams = new URLSearchParams(params).toString();
+      
+      // If no language specified, get all translations (admin mode)
+      const url = language 
+        ? `/admin/content/faqs?language_code=${language}&${queryParams}`
+        : `/admin/content/faqs?${queryParams}`;
+        
+      const response = await api.get(url);
       return response.data;
     } catch (error) {
       console.error('Error fetching FAQs:', error);
+      throw error;
+    }
+  }
+
+  async getFAQById(id) {
+    try {
+      const response = await api.get(`/admin/content/faqs/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching FAQ:', error);
       throw error;
     }
   }
@@ -315,6 +333,9 @@ async getCategories(params = {}) {
       return response.data;
     } catch (error) {
       console.error('Error creating FAQ:', error);
+      if (error.response) {
+        return error.response.data;
+      }
       throw error;
     }
   }
@@ -325,6 +346,9 @@ async getCategories(params = {}) {
       return response.data;
     } catch (error) {
       console.error('Error updating FAQ:', error);
+      if (error.response) {
+        return error.response.data;
+      }
       throw error;
     }
   }
@@ -353,10 +377,40 @@ async getCategories(params = {}) {
 
   async createReview(reviewData) {
     try {
-      const response = await api.post('/admin/content/reviews', reviewData);
+      const response = await api.post('/admin/content/reviews', reviewData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       return response.data;
     } catch (error) {
       console.error('Error creating review:', error);
+      if (error.response) {
+        return error.response.data;
+      }
+      throw error;
+    }
+  }
+
+  async updateReview(id, reviewData) {
+    try {
+      const response = await api.put(`/admin/content/reviews/${id}`, reviewData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating review:', error);
+      if (error.response) {
+        return error.response.data;
+      }
+      throw error;
+    }
+  }
+
+  async deleteReview(id) {
+    try {
+      const response = await api.delete(`/admin/content/reviews/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting review:', error);
       throw error;
     }
   }
@@ -371,10 +425,11 @@ async getCategories(params = {}) {
     }
   }
 
-  // Promotional Reviews
-  async getPromotionalReviews() {
+  // Promotional Reviews Management  
+  async getPromotionalReviews(params = {}) {
     try {
-      const response = await api.get('/admin/content/promotional-reviews');
+      const queryString = new URLSearchParams(params).toString();
+      const response = await api.get(`/admin/content/promotional-reviews?${queryString}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching promotional reviews:', error);
@@ -384,20 +439,34 @@ async getCategories(params = {}) {
 
   async createPromotionalReview(reviewData) {
     try {
-      const response = await api.post('/admin/content/promotional-reviews', reviewData);
+      const response = await api.post('/admin/content/promotional-reviews', reviewData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       return response.data;
     } catch (error) {
       console.error('Error creating promotional review:', error);
+      if (error.response) {
+        return error.response.data;
+      }
       throw error;
     }
   }
 
   async updatePromotionalReview(id, reviewData) {
     try {
-      const response = await api.put(`/admin/content/promotional-reviews/${id}`, reviewData);
+      const response = await api.put(`/admin/content/promotional-reviews/${id}`, reviewData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       return response.data;
     } catch (error) {
       console.error('Error updating promotional review:', error);
+      if (error.response) {
+        return error.response.data;
+      }
       throw error;
     }
   }

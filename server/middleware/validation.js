@@ -71,7 +71,10 @@ const tourValidation = {
     body('price_adult').isFloat({ min: 0 }).withMessage('Adult price must be a positive number'),
     body('price_child').isFloat({ min: 0 }).withMessage('Child price must be a positive number'),
     body('discount_percentage').optional().isFloat({ min: 0, max: 100 }).withMessage('Discount must be between 0-100'),
-    body('featured_tag').optional().isIn(['popular', 'great_value', 'new']).withMessage('Invalid featured tag'),
+    body('featured_tag').custom((value) => {
+      if (!value || value === '') return true; // Allow empty/null
+      return ['popular', 'great_value', 'new'].includes(value);
+  }).withMessage('Invalid featured tag'),
     handleValidationErrors
   ],
   
@@ -259,9 +262,109 @@ const categoryValidation = {
 // Content validation rules
 const contentValidation = {
   createFAQ: [
-    body('language_code').isIn(['en', 'ru', 'it', 'de']).withMessage('Invalid language code'),
-    body('question').notEmpty().withMessage('Question is required'),
-    body('answer').notEmpty().withMessage('Answer is required'),
+    // Validate the translations object structure
+    body('translations').custom((value) => {
+      // Handle both string (from FormData) and object
+      let translations;
+      try {
+        translations = typeof value === 'string' ? JSON.parse(value) : value;
+      } catch (error) {
+        throw new Error('Invalid translations format');
+      }
+      
+      if (!translations || typeof translations !== 'object') {
+        throw new Error('Translations object is required');
+      }
+      
+      // Check if at least English has content
+      if (!translations.en || !translations.en.question || !translations.en.question.trim()) {
+        throw new Error('English question is required');
+      }
+      
+      if (!translations.en.answer || !translations.en.answer.trim()) {
+        throw new Error('English answer is required');
+      }
+      
+      // Validate other languages if provided
+      const validLanguages = ['en', 'ru', 'it', 'de'];
+      for (const lang of validLanguages) {
+        if (translations[lang]) {
+          const translation = translations[lang];
+          
+          // If question is provided, answer must be provided and vice versa
+          const hasQuestion = translation.question && translation.question.trim();
+          const hasAnswer = translation.answer && translation.answer.trim();
+          
+          if (hasQuestion && !hasAnswer) {
+            throw new Error(`${lang.toUpperCase()} answer is required when question is provided`);
+          }
+          
+          if (hasAnswer && !hasQuestion) {
+            throw new Error(`${lang.toUpperCase()} question is required when answer is provided`);
+          }
+          
+          // Validate lengths
+          if (translation.question && translation.question.length > 500) {
+            throw new Error(`${lang.toUpperCase()} question cannot exceed 500 characters`);
+          }
+          
+          if (translation.answer && translation.answer.length > 2000) {
+            throw new Error(`${lang.toUpperCase()} answer cannot exceed 2000 characters`);
+          }
+        }
+      }
+      
+      return true;
+    }),
+    
+    // Validate optional fields
+    body('is_active').optional().isBoolean().withMessage('Status must be boolean'),
+    body('display_order').optional().isInt({ min: 0 }).withMessage('Display order must be a non-negative integer'),
+    
+    handleValidationErrors
+  ],
+
+  updateFAQ: [
+    param('id').isInt({ min: 1 }).withMessage('Valid FAQ ID is required'),
+    
+    // For updates, translations are optional but if provided, should be valid
+    body('translations').optional().custom((value) => {
+      if (!value) return true; // Skip if not provided
+      
+      let translations;
+      try {
+        translations = typeof value === 'string' ? JSON.parse(value) : value;
+      } catch (error) {
+        throw new Error('Invalid translations format');
+      }
+      
+      if (translations && typeof translations !== 'object') {
+        throw new Error('Translations must be an object');
+      }
+      
+      // If translations are provided, validate structure
+      const validLanguages = ['en', 'ru', 'it', 'de'];
+      for (const lang of validLanguages) {
+        if (translations[lang]) {
+          const translation = translations[lang];
+          
+          // Validate lengths
+          if (translation.question && translation.question.length > 500) {
+            throw new Error(`${lang.toUpperCase()} question cannot exceed 500 characters`);
+          }
+          
+          if (translation.answer && translation.answer.length > 2000) {
+            throw new Error(`${lang.toUpperCase()} answer cannot exceed 2000 characters`);
+          }
+        }
+      }
+      
+      return true;
+    }),
+    
+    body('is_active').optional().isBoolean().withMessage('Status must be boolean'),
+    body('display_order').optional().isInt({ min: 0 }).withMessage('Display order must be a non-negative integer'),
+    
     handleValidationErrors
   ],
   

@@ -12,7 +12,7 @@ router.use(authMiddleware);
 router.get('/faqs', contentController.getAllFAQs);
 router.get('/faqs/:id', contentController.getFAQById);
 router.post('/faqs', contentValidation.createFAQ, contentController.createFAQ);
-router.put('/faqs/:id', contentController.updateFAQ);
+router.put('/faqs/:id', contentValidation.updateFAQ, contentController.updateFAQ);
 router.delete('/faqs/:id', contentController.deleteFAQ);
 
 // Reviews routes
