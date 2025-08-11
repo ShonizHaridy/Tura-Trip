@@ -478,7 +478,8 @@ async updateTour(req, res) {
       updateFields.push('price_child = ?');
       updateValues.push(price_child);
     }
-    if (featured_tag !== undefined) {
+    if (featured_tag !== undefined && featured_tag !== '' && featured_tag !== null) {
+      // Validate featured_tag against allowed values
       updateFields.push('featured_tag = ?');
       updateValues.push(featured_tag);
     }

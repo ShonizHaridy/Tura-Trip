@@ -41,6 +41,8 @@ router.put('/promotional-reviews/:id',
   upload.fields([{ name: 'screenshot_image', maxCount: 1 }]),
   contentController.updatePromotionalReview
 );
+router.delete('/promotional-reviews/:id', contentController.deletePromotionalReview);
+
 
 
 module.exports = router;

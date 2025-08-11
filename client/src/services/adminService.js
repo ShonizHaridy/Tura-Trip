@@ -471,6 +471,16 @@ async getCategories(params = {}) {
     }
   }
 
+  async deletePromotionalReview(id) {
+    try {
+      const response = await api.delete(`/admin/content/promotional-reviews/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting promotional review:', error);
+      throw error;
+    }
+  }
+
   // Currency & Commission Management
   async getCurrencies() {
     try {

@@ -188,6 +188,7 @@ class ContentController {
 
   // Create FAQ with translations
   async createFAQ(req, res) {
+    const connection = await pool.getConnection();
     try {
       const { translations, is_active = true, display_order = 0 } = req.body;
 
@@ -198,11 +199,11 @@ class ContentController {
         });
       }
 
-      await pool.execute('START TRANSACTION');
+      await connection.beginTransaction();
 
       try {
         // Insert main FAQ
-        const [faqResult] = await pool.execute(
+        const [faqResult] = await connection.execute(
           'INSERT INTO faqs (is_active, display_order) VALUES (?, ?)',
           [is_active, display_order]
         );
@@ -213,14 +214,14 @@ class ContentController {
         for (const [langCode, translation] of Object.entries(translations)) {
           const { question, answer } = translation;
           if (question && answer) {
-            await pool.execute(
+            await connection.execute(
               'INSERT INTO faq_translations (faq_id, language_code, question, answer) VALUES (?, ?, ?, ?)',
               [faqId, langCode, question, answer]
             );
           }
         }
 
-        await pool.execute('COMMIT');
+        await connection.commit();
 
         res.json({
           success: true,
@@ -228,7 +229,7 @@ class ContentController {
           data: { id: faqId }
         });
       } catch (error) {
-        await pool.execute('ROLLBACK');
+        await connection.rollback();
         throw error;
       }
     } catch (error) {
@@ -237,17 +238,20 @@ class ContentController {
         success: false,
         message: 'Internal server error'
       });
+    } finally {
+      connection.release();
     }
   }
 
   // Update FAQ
   async updateFAQ(req, res) {
+    const connection = await pool.getConnection();
     try {
       const { id } = req.params;
       const { translations, is_active, display_order } = req.body;
 
       // Check if FAQ exists
-      const [existingFAQ] = await pool.execute(
+      const [existingFAQ] = await connection.execute(
         'SELECT * FROM faqs WHERE id = ?',
         [id]
       );
@@ -259,7 +263,7 @@ class ContentController {
         });
       }
 
-      await pool.execute('START TRANSACTION');
+      await connection.beginTransaction();
 
       try {
         // Update main FAQ table
@@ -280,7 +284,7 @@ class ContentController {
           updateFields.push('updated_at = CURRENT_TIMESTAMP');
           updateValues.push(id);
 
-          await pool.execute(
+          await connection.execute(
             `UPDATE faqs SET ${updateFields.join(', ')} WHERE id = ?`,
             updateValues
           );
@@ -291,7 +295,7 @@ class ContentController {
           for (const [langCode, translation] of Object.entries(translations)) {
             const { question, answer } = translation;
             if (question && answer) {
-              await pool.execute(`
+              await connection.execute(`
                 INSERT INTO faq_translations (faq_id, language_code, question, answer)
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE 
@@ -302,14 +306,14 @@ class ContentController {
           }
         }
 
-        await pool.execute('COMMIT');
+        await connection.commit();
 
         res.json({
           success: true,
           message: 'FAQ updated successfully'
         });
       } catch (error) {
-        await pool.execute('ROLLBACK');
+        await connection.rollback();
         throw error;
       }
     } catch (error) {
@@ -318,6 +322,8 @@ class ContentController {
         success: false,
         message: 'Internal server error'
       });
+    } finally {
+      connection.release();
     }
   }
 
@@ -1016,6 +1022,35 @@ async updatePromotionalReview(req, res) {
     connection.release();
   }
 }
+
+  // Delete promotional review
+  async deletePromotionalReview(req, res) {
+    try {
+      const { id } = req.params;
+
+      const [result] = await pool.execute('DELETE FROM promotional_reviews WHERE id = ?', [id]);
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Promotional review not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        message: 'Promotional review deleted successfully'
+      });
+    } catch (error) {
+      console.error('❌ Delete promotional review error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error'
+      });
+    }
+  }
+
+
 }
 
 module.exports = new ContentController();

@@ -711,9 +711,9 @@ const TripDetail = () => {
 
           {/* What's Included Section */}
           <div className="p-6 rounded-xl bg-gradient-to-b from-[rgba(114,195,194,0.20)] to-[rgba(99,147,210,0.20)]">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="flex flex-col lg:flex-row gap-8">
               {/* What's Included */}
-              <div className="space-y-2">
+              <div className="flex-1 space-y-2">
                 <h3 className="text-3xl font-semibold text-danim-700">
                   {t('tripDetail.whatsIncluded') || "What's included"}
                 </h3>
@@ -743,36 +743,25 @@ const TripDetail = () => {
                 </div>
               </div>
 
-              {/* What's Not Included - Same pattern */}
-              <div className="space-y-2">
-                <h3 className="text-3xl font-semibold text-danim-700">
-                  {t('tripDetail.whatsNotIncluded') || "What's Not included"}
-                </h3>
-                <div className="font-family-primary font-medium space-y-2">
-                  {content.not_included && content.not_included.length > 0 ? (
-                    content.not_included.map((item, index) => (
+              {/* What's Not Included - Only show if data exists */}
+              {content.not_included && content.not_included.length > 0 && (
+                <div className="flex-1 space-y-2">
+                  <h3 className="text-3xl font-semibold text-danim-700">
+                    {t('tripDetail.whatsNotIncluded') || "What's Not included"}
+                  </h3>
+                  <div className="font-family-primary font-medium space-y-2">
+                    {content.not_included.map((item, index) => (
                       <div key={index} className="flex items-start gap-2">
                         <span className="text-xl text-rose-black-300 flex-shrink-0 mt-0.5 font-bold">•</span>
                         <span className="text-xl text-rose-black-300 flex-1 leading-relaxed">{item}</span>
                       </div>
-                    ))
-                  ) : (
-                    [
-                      t('tripDetail.masks') || 'Masks',
-                      t('tripDetail.fins') || 'Fins', 
-                      t('tripDetail.divingSuits') || 'Diving Suits'
-                    ].map((item, index) => (
-                      <div key={index} className="flex items-start gap-2">
-                        <span className="text-xl text-rose-black-300 flex-shrink-0 mt-0.5 font-bold">•</span>
-                        <span className="text-xl text-rose-black-300 flex-1 leading-relaxed">{item}</span>
-                      </div>
-                    ))
-                  )}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* Take with you - Same pattern */}
-              <div className="space-y-2">
+              {/* Take with you */}
+              <div className="flex-1 space-y-2">
                 <h3 className="text-3xl font-semibold text-danim-700">
                   {t('tripDetail.takeWithYou') || "Take with you"}
                 </h3>

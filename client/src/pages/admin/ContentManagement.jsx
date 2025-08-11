@@ -808,6 +808,8 @@ const ContentManagement = () => {
       let response;
       if (activeTab === "FAQs") {
         response = await adminService.deleteFAQ(id);
+      } else if (activeTab === "Reviews") {
+        response = await adminService.deletePromotionalReview(id); // Add this line
       } else if (activeTab === "Comments") {
         response = await adminService.deleteReview(id);
       }

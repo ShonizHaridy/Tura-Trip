@@ -85,7 +85,10 @@ const tourValidation = {
     body('price_adult').optional().isFloat({ min: 0 }).withMessage('Adult price must be a positive number'),
     body('price_child').optional().isFloat({ min: 0 }).withMessage('Child price must be a positive number'),
     body('discount_percentage').optional().isFloat({ min: 0, max: 100 }).withMessage('Discount must be between 0-100'),
-    body('featured_tag').optional().isIn(['popular', 'great_value', 'new']).withMessage('Invalid featured tag'),
+    body('featured_tag').custom((value) => {
+      if (!value || value === '') return true; // Allow empty/null
+      return ['popular', 'great_value', 'new'].includes(value);
+    }).withMessage('Invalid featured tag'),
     handleValidationErrors
   ]
 };
