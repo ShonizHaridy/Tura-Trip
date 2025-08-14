@@ -118,7 +118,8 @@ const CommissionSettings = () => {
 
   return (
     <AdminLayout activeItem="Commission">
-      <div className="max-w-4xl mx-auto">
+      {/* <div className="max-w-4xl mx-auto"> */}
+      <div className="">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">

@@ -19,7 +19,7 @@ const StatsCard = ({ title, value, icon, linkText = "View all" }) => {
         </div>
       </div>
       <div className="bg-gray-50 px-6 py-3">
-        <button className="text-sm font-medium text-teal-600 hover:text-teal-500 transition-colors">
+        <button className="text-sm cursor-pointer hover:underline font-medium text-teal-600 hover:text-teal-500 transition-colors">
           {linkText}
         </button>
       </div>

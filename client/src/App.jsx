@@ -1,7 +1,7 @@
 // src/App.jsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./utils/ProtectedRoute"; // ← Fixed import path
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 
@@ -24,38 +24,24 @@ import ContentManagement from "./pages/admin/ContentManagement";
 import AddTour from "./pages/admin/AddTour";
 import EditTour from "./pages/admin/EditTour";
 import ViewTour from "./pages/admin/ViewTour";
-
-import BrowseTours from "./pages/BrowseTours";
-
-
-import SearchResults from "./pages/SearchResults";
-
-import ScrollToTop from "./components/ScrollToTop";
-
-import EdgeSocialMedia from "./components/EdgeScoialMedia"; 
-import LeftScrollToTop from "./components/LeftScrollToTop";
 import CommissionSettings from "./pages/admin/CommissionSettings";
 
-// Admin route wrapper that redirects to login or dashboard
-const AdminRoute = () => {
-  return <Navigate to="/admin/dashboard" replace />;
-};
-
-// Login route wrapper that redirects to dashboard if authenticated
-const LoginRoute = () => {
-  return <AdminLogin />;
-};
+import BrowseTours from "./pages/BrowseTours";
+import SearchResults from "./pages/SearchResults";
+import ScrollToTop from "./components/ScrollToTop";
+import EdgeSocialMedia from "./components/EdgeScoialMedia"; 
+import LeftScrollToTop from "./components/LeftScrollToTop";
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <ScrollToTop /> {/* Add this inside Router but outside Routes */}
+        <ScrollToTop />
 
         <Routes>
           {/* Admin Routes - No Header/Footer */}
-          <Route path="/admin" element={<AdminRoute />} />
-          <Route path="/admin/login" element={<LoginRoute />} />
+          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
           
           {/* Protected Admin Routes */}
           <Route 
@@ -172,9 +158,7 @@ function App() {
                       path="/destination/:citySlug/:tripId"
                       element={<TripDetail />}
                     />
-
                     <Route path="/browse-tours" element={<BrowseTours />} />
-
                   </Routes>
                 </main>
                 <Footer />

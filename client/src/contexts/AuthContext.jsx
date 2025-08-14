@@ -1,4 +1,4 @@
-// src/contexts/AuthContext.jsx
+// src/contexts/AuthContext.jsx - CLEAN VERSION
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import adminService from '../services/adminService';
 
@@ -17,46 +17,67 @@ export const AuthProvider = ({ children }) => {
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Check if user is authenticated on app load
   useEffect(() => {
-    checkAuthStatus();
-  }, []);
+    let ignore = false;
 
-  const checkAuthStatus = async () => {
-    try {
-      const token = localStorage.getItem('admin_token');
-      const storedAdmin = localStorage.getItem('admin_user');
+    const checkAuthStatus = async () => {
+      try {
+        const token = localStorage.getItem('admin_token');
+        const storedAdmin = localStorage.getItem('admin_user');
 
-      if (token && storedAdmin) {
-        // Verify token with backend
-        const response = await adminService.verifyToken();
-        if (response.success) {
-          setIsAuthenticated(true);
-          setAdmin(response.data);
-        } else {
-          // Invalid token, clear storage
-          logout();
+        if (token && storedAdmin) {
+          const response = await adminService.verifyToken();
+          
+          if (!ignore && response.success) {
+            setIsAuthenticated(true);
+            setAdmin(response.data);
+          } else if (!ignore) {
+            localStorage.removeItem('admin_token');
+            localStorage.removeItem('admin_user');
+            setIsAuthenticated(false);
+            setAdmin(null);
+          }
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        if (!ignore) {
+          localStorage.removeItem('admin_token');
+          localStorage.removeItem('admin_user');
+          setIsAuthenticated(false);
+          setAdmin(null);
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
         }
       }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      logout();
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    checkAuthStatus();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const login = async (credentials) => {
     try {
       const response = await adminService.login(credentials);
+      
       if (response.success) {
         setIsAuthenticated(true);
         setAdmin(response.data.admin);
+        setLoading(false);
+        return response;
+      } else {
         return response;
       }
-      throw new Error(response.message || 'Login failed');
     } catch (error) {
-      throw error;
+      console.error('Auth login error:', error);
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Login failed'
+      };
     }
   };
 
@@ -72,7 +93,6 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     logout,
-    checkAuthStatus,
   };
 
   return (

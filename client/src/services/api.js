@@ -35,12 +35,20 @@ api.interceptors.response.use(
   (error) => {
     // Handle 401 - Unauthorized
     if (error.response?.status === 401) {
-      localStorage.removeItem('admin_token');
-      localStorage.removeItem('admin_user');
-      // Redirect to login if on admin route
-      if (window.location.pathname.startsWith('/admin')) {
-        window.location.href = '/admin/login';
+      // ⭐ FIXED: Don't redirect if this is a login attempt
+      const isLoginRequest = error.config?.url?.includes('/admin/login');
+      
+      if (!isLoginRequest) {
+        // Only clear tokens and redirect for other 401s (expired sessions, etc.)
+        localStorage.removeItem('admin_token');
+        localStorage.removeItem('admin_user');
+        
+        // Redirect to login if on admin route
+        if (window.location.pathname.startsWith('/admin')) {
+          window.location.href = '/admin/login';
+        }
       }
+      // For login requests, let the login form handle the 401 error
     }
     
     // Handle network errors

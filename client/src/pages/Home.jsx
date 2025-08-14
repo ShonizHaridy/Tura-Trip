@@ -670,9 +670,8 @@ const handleSuggestionClick = (suggestion) => {
               transportation={tour.availability || "Daily"}
               daysOfWeek={tour.days_of_week}
               reviews={tour.reviews_count || 0}
-              price={parseFloat(tour.price_adult)}
-              originalPrice={getOriginalPrice(parseFloat(tour.price_adult), parseFloat(tour.discount_percentage))}
-              priceUnit={t("common.perPerson")}
+              originalPrice={parseFloat(tour.price_adult)}
+              price={tour.discount_percentage > 0 ? Math.round(parseFloat(tour.price_adult) * (1 - tour.discount_percentage / 100)) : tour.price_adult}
               isFeatured={tour.featured_tag != null}
               featuredLabel={getFeaturedLabel(tour.featured_tag)} 
               onNavigate={() => navigate(`/destination/${tour.city_slug}/${tour.id}`)}

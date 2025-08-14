@@ -6,6 +6,7 @@ const helpers = require('../utils/helpers'); // Import your helpers
 class ToursController {
   // Get all tours with filters and pagination
 // Get all tours with filters and pagination
+// Get all tours with filters and pagination
 async getAllTours(req, res) {
   try {
     const {
@@ -16,11 +17,16 @@ async getAllTours(req, res) {
       category_id,
       status,
       featured_tag,
+      min_price,          
+      max_price,          
       sort_by = 'created_at',
       sort_order = 'DESC'
     } = req.query;
 
-    console.log('📥 Request params:', { page, limit, search, city_id, category_id, status, featured_tag });
+    console.log('📥 Request params:', { 
+      page, limit, search, city_id, category_id, status, featured_tag, 
+      min_price, max_price  
+    });
 
     // Convert to safe integers
     const safeLimit = Math.max(1, Math.min(100, parseInt(limit) || 10));
@@ -54,6 +60,17 @@ async getAllTours(req, res) {
     if (featured_tag && ['popular', 'great_value', 'new'].includes(featured_tag)) {
       whereConditions.push('t.featured_tag = ?');
       whereParams.push(featured_tag);
+    }
+
+    // ✅ ADD PRICE FILTERING
+    if (min_price && !isNaN(parseFloat(min_price))) {
+      whereConditions.push('t.price_adult >= ?');
+      whereParams.push(parseFloat(min_price));
+    }
+
+    if (max_price && !isNaN(parseFloat(max_price))) {
+      whereConditions.push('t.price_adult <= ?');
+      whereParams.push(parseFloat(max_price));
     }
 
     const whereClause = whereConditions.length > 0 
@@ -120,8 +137,8 @@ async getAllTours(req, res) {
     const [tours] = await pool.execute(toursQuery, whereParams);
     const processedTours = imageHelper.processArrayImages(tours, 'tour');
 
-
     console.log('✅ Tours query succeeded, found:', tours.length, 'tours');
+    console.log('💰 Price filtering applied:', { min_price, max_price }); // ✅ ADD THIS LOG
 
     res.json({
       success: true,

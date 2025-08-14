@@ -255,10 +255,9 @@ const getTranslatedFeaturedLabel = useTranslatedFeaturedLabel();
                             category={tour.category}
                             duration={tour.duration}
                             daysOfWeek={tour.availability || 'Daily'}  // Add this
-                            reviews={tour.reviews_count}
-                            price={tour.price_adult}
-                            originalPrice={tour.discount_percentage > 0 ? 
-                            Math.round(tour.price_adult / (1 - tour.discount_percentage / 100)) : null}
+                            reviews={tour.reviews_count || 0}
+                            originalPrice={parseFloat(tour.price_adult)}
+                            price={tour.discount_percentage > 0 ? Math.round(parseFloat(tour.price_adult) * (1 - tour.discount_percentage / 100)) : tour.price_adult}
                             priceUnit={t('common.perPerson') || 'per person'}
                             isFeatured={tour.featured_tag !== null}
                             featuredLabel={getTranslatedFeaturedLabel(tour.featured_tag) || t('common.featured')}
@@ -305,10 +304,9 @@ const getTranslatedFeaturedLabel = useTranslatedFeaturedLabel();
                       image={tour.cover_image_url}
                       category={tour.category}
                       duration={tour.duration}
-                      reviews={tour.reviews_count}
-                      price={tour.price_adult}
-                      originalPrice={tour.discount_percentage > 0 ? 
-                        Math.round(tour.price_adult / (1 - tour.discount_percentage / 100)) : null}
+                      reviews={tour.reviews_count || 0}
+                      originalPrice={parseFloat(tour.price_adult)}
+                      price={tour.discount_percentage > 0 ? Math.round(parseFloat(tour.price_adult) * (1 - tour.discount_percentage / 100)) : tour.price_adult}
                       priceUnit={t('common.perPerson') || 'per person'}
                       isFeatured={tour.featured_tag !== null}
                       featuredLabel={getTranslatedFeaturedLabel(tour.featured_tag) || 'Featured'}

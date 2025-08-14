@@ -1,4 +1,4 @@
-// src/pages/admin/CitiesManagement.jsx
+// CitiesManagement.jsx - FIXED VERSION
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AddCityModal from '../../components/admin/AddCityModal';
@@ -8,14 +8,40 @@ import adminService from '../../services/adminService';
 
 const CitiesManagement = () => {
   const [cities, setCities] = useState([]);
+  const [filteredCities, setFilteredCities] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCity, setEditingCity] = useState(null);
+  
+  // ✅ FIXED: Proper search state management
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
+  // ✅ FIXED: Proper debouncing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // ✅ FIXED: Fetch cities once
   useEffect(() => {
     fetchCities();
   }, []);
+
+  // ✅ FIXED: Filter cities when debounced search changes
+  useEffect(() => {
+    if (!debouncedSearchTerm.trim()) {
+      setFilteredCities(cities);
+    } else {
+      const filtered = cities.filter(city =>
+        city.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        (city.description && city.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
+      );
+      setFilteredCities(filtered);
+    }
+  }, [cities, debouncedSearchTerm]);
 
   const fetchCities = async () => {
     try {
@@ -23,6 +49,7 @@ const CitiesManagement = () => {
       const response = await adminService.getCities();
       if (response.success) {
         setCities(response.data);
+        setFilteredCities(response.data);
       }
     } catch (error) {
       console.error('Error fetching cities:', error);
@@ -69,12 +96,6 @@ const CitiesManagement = () => {
     }
   };
 
-  // Filter cities based on search term
-  const filteredCities = cities.filter(city =>
-    city.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (city.description && city.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
   return (
     <AdminLayout activeItem="Cities">
       <div className="max-w-7xl mx-auto">
@@ -105,6 +126,13 @@ const CitiesManagement = () => {
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-md text-rose-black-500 shadow-md placeholder-white-300 focus:border-transparent w-80"
               />
               <SearchNormal1 size="16" color="#9ca3af" className="absolute left-3 top-1/2 transform -translate-y-1/2" />
+              
+              {/* ✅ ADDED: Typing indicator */}
+              {searchTerm !== debouncedSearchTerm && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-teal-500"></div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -144,7 +172,7 @@ const CitiesManagement = () => {
                   ) : filteredCities.length === 0 ? (
                     <tr>
                       <td colSpan="5" className="px-4 py-8 text-center text-rose-black-300">
-                        {searchTerm ? 'No cities found matching your search.' : 'No cities found.'}
+                        {searchTerm ? `No cities found for "${searchTerm}".` : 'No cities found.'}
                       </td>
                     </tr>
                   ) : (

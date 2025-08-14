@@ -85,16 +85,46 @@ class AdminService {
   }
 
   // Tours management
-  async getTours(params = {}) {
-    try {
-      const queryString = new URLSearchParams(params).toString();
-      const response = await api.get(`/admin/tours?${queryString}`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching tours:', error);
-      throw error;
-    }
+  // async getTours(params = {}) {
+  //   try {
+  //     const queryString = new URLSearchParams(params).toString();
+  //     const response = await api.get(`/admin/tours?${queryString}`);
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error('Error fetching tours:', error);
+  //     throw error;
+  //   }
+  // }
+
+async getTours(params = {}) {
+  try {
+    // Build query parameters properly including min_price and max_price
+    const queryParams = {
+      page: params.page || 1,
+      limit: params.limit || 10,
+      search: params.search || '',
+      city_id: params.city_id || '',
+      category_id: params.category_id || '',
+      status: params.status || '',
+      min_price: params.min_price || '',    // ✅ ADD THIS
+      max_price: params.max_price || ''     // ✅ ADD THIS
+    };
+    
+    // Remove empty values to clean up URL
+    Object.keys(queryParams).forEach(key => {
+      if (queryParams[key] === '' || queryParams[key] === null || queryParams[key] === undefined) {
+        delete queryParams[key];
+      }
+    });
+    
+    const queryString = new URLSearchParams(queryParams).toString();
+    const response = await api.get(`/admin/tours?${queryString}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching tours:', error);
+    throw error;
   }
+}
 
   async getTourById(id) {
     try {

@@ -31,7 +31,7 @@ const handleValidationErrors = (req, res, next) => {
 // Admin validation rules
 const adminValidation = {
   login: [
-    // Accept either email OR admin_id
+    // Fix the validation logic
     body().custom((value, { req }) => {
       const { email, admin_id } = req.body;
       
@@ -39,17 +39,41 @@ const adminValidation = {
         throw new Error('Please provide either email or admin ID');
       }
       
+      // If email is provided, validate email format
       if (email && !email.match(/^\S+@\S+\.\S+$/)) {
         throw new Error('Please provide a valid email');
       }
       
-      if (admin_id && admin_id.length < 3) {
-        throw new Error('Admin ID must be at least 3 characters');
+      // If admin_id is provided, check if it's an email or admin ID
+      if (admin_id) {
+        // If it looks like an email, validate as email
+        if (admin_id.includes('@')) {
+          if (!admin_id.match(/^\S+@\S+\.\S+$/)) {
+            throw new Error('Please provide a valid email');
+          }
+        } else {
+          // If it's not an email, validate as admin ID
+          if (admin_id.length < 3) {
+            throw new Error('Admin ID must be at least 3 characters');
+          }
+        }
       }
       
       return true;
     }),
     body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+    handleValidationErrors
+  ],
+  forgotPasswordValidation : [
+    body('admin_id').notEmpty().withMessage('Admin ID is required'),
+    body('email').isEmail().withMessage('Valid email is required'),
+    handleValidationErrors
+  ],
+  resetPasswordValidation : [
+    body('admin_id').notEmpty().withMessage('Admin ID is required'),
+    body('email').isEmail().withMessage('Valid email is required'),
+    body('verification_code').notEmpty().withMessage('Verification code is required'),
+    body('new_password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
     handleValidationErrors
   ],
   

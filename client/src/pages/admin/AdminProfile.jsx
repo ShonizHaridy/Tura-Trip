@@ -4,7 +4,7 @@ import AdminLayout from "../../components/admin/AdminLayout";
 import EditProfileModal from "../../components/admin/EditProfileModal";
 import LogoutConfirmModal from "../../components/admin/LogoutConfirmModal";
 import { useAuth } from "../../contexts/AuthContext";
-import { Edit2, Refresh, Logout, User } from 'iconsax-react';
+import { Edit2, Refresh, Logout, User, ProfileCircle } from 'iconsax-react';
 
 const AdminProfile = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -13,7 +13,7 @@ const AdminProfile = () => {
 
   return (
     <AdminLayout activeItem="Profile">
-      <div className="max-w-4xl mx-auto">
+      <div className="">
         {/* Profile Card */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           {/* Header */}
@@ -29,14 +29,15 @@ const AdminProfile = () => {
             {/* Profile Image and Info */}
             <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6">
               <div className="relative">
-                <img
+                {/* <img
                   src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
                   alt="Profile"
                   className="w-40 h-40 rounded-full object-cover"
-                />
-                <button className="absolute bottom-0 right-0 w-9 h-9 bg-gray-200 rounded-md flex items-center justify-center hover:bg-gray-300 transition-colors">
+                /> */}
+                <ProfileCircle className="w-40 h-40 rounded-full object-cover" color="#010828" />
+                {/* <button className="absolute bottom-0 right-0 w-9 h-9 bg-gray-200 rounded-md flex items-center justify-center hover:bg-gray-300 transition-colors">
                   <Edit2 size="20" color="#155e75" />
-                </button>
+                </button> */}
               </div>
 
               <div className="text-center lg:text-left">
@@ -59,10 +60,10 @@ const AdminProfile = () => {
                 Edit Profile
               </button>
 
-              <button className="flex items-center justify-center gap-3 px-4 py-2 bg-gray-200 text-teal-800 rounded-md hover:bg-gray-300 transition-colors">
+              {/* <button className="flex items-center justify-center gap-3 px-4 py-2 bg-gray-200 text-teal-800 rounded-md hover:bg-gray-300 transition-colors">
                 <Refresh size="20" color="#155e75" />
                 Reset Password
-              </button>
+              </button> */}
 
               <button
                 onClick={() => setIsLogoutModalOpen(true)}
@@ -85,12 +86,12 @@ const AdminProfile = () => {
                   {admin?.email || 'admin@example.com'}
                 </span>
               </div>
-              <div className="flex items-center gap-4">
+              {/* <div className="flex items-center gap-4">
                 <span className="font-medium text-gray-700 min-w-0 flex-shrink-0">
                   Phone Number
                 </span>
                 <span className="text-gray-900 font-semibold">01018128987</span>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

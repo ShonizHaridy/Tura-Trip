@@ -297,3 +297,19 @@ CREATE TABLE city_categories (
     INDEX idx_category (category_id),
     INDEX idx_active (is_active)
 );
+
+-- Add to your database schema
+CREATE TABLE notifications (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    type ENUM('review', 'comment', 'booking', 'system') NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    related_id INT NULL,
+    related_type ENUM('tour', 'review', 'booking') NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_read_created (is_read, created_at),
+    INDEX idx_type (type)
+);

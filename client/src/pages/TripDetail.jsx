@@ -498,9 +498,15 @@ const TripDetail = () => {
               {/* Reviews */}
               <div className="flex items-center gap-2">
                 <UserTag size={24} color="#233660" />
-                <span className="text-danim-800 font-semibold underline">
-                  {reviewsCount} {t('common.reviews') || 'Reviews'}
-                </span>
+                {reviewsCount === 0 ? (
+                  <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                    New Tour!
+                  </span>
+                ) : (
+                  <span className="text-danim-800 font-semibold underline">
+                    {reviewsCount} {t('common.reviews') || 'Reviews'}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -662,7 +668,10 @@ const TripDetail = () => {
                     {content.trip_program && content.trip_program.length > 0 ? (
                       <div>
                         {(showMoreTripProgram ? content.trip_program : content.trip_program.slice(0, 5)).map((item, index) => (
-                          <div key={index}>• {item}<br /></div>
+                          <div key={index} className="flex items-start gap-2">
+                            <span className="flex-shrink-0">•</span>
+                            <span className="flex-1">{item}</span>
+                          </div>
                         ))}
                       </div>
                     ) : (
@@ -1085,8 +1094,8 @@ const TripDetail = () => {
                     durationUnit=""
                     daysOfWeek={trip.availability || "Almost Daily"}
                     reviews={trip.reviews_count || 0}
-                    price={parseFloat(trip.price_adult)}
-                    originalPrice={trip.discount_percentage > 0 ? Math.round(parseFloat(trip.price_adult) / (1 - trip.discount_percentage / 100)) : null}
+                    originalPrice={parseFloat(tour.price_adult)}
+                    price={tour.discount_percentage > 0 ? Math.round(parseFloat(tour.price_adult) * (1 - tour.discount_percentage / 100)) : tour.price_adult}
                     priceUnit="per person"
                     isFeatured={trip.featured_tag || false}
                   />

@@ -58,8 +58,8 @@ const Footer = () => {
               </Link>
               </div>
               
-              <h3 className="font-semibold text-lg mb-4">{t("footer.contact.title")}</h3>
-              <p className="text-gray-300 mb-2">{t("footer.contact.call")} : +201055957451 </p>
+              {/* <h3 className="font-semibold text-lg mb-4">{t("footer.contact.title")}</h3>
+              <p className="text-gray-300 mb-2">{t("footer.contact.call")} : +201055957451 </p> */}
               <p className="text-gray-400 text-sm mb-2 leading-relaxed">
                 {t("footer.contact.description")}
               </p>

@@ -6,6 +6,8 @@ const SlugHelper = require('../utils/slugHelper');
 const emailService = require('../services/emailService');
 const countryService = require('../services/countryService');
 
+const notificationController = require('./notificationController');
+
 
 class PublicController {
   // Get homepage data with RANDOM selections as requested
@@ -1324,126 +1326,136 @@ async getBrowseToursData(req, res) {
   }
 
   async submitTourReview(req, res) {
-      try {
-          const { tourId } = req.params;
-          console.log('Submit tour review for tourId:', tourId);
-          console.log('Submit tour review body:', req.body);
-          console.log('Submit tour review files:', req.files);
-          
-          const { client_name, comment, language = 'en' } = req.body;
+    try {
+      const { tourId } = req.params;
+      console.log('Submit tour review for tourId:', tourId);
+      console.log('Submit tour review body:', req.body);
+      console.log('Submit tour review files:', req.files);
+      
+      const { client_name, comment, language = 'en' } = req.body;
 
-          // Validation (NO RATING)
-          if (!client_name || !comment) {
-              return res.status(400).json({
-                  success: false,
-                  message: 'Client name and comment are required'
-              });
-          }
-
-          if (client_name.trim().length < 2) {
-              return res.status(400).json({
-                  success: false,
-                  message: 'Client name must be at least 2 characters long'
-              });
-          }
-
-          if (comment.trim().length < 10) {
-              return res.status(400).json({
-                  success: false,
-                  message: 'Comment must be at least 10 characters long'
-              });
-          }
-
-          // Check if tour exists and get tour details
-          const [tourCheck] = await pool.execute(`
-              SELECT
-                  t.id,
-                  COALESCE(tc.title, 'Tour') as tour_name,
-                  t.status
-              FROM tours t
-              LEFT JOIN tour_content tc ON t.id = tc.tour_id AND tc.language_code = ?
-              WHERE t.id = ?
-          `, [language, tourId]);
-
-          if (tourCheck.length === 0) {
-              return res.status(404).json({
-                  success: false,
-                  message: 'Tour not found'
-              });
-          }
-
-          if (tourCheck[0].status !== 'active') {
-              return res.status(400).json({
-                  success: false,
-                  message: 'Reviews cannot be submitted for inactive tours'
-              });
-          }
-
-          const tourName = tourCheck[0].tour_name;
-
-          // Handle file uploads
-          const client_image = req.files?.client_image?.[0]?.filename || null;
-          const profile_image = req.files?.profile_image?.[0]?.filename || null;
-
-          // Insert the review (NO RATING - set to null)
-          const [result] = await pool.execute(`
-              INSERT INTO reviews (
-                  tour_id,
-                  client_name,
-                  rating,
-                  comment,
-                  tour_name,
-                  review_date,
-                  client_image,
-                  profile_image,
-                  is_active,
-                  created_at
-              ) VALUES (?, ?, null, ?, ?, CURDATE(), ?, ?, true, NOW())
-          `, [
-              tourId,
-              client_name.trim(),
-              comment.trim(),
-              tourName,
-              client_image,
-              profile_image
-          ]);
-
-          // Get the inserted review with processed images
-          const [newReview] = await pool.execute(`
-              SELECT
-                  id,
-                  client_name,
-                  rating,
-                  comment,
-                  tour_name,
-                  review_date,
-                  client_image,
-                  profile_image,
-                  created_at
-              FROM reviews
-              WHERE id = ?
-          `, [result.insertId]);
-
-          // Process the review with images using imageHelper
-          const processedReview = imageHelper.processImages(newReview[0], 'review');
-
-          res.status(201).json({
-              success: true,
-              message: 'Review submitted successfully',
-              data: {
-                  review: processedReview,
-                  message: 'Thank you for your review! It will appear on the tour page shortly.'
-              }
-          });
-
-      } catch (error) {
-          console.error('❌ Submit tour review error:', error);
-
-          res.status(500).json({
+      // Validation (NO RATING)
+      if (!client_name || !comment) {
+          return res.status(400).json({
               success: false,
-              message: 'Internal server error. Please try again later.'
+              message: 'Client name and comment are required'
           });
       }
+
+      if (client_name.trim().length < 2) {
+          return res.status(400).json({
+              success: false,
+              message: 'Client name must be at least 2 characters long'
+          });
+      }
+
+      if (comment.trim().length < 10) {
+          return res.status(400).json({
+              success: false,
+              message: 'Comment must be at least 10 characters long'
+          });
+      }
+
+      // Check if tour exists and get tour details
+      const [tourCheck] = await pool.execute(`
+          SELECT
+              t.id,
+              COALESCE(tc.title, 'Tour') as tour_name,
+              t.status
+          FROM tours t
+          LEFT JOIN tour_content tc ON t.id = tc.tour_id AND tc.language_code = ?
+          WHERE t.id = ?
+      `, [language, tourId]);
+
+      if (tourCheck.length === 0) {
+          return res.status(404).json({
+              success: false,
+              message: 'Tour not found'
+          });
+      }
+
+      if (tourCheck[0].status !== 'active') {
+          return res.status(400).json({
+              success: false,
+              message: 'Reviews cannot be submitted for inactive tours'
+          });
+      }
+
+      const tourName = tourCheck[0].tour_name;
+
+      // Handle file uploads
+      const client_image = req.files?.client_image?.[0]?.filename || null;
+      const profile_image = req.files?.profile_image?.[0]?.filename || null;
+
+      // Insert the review (NO RATING - set to null)
+      const [result] = await pool.execute(`
+          INSERT INTO reviews (
+              tour_id,
+              client_name,
+              rating,
+              comment,
+              tour_name,
+              review_date,
+              client_image,
+              profile_image,
+              is_active,
+              created_at
+          ) VALUES (?, ?, null, ?, ?, CURDATE(), ?, ?, true, NOW())
+      `, [
+          tourId,
+          client_name.trim(),
+          comment.trim(),
+          tourName,
+          client_image,
+          profile_image
+      ]);
+
+      // Get the inserted review with processed images
+      const [newReview] = await pool.execute(`
+          SELECT
+              id,
+              client_name,
+              rating,
+              comment,
+              tour_name,
+              review_date,
+              client_image,
+              profile_image,
+              created_at
+          FROM reviews
+          WHERE id = ?
+      `, [result.insertId]);
+
+        // Process the review with images using imageHelper
+        const processedReview = imageHelper.processImages(newReview[0], 'review');
+
+
+
+        await notificationController.createNotification(
+          'review',
+          'New Review Submitted',
+          `A new review has been submitted for tour: ${tourName}`,
+          tourId,
+          'tour'
+        );
+
+        res.status(201).json({
+            success: true,
+            message: 'Review submitted successfully',
+            data: {
+                review: processedReview,
+                message: 'Thank you for your review! It will appear on the tour page shortly.'
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ Submit tour review error:', error);
+
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error. Please try again later.'
+        });
+    }
   }
 
 

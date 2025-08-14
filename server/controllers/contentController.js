@@ -1,6 +1,8 @@
 const { pool } = require('../config/database');
 const imageHelper = require('../utils/imageHelper');
 
+const notificationController = require('./notificationController');
+
 class ContentController {
   // ==== FAQ MANAGEMENT ====
 
@@ -11,7 +13,8 @@ class ContentController {
         page = 1,
         limit = 10,
         language_code,
-        active_only = false
+        active_only = false,
+        search = '' // ✅ ADD search parameter
       } = req.query;
 
       // Safe pagination values
@@ -24,6 +27,23 @@ class ContentController {
 
       if (active_only === 'true') {
         whereConditions.push('f.is_active = true');
+      }
+
+      // ✅ ADD search functionality
+      if (search && search.trim()) {
+        if (language_code) {
+          // Search in specific language
+          whereConditions.push('(ft.question LIKE ? OR ft.answer LIKE ?)');
+          queryParams.push(`%${search.trim()}%`, `%${search.trim()}%`);
+        } else {
+          // Search across all languages (for admin)
+          whereConditions.push(`EXISTS (
+            SELECT 1 FROM faq_translations ft_search 
+            WHERE ft_search.faq_id = f.id 
+            AND (ft_search.question LIKE ? OR ft_search.answer LIKE ?)
+          )`);
+          queryParams.push(`%${search.trim()}%`, `%${search.trim()}%`);
+        }
       }
 
       if (language_code) {
@@ -51,7 +71,7 @@ class ContentController {
           LIMIT ${safeLimit} OFFSET ${safeOffset}
         `;
 
-        // console.log('🔍 FAQ Query (specific language):', query);
+        console.log('🔍 FAQ Query (specific language):', query);
         console.log('🔍 FAQ Params:', queryParams);
 
         const [faqs] = await pool.execute(query, queryParams);
@@ -61,7 +81,7 @@ class ContentController {
           data: faqs
         });
       } else {
-        // Get all FAQs with all translations for admin (simplified approach)
+        // Get all FAQs with all translations for admin
         const whereClause = whereConditions.length > 0 
           ? `WHERE ${whereConditions.join(' AND ')}` 
           : '';
@@ -111,7 +131,7 @@ class ContentController {
         }
 
         // Get total count for pagination
-        const countQuery = `SELECT COUNT(*) as total FROM faqs f ${whereClause}`;
+        const countQuery = `SELECT COUNT(DISTINCT f.id) as total FROM faqs f ${whereClause}`;
         const [countResult] = await pool.execute(countQuery, queryParams);
         const totalFAQs = countResult[0].total;
 
@@ -129,13 +149,14 @@ class ContentController {
         });
       }
     } catch (error) {
-      console.error('❌ Get all FAQs error:', error);
+      console.error('⌚ Get all FAQs error:', error);
       res.status(500).json({
         success: false,
         message: 'Internal server error'
       });
     }
   }
+
   // Get FAQ by ID
   async getFAQById(req, res) {
     try {
@@ -357,92 +378,109 @@ class ContentController {
   // ==== REVIEWS MANAGEMENT ====
 
   // Get all reviews
-  async getAllReviews(req, res) {
-    try {
-      const {
-        page = 1,
-        limit = 10,
-        tour_id,
-        rating,
-        active_only = false
-      } = req.query;
+async getAllReviews(req, res) {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      tour_id,
+      rating,
+      active_only = false,
+      search = '' // ✅ ADD search parameter
+    } = req.query;
 
-      // Safe system values
-      const safeLimit = Math.max(1, Math.min(100, parseInt(limit) || 10));
-      const safePage = Math.max(1, parseInt(page) || 1);
-      const safeOffset = (safePage - 1) * safeLimit;
+    // Safe system values
+    const safeLimit = Math.max(1, Math.min(100, parseInt(limit) || 10));
+    const safePage = Math.max(1, parseInt(page) || 1);
+    const safeOffset = (safePage - 1) * safeLimit;
 
-      // Build WHERE conditions (user input only)
-      let whereConditions = [];
-      let whereParams = [];
+    // Build WHERE conditions (user input only)
+    let whereConditions = [];
+    let whereParams = [];
 
-      if (tour_id) {
-        whereConditions.push('r.tour_id = ?');
-        whereParams.push(parseInt(tour_id));
-      }
-
-      if (rating) {
-        whereConditions.push('r.rating = ?');
-        whereParams.push(parseInt(rating));
-      }
-
-      if (active_only === 'true') {
-        whereConditions.push('r.is_active = true');
-      }
-
-      const whereClause = whereConditions.length > 0
-        ? `WHERE ${whereConditions.join(' AND ')}`
-        : '';
-
-      // Count query
-      const countQuery = `
-        SELECT COUNT(*) as total
-        FROM reviews r
-        LEFT JOIN tours t ON r.tour_id = t.id
-        LEFT JOIN tour_content tc ON t.id = tc.tour_id AND tc.language_code = 'en'
-        ${whereClause}
-      `;
-
-      const [countResult] = await pool.execute(countQuery, whereParams);
-      const totalReviews = countResult[0].total;
-
-      // Main query with safe LIMIT/OFFSET concatenation
-      const reviewsQuery = `
-        SELECT
-          r.*,
-          tc.title as tour_title,
-          c.name as city_name
-        FROM reviews r
-        LEFT JOIN tours t ON r.tour_id = t.id
-        LEFT JOIN tour_content tc ON t.id = tc.tour_id AND tc.language_code = 'en'
-        LEFT JOIN cities c ON t.city_id = c.id
-        ${whereClause}
-        ORDER BY r.review_date DESC
-        LIMIT ${safeLimit} OFFSET ${safeOffset}
-      `;
-
-      const [reviews] = await pool.execute(reviewsQuery, whereParams);
-
-      res.json({
-        success: true,
-        data: {
-          reviews,
-          pagination: {
-            currentPage: safePage,
-            totalPages: Math.ceil(totalReviews / safeLimit),
-            totalItems: totalReviews,
-            itemsPerPage: safeLimit
-          }
-        }
-      });
-    } catch (error) {
-      console.error('❌ Get all reviews error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Internal server error'
-      });
+    if (tour_id) {
+      whereConditions.push('r.tour_id = ?');
+      whereParams.push(parseInt(tour_id));
     }
+
+    if (rating) {
+      whereConditions.push('r.rating = ?');
+      whereParams.push(parseInt(rating));
+    }
+
+    if (active_only === 'true') {
+      whereConditions.push('r.is_active = true');
+    }
+
+    // ✅ ADD search functionality
+    if (search && search.trim()) {
+      whereConditions.push('(r.client_name LIKE ? OR r.comment LIKE ? OR tc.title LIKE ? OR c.name LIKE ?)');
+      whereParams.push(
+        `%${search.trim()}%`, 
+        `%${search.trim()}%`, 
+        `%${search.trim()}%`, 
+        `%${search.trim()}%`
+      );
+    }
+
+    const whereClause = whereConditions.length > 0
+      ? `WHERE ${whereConditions.join(' AND ')}`
+      : '';
+
+    // Count query
+    const countQuery = `
+      SELECT COUNT(*) as total
+      FROM reviews r
+      LEFT JOIN tours t ON r.tour_id = t.id
+      LEFT JOIN tour_content tc ON t.id = tc.tour_id AND tc.language_code = 'en'
+      LEFT JOIN cities c ON t.city_id = c.id
+      ${whereClause}
+    `;
+
+    const [countResult] = await pool.execute(countQuery, whereParams);
+    const totalReviews = countResult[0].total;
+
+    // Main query with safe LIMIT/OFFSET concatenation
+    const reviewsQuery = `
+      SELECT
+        r.*,
+        tc.title as tour_title,
+        c.name as city_name
+      FROM reviews r
+      LEFT JOIN tours t ON r.tour_id = t.id
+      LEFT JOIN tour_content tc ON t.id = tc.tour_id AND tc.language_code = 'en'
+      LEFT JOIN cities c ON t.city_id = c.id
+      ${whereClause}
+      ORDER BY r.review_date DESC
+      LIMIT ${safeLimit} OFFSET ${safeOffset}
+    `;
+
+    console.log('🔍 Reviews Query:', reviewsQuery);
+    console.log('🔍 Reviews Params:', whereParams);
+
+    const [reviews] = await pool.execute(reviewsQuery, whereParams);
+
+    res.json({
+      success: true,
+      data: {
+        reviews,
+        pagination: {
+          currentPage: safePage,
+          totalPages: Math.ceil(totalReviews / safeLimit),
+          totalItems: totalReviews,
+          itemsPerPage: safeLimit
+        }
+      }
+    });
+  } catch (error) {
+    console.error('⌚ Get all reviews error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
   }
+}
+
 
 
   // Get review by ID
@@ -520,11 +558,19 @@ class ContentController {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, true)
       `, [tour_id, client_name, rating || null, comment, tour_name, finalReviewDate, client_image, profile_image]);
 
+      // await notificationController.createNotification(
+      //   'review',
+      //   'New Review Submitted',
+      //   `A new review has been submitted for tour: ${tour_name}`,
+      //   tour_id,
+      //   'tour'
+      // );
       res.status(201).json({
         success: true,
         message: 'Review created successfully',
         data: { id: result.insertId }
       });
+
     } catch (error) {
       console.error('❌ Create review error:', error);
       res.status(500).json({
@@ -704,105 +750,145 @@ class ContentController {
   }
 
   // Get all promotional reviews for admin (ADMIN ONLY)
-  async getAllPromotionalReviews(req, res) {
-    try {
-      const { page = 1, limit = 10, language_code } = req.query;
-      const safeLimit = Math.max(1, Math.min(100, parseInt(limit)));
-      const safePage = Math.max(1, parseInt(page));
-      const safeOffset = (safePage - 1) * safeLimit;
+async getAllPromotionalReviews(req, res) {
+  try {
+    const { 
+      page = 1, 
+      limit = 10, 
+      language_code,
+      search = '' // ✅ ADD search parameter
+    } = req.query;
+    
+    const safeLimit = Math.max(1, Math.min(100, parseInt(limit)));
+    const safePage = Math.max(1, parseInt(page));
+    const safeOffset = (safePage - 1) * safeLimit;
 
+    let whereConditions = [];
+    let whereParams = [];
+
+    // ✅ ADD search functionality
+    if (search && search.trim()) {
       if (language_code) {
-        // Get reviews for specific language
-        const query = `
-          SELECT 
-            pr.id,
-            pr.client_name,
-            pr.screenshot_image,
-            pr.review_date,
-            pr.is_active,
-            pr.display_order,
-            pr.created_at,
-            pr.updated_at,
-            prt.review_text
-          FROM promotional_reviews pr
-          INNER JOIN promotional_review_translations prt ON pr.id = prt.review_id
-          WHERE prt.language_code = ?
-          ORDER BY pr.display_order ASC, pr.created_at DESC 
-          LIMIT ${safeLimit} OFFSET ${safeOffset}
-        `;
-
-        const [reviews] = await pool.execute(query, [language_code]);
-        const processedReviews = imageHelper.processArrayImages(reviews, 'review');
-        console.log("These are the reviews:", processedReviews);
-        res.json({
-          success: true,
-          data: processedReviews
-        });
+        // Search in specific language
+        whereConditions.push('(pr.client_name LIKE ? OR prt.review_text LIKE ?)');
+        whereParams.push(`%${search.trim()}%`, `%${search.trim()}%`);
       } else {
-        // Get all reviews with all translations (multi-query approach)
-        const mainQuery = `
-          SELECT 
-            pr.id,
-            pr.client_name,
-            pr.screenshot_image,
-            pr.review_date,
-            pr.is_active,
-            pr.display_order,
-            pr.created_at,
-            pr.updated_at
-          FROM promotional_reviews pr
-          ORDER BY pr.display_order ASC, pr.created_at DESC 
-          LIMIT ${safeLimit} OFFSET ${safeOffset}
-        `;
+        // Search across all languages (for admin)
+        whereConditions.push(`(pr.client_name LIKE ? OR EXISTS (
+          SELECT 1 FROM promotional_review_translations prt_search 
+          WHERE prt_search.review_id = pr.id 
+          AND prt_search.review_text LIKE ?
+        ))`);
+        whereParams.push(`%${search.trim()}%`, `%${search.trim()}%`);
+      }
+    }
 
-        const [mainReviews] = await pool.execute(mainQuery);
+    const whereClause = whereConditions.length > 0 
+      ? `WHERE ${whereConditions.join(' AND ')}` 
+      : '';
 
-        // Get translations for each review
-        const reviewsWithTranslations = [];
-        for (const review of mainReviews) {
-          const [translations] = await pool.execute(
-            'SELECT language_code, review_text FROM promotional_review_translations WHERE review_id = ?',
-            [review.id]
-          );
+    if (language_code) {
+      // Get reviews for specific language
+      const query = `
+        SELECT 
+          pr.id,
+          pr.client_name,
+          pr.screenshot_image,
+          pr.review_date,
+          pr.is_active,
+          pr.display_order,
+          pr.created_at,
+          pr.updated_at,
+          prt.review_text
+        FROM promotional_reviews pr
+        INNER JOIN promotional_review_translations prt ON pr.id = prt.review_id
+        ${whereClause}
+        ${whereClause ? 'AND' : 'WHERE'} prt.language_code = ?
+        ORDER BY pr.display_order ASC, pr.created_at DESC 
+        LIMIT ${safeLimit} OFFSET ${safeOffset}
+      `;
 
-          const translationsObj = {};
-          translations.forEach(trans => {
-            translationsObj[trans.language_code] = trans.review_text;
-          });
+      whereParams.push(language_code);
+      console.log('🔍 Promotional Reviews Query (specific language):', query);
+      console.log('🔍 Promotional Reviews Params:', whereParams);
 
-          reviewsWithTranslations.push({
-            ...review,
-            translations: translationsObj
-          });
-        }
+      const [reviews] = await pool.execute(query, whereParams);
+      const processedReviews = imageHelper.processArrayImages(reviews, 'review');
 
-        const processedReviewsWithTranslations = imageHelper.processArrayImages(reviewsWithTranslations, 'review');
+      res.json({
+        success: true,
+        data: processedReviews
+      });
+    } else {
+      // Get all reviews with all translations (multi-query approach)
+      const mainQuery = `
+        SELECT 
+          pr.id,
+          pr.client_name,
+          pr.screenshot_image,
+          pr.review_date,
+          pr.is_active,
+          pr.display_order,
+          pr.created_at,
+          pr.updated_at
+        FROM promotional_reviews pr
+        ${whereClause}
+        ORDER BY pr.display_order ASC, pr.created_at DESC 
+        LIMIT ${safeLimit} OFFSET ${safeOffset}
+      `;
 
-        // Get total count
-        const [countResult] = await pool.execute('SELECT COUNT(*) as total FROM promotional_reviews');
-        const totalReviews = countResult[0].total;
+      console.log('🔍 Promotional Reviews Main Query:', mainQuery);
+      console.log('🔍 Promotional Reviews Main Params:', whereParams);
 
-        res.json({
-          success: true,
-          data: {
-            reviews: processedReviewsWithTranslations,
-            pagination: {
-              currentPage: safePage,
-              totalPages: Math.ceil(totalReviews / safeLimit),
-              totalItems: totalReviews,
-              itemsPerPage: safeLimit
-            }
-          }
+      const [mainReviews] = await pool.execute(mainQuery, whereParams);
+
+      // Get translations for each review
+      const reviewsWithTranslations = [];
+      for (const review of mainReviews) {
+        const [translations] = await pool.execute(
+          'SELECT language_code, review_text FROM promotional_review_translations WHERE review_id = ?',
+          [review.id]
+        );
+
+        const translationsObj = {};
+        translations.forEach(trans => {
+          translationsObj[trans.language_code] = trans.review_text;
+        });
+
+        reviewsWithTranslations.push({
+          ...review,
+          translations: translationsObj
         });
       }
-    } catch (error) {
-      console.error('❌ Get all promotional reviews error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Internal server error'
+
+      const processedReviewsWithTranslations = imageHelper.processArrayImages(reviewsWithTranslations, 'review');
+
+      // Get total count
+      const countQuery = `SELECT COUNT(*) as total FROM promotional_reviews pr ${whereClause}`;
+      const [countResult] = await pool.execute(countQuery, whereParams);
+      const totalReviews = countResult[0].total;
+
+      res.json({
+        success: true,
+        data: {
+          reviews: processedReviewsWithTranslations,
+          pagination: {
+            currentPage: safePage,
+            totalPages: Math.ceil(totalReviews / safeLimit),
+            totalItems: totalReviews,
+            itemsPerPage: safeLimit
+          }
+        }
       });
     }
+  } catch (error) {
+    console.error('⌚ Get all promotional reviews error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
   }
+}
 
 
   // Create promotional review with translations

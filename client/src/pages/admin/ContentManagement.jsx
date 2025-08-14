@@ -642,17 +642,17 @@
 
 // export default ContentManagement;
 
-
-
-// src/pages/admin/ContentManagement.jsx
-import React, { useState, useEffect } from "react";
+// ContentManagement.jsx - Key improvements for search and pagination
+// ContentManagement.jsx - CORRECTED VERSION
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Edit2, Trash, Add, SearchNormal1, ArrowLeft2, ArrowRight2, Eye } from 'iconsax-react';
+import { Edit2, Trash, Add, SearchNormal1, Eye } from 'iconsax-react';
 import AdminLayout from "../../components/admin/AdminLayout";
 import AddFAQModal from "../../components/admin/AddFAQModal";
 import AddReviewModal from "../../components/admin/AddReviewModal";
 import AddCommentModal from "../../components/admin/AddCommentModal";
 import ViewCommentModal from "../../components/admin/ViewCommentModal";
+import DynamicPagination from "../../components/admin/DynamicPagination";
 import adminService from "../../services/adminService";
 
 const ContentManagement = () => {
@@ -673,15 +673,16 @@ const ContentManagement = () => {
 
   // Data states
   const [faqs, setFaqs] = useState([]);
-  const [reviews, setReviews] = useState([]);
   const [promotionalReviews, setPromotionalReviews] = useState([]);
   const [comments, setComments] = useState([]);
 
-  // Pagination states
+  // ✅ FIXED: Proper pagination and search state management
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const abortControllerRef = useRef();
 
   const itemsPerPage = 10;
 
@@ -699,16 +700,37 @@ const ContentManagement = () => {
     }
   }, [location.search]);
 
-  // Fetch data when tab changes
+  // ✅ FIXED: Reset pagination and search when tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+    setSearchTerm("");
+    setDebouncedSearchTerm(""); // Also reset debounced term
+  }, [activeTab]);
+
+  // ✅ FIXED: Proper debouncing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // ✅ FIXED: Reset page when debounced search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchTerm]);
+
+  // ✅ FIXED: Fetch data when debounced search, page, or tab changes
   useEffect(() => {
     fetchData();
-  }, [activeTab, currentPage, searchTerm]);
+  }, [debouncedSearchTerm, currentPage, activeTab]);
 
   // Update URL when tab changes
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     setCurrentPage(1);
     setSearchTerm("");
+    setDebouncedSearchTerm(""); // Also reset debounced term
     
     if (tab === 'Reviews') {
       navigate('/admin/content?tab=reviews');
@@ -719,58 +741,96 @@ const ContentManagement = () => {
     }
   };
 
+  // ✅ FIXED: Corrected fetchData function
   const fetchData = async () => {
+    // Cancel previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    abortControllerRef.current = new AbortController();
     setLoading(true);
     setError("");
     
     try {
+      let response;
+      
       if (activeTab === "FAQs") {
-        // Remove the language parameter to get ALL translations
-        const response = await adminService.getFAQs(null, { page: currentPage, limit: itemsPerPage });
-        if (response.success) {
+        response = await adminService.getFAQs(null, { 
+          page: currentPage, 
+          limit: itemsPerPage, 
+          search: debouncedSearchTerm, // ✅ FIXED: Use debouncedSearchTerm
+          signal: abortControllerRef.current.signal  
+        });
+        
+        if (!abortControllerRef.current.signal.aborted && response.success) {
           if (response.data.faqs) {
             setFaqs(response.data.faqs);
             setTotalPages(response.data.pagination?.totalPages || 1);
             setTotalItems(response.data.pagination?.totalItems || 0);
           } else {
             setFaqs(response.data);
+            setTotalItems(response.data.length);
+            setTotalPages(Math.ceil(response.data.length / itemsPerPage));
           }
-        } else {
+        } else if (!response.success) {
           setError("Failed to load FAQs");
         }
+        
       } else if (activeTab === "Reviews") {
-        const response = await adminService.getPromotionalReviews({ page: currentPage, limit: itemsPerPage });
-        if (response.success) {
+        response = await adminService.getPromotionalReviews({ 
+          page: currentPage, 
+          limit: itemsPerPage, 
+          search: debouncedSearchTerm, // ✅ FIXED: Use debouncedSearchTerm
+          signal: abortControllerRef.current.signal  
+        });
+        
+        if (!abortControllerRef.current.signal.aborted && response.success) {
           if (response.data.reviews) {
-            console.log("These are the reviews:", response.data.reviews);
             setPromotionalReviews(response.data.reviews);
             setTotalPages(response.data.pagination?.totalPages || 1);
             setTotalItems(response.data.pagination?.totalItems || 0);
           } else {
             setPromotionalReviews(response.data);
+            setTotalItems(response.data.length);
+            setTotalPages(Math.ceil(response.data.length / itemsPerPage));
           }
-        } else {
+        } else if (!response.success) {
           setError("Failed to load reviews");
         }
+        
       } else if (activeTab === "Comments") {
-        const response = await adminService.getReviews({ page: currentPage, limit: itemsPerPage });
-        if (response.success) {
+        response = await adminService.getReviews({ 
+          page: currentPage, 
+          limit: itemsPerPage, 
+          search: debouncedSearchTerm, // ✅ FIXED: Use debouncedSearchTerm
+          signal: abortControllerRef.current.signal  
+        });
+        
+        if (!abortControllerRef.current.signal.aborted && response.success) {
           if (response.data.reviews) {
             setComments(response.data.reviews);
             setTotalPages(response.data.pagination?.totalPages || 1);
             setTotalItems(response.data.pagination?.totalItems || 0);
           } else {
             setComments(response.data);
+            setTotalItems(response.data.length);
+            setTotalPages(Math.ceil(response.data.length / itemsPerPage));
           }
-        } else {
+        } else if (!response.success) {
           setError("Failed to load comments");
         }
       }
+
     } catch (error) {
-      console.error('Error fetching data:', error);
-      setError("Failed to load data");
+      if (error.name !== 'AbortError' && !abortControllerRef.current.signal.aborted) {
+        console.error('Error fetching data:', error);
+        setError("Failed to load data");
+      }
     } finally {
-      setLoading(false);
+      if (!abortControllerRef.current.signal.aborted) {
+        setLoading(false);
+      }
     }
   };
 
@@ -809,7 +869,7 @@ const ContentManagement = () => {
       if (activeTab === "FAQs") {
         response = await adminService.deleteFAQ(id);
       } else if (activeTab === "Reviews") {
-        response = await adminService.deletePromotionalReview(id); // Add this line
+        response = await adminService.deletePromotionalReview(id);
       } else if (activeTab === "Comments") {
         response = await adminService.deleteReview(id);
       }
@@ -844,52 +904,8 @@ const ContentManagement = () => {
     setEditingItem(null);
   };
 
-  // Pagination component
-  const Pagination = () => {
-    if (totalPages <= 1) return null;
-
-    return (
-      <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-        <div className="text-sm text-gray-700">
-          Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems}
-        </div>
-        <div className="flex items-center space-x-1">
-          <button 
-            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 1}
-            className="px-3 py-1 border border-gray-300 rounded-l-md bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-          >
-            <ArrowLeft2 size="20" color="#6b7280" />
-          </button>
-          
-          {[...Array(Math.min(totalPages, 10))].map((_, index) => {
-            const pageNum = index + 1;
-            return (
-              <button
-                key={pageNum}
-                onClick={() => setCurrentPage(pageNum)}
-                className={`px-3 py-1 border-t border-b ${
-                  currentPage === pageNum 
-                    ? 'border-teal-600 bg-teal-100 text-teal-700' 
-                    : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                {pageNum}
-              </button>
-            );
-          })}
-          
-          <button 
-            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-            disabled={currentPage === totalPages}
-            className="px-3 py-1 border border-gray-300 rounded-r-md bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-          >
-            <ArrowRight2 size="20" color="#6b7280" />
-          </button>
-        </div>
-      </div>
-    );
-  };
+  // ✅ FIXED: Calculate if user is currently typing
+  const isSearching = searchTerm !== debouncedSearchTerm;
 
   return (
     <AdminLayout activeItem="Content">
@@ -954,17 +970,27 @@ const ContentManagement = () => {
                 type="text"
                 placeholder="Search"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent w-96"
+                onChange={(e) => setSearchTerm(e.target.value)} // ✅ FIXED: Direct state update
+                className="pl-10 pr-4 py-2 text-gray-500 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent w-96"
               />
               <SearchNormal1 size="16" color="#9ca3af" className="absolute left-3 top-1/2 transform -translate-y-1/2" />
+              
+              {/* ✅ ADDED: Typing indicator */}
+              {isSearching && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-teal-500"></div>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {loading ? (
           <div className="flex justify-center items-center py-8">
-            <span className="text-gray-500">Loading...</span>
+            <div className="flex items-center space-x-2">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-500"></div>
+              <span className="text-gray-500">Loading...</span>
+            </div>
           </div>
         ) : error ? (
           <div className="flex justify-center items-center py-8">
@@ -988,7 +1014,7 @@ const ContentManagement = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {faqs.map((faq) => (
+                    {faqs.length > 0 ? faqs.map((faq) => (
                       <tr key={faq.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 align-top">
                           <div className="text-sm text-gray-900">
@@ -1017,7 +1043,13 @@ const ContentManagement = () => {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    )) : (
+                      <tr>
+                        <td colSpan="3" className="px-6 py-8 text-center text-gray-500">
+                          {debouncedSearchTerm ? `No FAQs found for "${debouncedSearchTerm}"` : "No FAQs available"}
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -1045,7 +1077,7 @@ const ContentManagement = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {promotionalReviews.map((review) => (
+                    {promotionalReviews.length > 0 ? promotionalReviews.map((review) => (
                       <tr key={review.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 align-top">
                           <div className="w-16 h-10 bg-gray-200 rounded border overflow-hidden">
@@ -1097,7 +1129,13 @@ const ContentManagement = () => {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    )) : (
+                      <tr>
+                        <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                          {debouncedSearchTerm ? `No reviews found for "${debouncedSearchTerm}"` : "No reviews available"}
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -1131,7 +1169,7 @@ const ContentManagement = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {comments.map((comment) => (
+                    {comments.length > 0 ? comments.map((comment) => (
                       <tr key={comment.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 align-top">
                           <div className="text-sm text-gray-900">
@@ -1176,12 +1214,6 @@ const ContentManagement = () => {
                             >
                               <Eye size="20" color="currentColor" />
                             </button>
-                            {/* <button
-                              onClick={() => handleEdit(comment)}
-                              className="text-gray-400 hover:text-gray-600 transition-colors"
-                            >
-                              <Edit2 size="20" color="currentColor" />
-                            </button> */}
                             <button
                               onClick={() => handleDelete(comment.id)}
                               className="text-gray-400 hover:text-red-600 transition-colors"
@@ -1191,14 +1223,28 @@ const ContentManagement = () => {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    )) : (
+                      <tr>
+                        <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
+                          {debouncedSearchTerm ? `No comments found for "${debouncedSearchTerm}"` : "No comments available"}
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
             )}
 
             {/* Pagination */}
-            <Pagination />
+            {!loading && !error && totalItems > 0 && (
+              <DynamicPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+              />
+            )}
           </>
         )}
       </div>

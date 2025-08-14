@@ -232,7 +232,7 @@ const handleShowPricing = async () => {
   return (
     <div className="min-h-screen pt-[80px] lg:pt-[100px]">
       {/* Category Tabs - Fixed position */}
-      <div className="w-full flex flex-col items-start border-b-2 border-[#E6E6E8] shadow-[0px_2px_12px_0px_rgba(20,20,43,0.08)] bg-white fixed top-[85px] md:top-[100px] left-0 right-0 z-40">
+      <div className="w-full flex flex-col items-start border-b-2 border-[#E6E6E8] shadow-[0px_2px_12px_0px_rgba(20,20,43,0.08)] bg-white fixed top-[85px] left-0 right-0 z-40">
         <div className="w-full px-2 lg:px-[70px] h-12">
           <div className="flex h-12 items-center overflow-x-auto">
             {categories.map((category) => (
@@ -449,8 +449,11 @@ const handleShowPricing = async () => {
                   durationUnit=""
                   daysOfWeek={tour.availability || t('common.daily') || "Daily"}
                   reviews={tour.reviews_count || 0}
-                  price={parseFloat(tour.price_adult)}
-                  originalPrice={tour.discount_percentage > 0 ? Math.round(parseFloat(tour.price_adult) / (1 - tour.discount_percentage / 100)) : null}
+                  originalPrice={tour.discount_percentage > 0 ? parseFloat(tour.price_adult) : null}
+                  price={tour.discount_percentage > 0 ? 
+                    Math.round(parseFloat(tour.price_adult) * (1 - tour.discount_percentage / 100)) : 
+                    parseFloat(tour.price_adult)
+                  }
                   priceUnit={t('common.perPerson') || "per person"}
                   isFeatured={tour.featured_tag !== null && tour.featured_tag !== undefined}
                   featuredLabel={getTranslatedFeaturedLabel(tour.featured_tag) || t('common.featured') || "Featured"}

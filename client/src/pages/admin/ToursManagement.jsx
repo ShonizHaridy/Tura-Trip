@@ -1,3 +1,4 @@
+// ToursManagement.jsx - UPDATED VERSION (Remove categories filter)
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
@@ -15,9 +16,31 @@ const ToursManagement = () => {
   const [showEditCategoryModal, setShowEditCategoryModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isCategoryFilterOpen, setIsCategoryFilterOpen] = useState(false);
   const [dashboardStats, setDashboardStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // ✅ Search state management
+  const [toursSearchTerm, setToursSearchTerm] = useState("");
+  const [categoriesSearchTerm, setCategoriesSearchTerm] = useState("");
+  const [debouncedToursSearchTerm, setDebouncedToursSearchTerm] = useState("");
+  const [debouncedCategoriesSearchTerm, setDebouncedCategoriesSearchTerm] = useState("");
+  const [appliedFilters, setAppliedFilters] = useState({});
+
+  // ✅ Debouncing for tours search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedToursSearchTerm(toursSearchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [toursSearchTerm]);
+
+  // ✅ Debouncing for categories search  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedCategoriesSearchTerm(categoriesSearchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [categoriesSearchTerm]);
 
   useEffect(() => {
     fetchDashboardStats();
@@ -35,6 +58,16 @@ const ToursManagement = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleApplyFilters = (filters) => {
+    setAppliedFilters(filters);
+    setIsFilterOpen(false);
+  };
+
+  const handleClearFilters = () => {
+    setAppliedFilters({});
+    setIsFilterOpen(false);
   };
 
   const stats = [
@@ -61,8 +94,7 @@ const ToursManagement = () => {
         <div
           className="p-3 rounded-md"
           style={{
-            background:
-              "linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), #2BA6A4",
+            background: "linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), #2BA6A4",
           }}
         >
           {icon}
@@ -71,14 +103,6 @@ const ToursManagement = () => {
           <p className="text-gray-600 text-sm font-medium">{title}</p>
           <p className="text-2xl font-semibold text-gray-900">{value}</p>
         </div>
-      </div>
-      <div className="px-4 py-4" style={{ backgroundColor: "#F7F7F4" }}>
-        <span
-          style={{ color: "#2BA6A4" }}
-          className="text-sm cursor-pointer hover:underline font-medium"
-        >
-          View all
-        </span>
       </div>
     </div>
   );
@@ -89,12 +113,7 @@ const ToursManagement = () => {
         {/* Stats Cards */}
         <div className="flex items-center gap-6 w-full">
           {stats.map((stat, index) => (
-            <StatsCard
-              key={index}
-              title={stat.title}
-              value={stat.value}
-              icon={stat.icon}
-            />
+            <StatsCard key={index} title={stat.title} value={stat.value} icon={stat.icon} />
           ))}
         </div>
 
@@ -103,17 +122,13 @@ const ToursManagement = () => {
           className="flex h-10 items-center gap-2 px-3 py-2 rounded bg-teal-700 text-white hover:bg-teal-800 transition-colors"
         >
           <Add size="16" color="#EAF6F6" />
-          <span
-            className="text-base font-semibold"
-            style={{ color: "#EAF6F6" }}
-          >
+          <span className="text-base font-semibold" style={{ color: "#EAF6F6" }}>
             Add New Tour
           </span>
         </button>
 
         {/* Tours Section */}
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 w-full">
-          {/* Header */}
           <div className="flex items-center justify-end gap-2.5 mb-4">
             <div className="flex h-10 flex-col justify-center items-start">
               <h1 className="text-2xl font-medium" style={{ color: "#124645" }}>
@@ -125,18 +140,23 @@ const ToursManagement = () => {
                 <div className="flex justify-between items-center flex-1">
                   <div className="flex justify-end items-center gap-4 flex-1">
                     <div className="flex items-center gap-2">
-                      {/* Search Input */}
+                      {/* Tours Search Input */}
                       <div className="flex flex-col items-end gap-2 w-96">
                         <div className="flex justify-end items-center gap-2 flex-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-3">
                           <SearchNormal1 size="24" color="#B3B3B3" />
                           <input
                             type="text"
-                            placeholder="Search"
+                            placeholder="Search tours..."
+                            value={toursSearchTerm}
+                            onChange={(e) => setToursSearchTerm(e.target.value)}
                             className="flex-1 text-gray-400 text-base font-normal outline-none border-none"
                           />
+                          {toursSearchTerm !== debouncedToursSearchTerm && (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-teal-500"></div>
+                          )}
                         </div>
                       </div>
-                      {/* Filter Button */}
+                      {/* ✅ UPDATED: Dynamic Filter Button */}
                       <div className="relative">
                         <button
                           onClick={() => setIsFilterOpen(!isFilterOpen)}
@@ -150,7 +170,11 @@ const ToursManagement = () => {
                         {isFilterOpen && (
                           <FilterDropdown
                             isOpen={isFilterOpen}
-                            onClose={() => setIsFilterOpen(false)}
+                            onClose={() => setIsFilterOpen(false)} 
+                            onApplyFilters={handleApplyFilters}
+                            onClearFilters={handleClearFilters}
+                            currentFilters={appliedFilters}
+                            context="tours" // ✅ ADDED: Context for dynamic data
                           />
                         )}
                       </div>
@@ -161,8 +185,10 @@ const ToursManagement = () => {
             </div>
           </div>
 
-          {/* Tours Table */}
-          <ToursTable />
+          <ToursTable 
+            searchTerm={debouncedToursSearchTerm}
+            appliedFilters={appliedFilters}
+          />
         </div>
 
         {/* Action Buttons */}
@@ -172,18 +198,14 @@ const ToursManagement = () => {
             className="flex h-10 items-center gap-2 px-3 py-2 rounded bg-teal-700 text-white hover:bg-teal-800 transition-colors"
           >
             <Add size="16" color="#EAF6F6" />
-            <span
-              className="text-base font-semibold"
-              style={{ color: "#EAF6F6" }}
-            >
+            <span className="text-base font-semibold" style={{ color: "#EAF6F6" }}>
               Add New Category
             </span>
           </button>
         </div>
 
-        {/* Tour Categories Section */}
+        {/* ✅ UPDATED: Tour Categories Section (NO FILTER) */}
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 w-full">
-          {/* Header */}
           <div className="flex items-center justify-end gap-2.5 mb-4">
             <div className="flex h-10 flex-col justify-center items-start">
               <h2 className="text-2xl font-medium" style={{ color: "#124645" }}>
@@ -194,36 +216,19 @@ const ToursManagement = () => {
               <div className="flex justify-end items-center gap-2 flex-1">
                 <div className="flex justify-between items-center flex-1">
                   <div className="flex justify-end items-center gap-4 flex-1">
-                    <div className="flex items-center gap-2">
-                      {/* Search Input */}
-                      <div className="flex flex-col items-end gap-2 w-96">
-                        <div className="flex justify-end items-center gap-2 flex-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-3">
-                          <SearchNormal1 size="24" color="#B3B3B3" />
-                          <input
-                            type="text"
-                            placeholder="Search"
-                            className="flex-1 text-gray-400 text-base font-normal outline-none border-none"
-                          />
-                        </div>
-                      </div>
-                      {/* Filter Button */}
-                      <div className="relative">
-                        <button
-                          onClick={() =>
-                            setIsCategoryFilterOpen(!isCategoryFilterOpen)
-                          }
-                          className="flex items-center w-24 justify-center gap-2 py-2 px-4 rounded border border-gray-200 bg-white shadow-sm"
-                        >
-                          <Filter size="20" color="#9E939A" />
-                          <span className="text-gray-400 text-base font-normal">
-                            Filter
-                          </span>
-                        </button>
-                        {isCategoryFilterOpen && (
-                          <FilterDropdown
-                            isOpen={isCategoryFilterOpen}
-                            onClose={() => setIsCategoryFilterOpen(false)}
-                          />
+                    {/* ✅ REMOVED: Filter button, only search now */}
+                    <div className="flex flex-col items-end gap-2 w-96">
+                      <div className="flex justify-end items-center gap-2 flex-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-3">
+                        <SearchNormal1 size="24" color="#B3B3B3" />
+                        <input
+                          type="text"
+                          placeholder="Search categories..."
+                          value={categoriesSearchTerm}
+                          onChange={(e) => setCategoriesSearchTerm(e.target.value)}
+                          className="flex-1 text-gray-400 text-base font-normal outline-none border-none"
+                        />
+                        {categoriesSearchTerm !== debouncedCategoriesSearchTerm && (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-teal-500"></div>
                         )}
                       </div>
                     </div>
@@ -233,8 +238,8 @@ const ToursManagement = () => {
             </div>
           </div>
 
-          {/* Categories Table */}
           <TourCategoriesTable
+            searchTerm={debouncedCategoriesSearchTerm}
             onEditCategory={(category) => {
               setSelectedCategory(category);
               setShowEditCategoryModal(true);
@@ -243,18 +248,14 @@ const ToursManagement = () => {
         </div>
       </div>
 
-      {/* Add Category Modal */}
+      {/* Modals */}
       {showAddCategoryModal && (
         <AddCategoryModal
           onClose={() => setShowAddCategoryModal(false)}
-          onSave={(categoryData) => {
-            console.log("Adding category:", categoryData);
-            setShowAddCategoryModal(false);
-          }}
+          onSave={() => setShowAddCategoryModal(false)}
         />
       )}
 
-      {/* Edit Category Modal */}
       {showEditCategoryModal && (
         <EditCategoryModal
           category={selectedCategory}
@@ -262,8 +263,7 @@ const ToursManagement = () => {
             setShowEditCategoryModal(false);
             setSelectedCategory(null);
           }}
-          onSave={(categoryData) => {
-            console.log("Updating category:", categoryData);
+          onSave={() => {
             setShowEditCategoryModal(false);
             setSelectedCategory(null);
           }}

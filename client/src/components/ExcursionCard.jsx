@@ -19,12 +19,16 @@ const ExcursionCard = ({
   transportation,
   daysOfWeek,
   reviews,
-  price,
   originalPrice,
+  price,
   priceUnit,
   isFeatured = false,
   featuredLabel = "Popular"
 }) => {
+
+  const hasDiscount = originalPrice && price && originalPrice != price;
+
+
   return (
     <div className="relative w-full max-w-[298px] mx-auto">
       {/* Main card container */}
@@ -103,21 +107,31 @@ const ExcursionCard = ({
           {/* Bottom section */}
           <div className="flex justify-between items-center">
             {/* Reviews */}
-            <div className="flex items-center gap-1">
+            {/* <div className="flex items-center gap-1">
               <RiShieldUserLine className="w-4 h-4 text-[#233660]" />
               <span className={`text-[#233660] font-roboto text-xs font-normal ${isFeatured ? 'underline underline-offset-2' : ''}`}>
                 {reviews} Reviews
+              </span>
+            </div> */}
+            <div className="flex items-center gap-1">
+              <RiShieldUserLine className="w-4 h-4 text-[#233660]" />
+              <span className={`text-[#233660] font-roboto text-xs font-normal ${isFeatured ? 'underline underline-offset-2' : ''}`}>
+                {reviews === 0 ? (
+                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">New Tour!</span>
+                ) : (
+                  `${reviews} Reviews`
+                )}
               </span>
             </div>
 
             {/* Pricing */}
             <div className="flex items-center gap-2">
               {/* Original price (strikethrough) */}
-              {(isFeatured || originalPrice) && originalPrice && (
-                <span className="text-[#8A8D95] font-roboto text-lg font-normal line-through">
-                  ${originalPrice}
-                </span>
-              )}
+              {hasDiscount && (
+                  <span className="text-[#8A8D95] font-roboto text-lg font-normal line-through">
+                    ${originalPrice}
+                  </span>
+                )}
               
               {/* Current price */}
               <div className="text-right">

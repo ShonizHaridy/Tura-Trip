@@ -8,6 +8,8 @@ import successImage from "../../assets/resetsuccess.png";
 
 import { useAuth } from "../../contexts/AuthContext";
 
+import adminService from "../../services/adminService";
+
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -18,7 +20,7 @@ const AdminLogin = () => {
     adminId: "",
     password: "",
     email: "",
-    idNumber: "",
+    // idNumber: "",
     adminCode: "",
     verificationCode: "",
     newPassword: "",
@@ -39,41 +41,50 @@ const AdminLogin = () => {
   };
 
   const handleLogin = async (e) => {
-      e.preventDefault();
-      setLoading(true);
-      setError("");
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (loading) return;
+    
+    setLoading(true);
+    setError("");
 
-      try {
-        const result = await login({
-          admin_id: formData.adminId, // Fixed: use adminId from form
-          password: formData.password,
-        });
+    try {
+      const result = await login({
+        admin_id: formData.adminId,
+        password: formData.password,
+      });
 
-        if (result.success) {
-          // Redirect to the page they were trying to visit or dashboard
-          const from = location.state?.from?.pathname || '/admin/dashboard';
-          navigate(from, { replace: true });
-        } else {
-          setError(result.message || 'Login failed');
-        }
-      } catch (error) {
-        setError(error.response?.data?.message || 'An error occurred during login');
-      } finally {
-        setLoading(false);
+      if (result.success) {
+        const from = location.state?.from?.pathname || '/admin/dashboard';
+        navigate(from, { replace: true });
+      } else {
+        setError(result.message || 'Login failed');
       }
-    };
+    } catch (error) {
+      console.error('Login error:', error);
+      if (error.response?.data?.message) {
+        setError(error.response.data.message);
+      } else if (error.message) {
+        setError(error.message);
+      } else {
+        setError('An error occurred during login');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleForgotPassword = async (e) => {
     e.preventDefault();
-    if (formData.adminCode && formData.email && formData.idNumber) {
+    if (formData.adminCode && formData.email) {
       setLoading(true);
       setError("");
       
       try {
         const response = await adminService.forgotPassword({
-          admin_code: formData.adminCode,
+          admin_id: formData.adminCode,
           email: formData.email,
-          id_number: formData.idNumber,
         });
 
         if (response.success) {
@@ -111,9 +122,9 @@ const AdminLogin = () => {
 
         try {
           const response = await adminService.resetPassword({
-            admin_code: formData.adminCode,
+            admin_id: formData.adminCode,
             email: formData.email,
-            id_number: formData.idNumber,
+            // id_number: formData.idNumber,
             verification_code: formData.verificationCode,
             new_password: formData.newPassword,
           });
@@ -242,7 +253,7 @@ const AdminLogin = () => {
 const renderLoginForm = () => (
   <form
     onSubmit={handleLogin}
-    className="flex flex-col items-start gap-4 self-stretch"
+    className="flex flex-col items-start gap-4 self-stretch" 
   >
     {error && (
       <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm w-full">
@@ -493,7 +504,7 @@ const renderLoginForm = () => (
       </div>
 
       {/* ID Number Field */}
-      <div className="flex w-full max-w-[380px] lg:max-w-[440px] xl:max-w-[531px] flex-col items-end gap-1">
+      {/* <div className="flex w-full max-w-[380px] lg:max-w-[440px] xl:max-w-[531px] flex-col items-end gap-1">
         <label
           className="self-stretch text-[#222E50] text-lg lg:text-[20px] font-normal leading-[1.2]"
           style={{
@@ -517,7 +528,7 @@ const renderLoginForm = () => (
             required
           />
         </div>
-      </div>
+      </div> */}
 
       {/* Blue Info Text */}
       <p className="text-[#065DFF] text-base text-center w-full" style={{ fontFamily: "Roboto, -apple-system, Helvetica, sans-serif" }}>
@@ -533,7 +544,7 @@ const renderLoginForm = () => (
           className="text-[#EAF6F6] text-xl lg:text-[24px] font-bold leading-normal"
           style={{ fontFamily: "Roboto, -apple-system, Helvetica, sans-serif" }}
         >
-          Send Reset Link
+          Send Code
         </span>
       </button>
 
