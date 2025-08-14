@@ -7,29 +7,15 @@ const PriceList = ({ isOpen, onClose, pricesData = [] }) => {
 
   const getCityDisplayName = () => {
     console.log("Prices Data:", pricesData);
-  if (pricesData.length === 1) {
-    return pricesData[0].city_name;
-  } else if (pricesData.length > 1) {
-    return t("priceList.allCities"); // Add this translation
-  }
-  return t("priceList.priceList"); // Fallback
-};
+    if (pricesData.length === 1) {
+      return pricesData[0].city_name;
+    } else if (pricesData.length > 1) {
+      return t("priceList.allCities"); // Add this translation
+    }
+    return t("priceList.priceList"); // Fallback
+  };
 
-  // Fallback data if no pricesData provided
-  const defaultExcursions = [
-    {
-      name: "Jerusalem from Hurghada",
-      adultPrice: "$250",
-      childPrice: "$100",
-    },
-    {
-      name: "Luxor (different programs) + $2 discount on another excursion",
-      adultPrice: "$40",
-      childPrice: "from $20",
-    },
-  ];
-
-  // Transform API data to component format
+  // Transform API data to component format - NO FALLBACK DATA
   const excursions = pricesData.length > 0 
     ? pricesData.flatMap(city => 
         city.tours?.map(tour => ({
@@ -38,12 +24,12 @@ const PriceList = ({ isOpen, onClose, pricesData = [] }) => {
           childPrice: `$${tour.price_child}`,
         })) || []
       )
-    : defaultExcursions;
+    : []; // Empty array if no data
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-60">
       <div className="bg-white rounded-xl p-4 md:p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-lg">
         {/* Header */}
         <div className="flex justify-between items-center pb-4 border-b border-gray-300 mb-6">
@@ -104,7 +90,7 @@ const PriceList = ({ isOpen, onClose, pricesData = [] }) => {
           </div>
         </div>
 
-    {/* No Data Message */}
+        {/* No Data Message */}
         {excursions.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <div className="mb-6">
@@ -129,105 +115,50 @@ const PriceList = ({ isOpen, onClose, pricesData = [] }) => {
             </p>
           </div>
         ) : (
-          <>
-            {/* Mobile Cards Layout */}
-            <div className="block md:hidden space-y-4">
-              {excursions.map((excursion, index) => (
-                <div
-                  key={index}
-                  className="bg-white border border-[#E6E6E8] rounded-lg p-4"
-                >
-                  <h4 className="text-[#555A64] font-roboto text-sm font-medium mb-3">
-                    {excursion.name}
-                  </h4>
-                  <div className="flex justify-between items-center">
-                    <div className="text-center">
-                      <div className="text-[#010818] font-roboto text-xs font-medium mb-1">
-                        {t("priceList.adults")}
+          /* Fully Responsive Table Layout - No Horizontal Scroll */
+          <div className="border border-[#E6E6E8] rounded-lg bg-white overflow-hidden">
+            <div className="w-full">
+              <div className="grid grid-cols-12 w-full">
+                {/* Header Row */}
+                <div className="col-span-6 sm:col-span-7 md:col-span-8 bg-[#ECEFF7] px-2 md:px-4 py-3 border-b border-[#E6E6E8] border-r border-[#E6E6E8]">
+                  <div className="text-[#010818] font-roboto text-sm md:text-[16px] leading-[19.2px] font-medium">
+                    {t("priceList.excursion")}
+                  </div>
+                </div>
+                <div className="col-span-3 sm:col-span-2 md:col-span-2 bg-[#ECEFF7] px-1 md:px-4 py-3 border-b border-[#E6E6E8] border-r border-[#E6E6E8]">
+                  <div className="text-[#010818] font-roboto text-xs md:text-[16px] leading-[19.2px] font-medium text-center">
+                    {t("priceList.adults")}
+                  </div>
+                </div>
+                <div className="col-span-3 sm:col-span-3 md:col-span-2 bg-[#ECEFF7] px-1 md:px-4 py-3 border-b border-[#E6E6E8]">
+                  <div className="text-[#010818] font-roboto text-xs md:text-[16px] leading-[19.2px] font-medium text-center">
+                    {t("priceList.children")}
+                  </div>
+                </div>
+
+                {/* Data Rows */}
+                {excursions.map((excursion, index) => (
+                  <React.Fragment key={index}>
+                    <div className="col-span-6 sm:col-span-7 md:col-span-8 px-2 md:px-4 py-3 md:py-4 border-b border-[#E6E6E8] last:border-b-0 border-r border-[#E6E6E8]">
+                      <div className="text-[#555A64] font-roboto text-sm md:text-[16px] leading-tight md:leading-[19.2px] break-words">
+                        {excursion.name}
                       </div>
-                      <div className="text-[#2D467C] font-roboto text-sm font-medium">
+                    </div>
+                    <div className="col-span-3 sm:col-span-2 md:col-span-2 px-1 md:px-4 py-3 md:py-4 border-b border-[#E6E6E8] last:border-b-0 border-r border-[#E6E6E8] flex items-center justify-center">
+                      <div className="text-[#2D467C] font-roboto text-sm md:text-[16px] leading-[19.2px] font-medium text-center">
                         {excursion.adultPrice}
                       </div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-[#010818] font-roboto text-xs font-medium mb-1">
-                        {t("priceList.children")}
-                      </div>
-                      <div className="text-[#2D467C] font-roboto text-sm font-medium">
+                    <div className="col-span-3 sm:col-span-3 md:col-span-2 px-1 md:px-4 py-3 md:py-4 border-b border-[#E6E6E8] last:border-b-0 flex items-center justify-center">
+                      <div className="text-[#2D467C] font-roboto text-sm md:text-[16px] leading-[19.2px] font-medium text-center">
                         {excursion.childPrice}
                       </div>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Desktop Table Layout */}
-            <div className="hidden md:block border border-[#E6E6E8] rounded-lg bg-white overflow-hidden">
-              <div className="overflow-x-auto">
-                <div className="flex min-w-[600px]">
-                  {/* Excursion Column */}
-                  <div className="flex-1 min-w-[300px]">
-                    <div className="bg-[#ECEFF7] px-4 py-3 border-b border-[#E6E6E8]">
-                      <div className="text-[#010818] font-roboto text-[16px] leading-[19.2px]">
-                        {t("priceList.excursion")}
-                      </div>
-                    </div>
-                    {excursions.map((excursion, index) => (
-                      <div
-                        key={index}
-                        className="px-4 py-4 border-b border-[#E6E6E8] last:border-b-0"
-                      >
-                        <div className="text-[#555A64] font-roboto text-[16px] leading-[19.2px]">
-                          {excursion.name}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Price Adults Column */}
-                  <div className="w-px bg-[#E6E6E8]"></div>
-                  <div className="w-48">
-                    <div className="bg-[#ECEFF7] px-4 py-3 border-b border-[#E6E6E8]">
-                      <div className="text-[#010818] font-roboto text-[16px] leading-[19.2px]">
-                        {t("priceList.priceAdults")}
-                      </div>
-                    </div>
-                    {excursions.map((excursion, index) => (
-                      <div
-                        key={index}
-                        className="px-4 py-4 border-b border-[#E6E6E8] last:border-b-0"
-                      >
-                        <div className="text-[#2D467C] font-roboto text-[16px] leading-[19.2px]">
-                          {excursion.adultPrice}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Price Children Column */}
-                  <div className="w-px bg-[#E6E6E8]"></div>
-                  <div className="w-48">
-                    <div className="bg-[#ECEFF7] px-4 py-3 border-b border-[#E6E6E8]">
-                      <div className="text-[#010818] font-roboto text-[16px] leading-[19.2px]">
-                        {t("priceList.priceChildren")}
-                      </div>
-                    </div>
-                    {excursions.map((excursion, index) => (
-                      <div
-                        key={index}
-                        className="px-4 py-4 border-b border-[#E6E6E8] last:border-b-0"
-                      >
-                        <div className="text-[#2D467C] font-roboto text-[16px] leading-[19.2px]">
-                          {excursion.childPrice}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                  </React.Fragment>
+                ))}
               </div>
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>
