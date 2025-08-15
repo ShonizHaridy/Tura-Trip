@@ -1,7 +1,8 @@
 // src/pages/BrowseTours.jsx
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation } from 'react-router-dom'; // ← Add useLocation
+import { useLocation } from '../hooks/useSmartNavigation'; // ← Add useLocation
+import { default as Link } from '../components/SmartLink';
 import { SlugHelper } from '../utils/slugHelper';
 import ExcursionCard from '../components/ExcursionCard';
 import publicService from '../services/publicService';

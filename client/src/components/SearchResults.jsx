@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { default as Link } from './SmartLink';
 
 const SearchResults = ({ suggestions, onSuggestionClick, loading }) => {
   const { t } = useTranslation();

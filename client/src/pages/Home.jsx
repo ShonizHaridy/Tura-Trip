@@ -9,13 +9,15 @@ import PaymentSection from '../components/PaymentSection';
 import TestimonialsSection from '../components/TestimonialsSection';
 import CurrencyConverter from '../components/CurrencyConverter';
 import PriceList from '../components/PriceList';
-import { Link } from 'react-router-dom';
+import { default as Link } from '../components/SmartLink';
 import { IoMdArrowDropdown } from "react-icons/io";
 import { FiSearch } from "react-icons/fi";
 import publicService from '../services/publicService';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '../hooks/useSmartNavigation';
 
-import { SlugHelper } from '../utils/slugHelper';
+import MetaTags from '../components/MetaTags';
+
 
 const Home = () => {
   const { t, i18n } = useTranslation();
@@ -263,6 +265,14 @@ const handleSuggestionClick = (suggestion) => {
   }
 
   return (
+    <>
+      <MetaTags
+        title={t('meta.home.title')}
+        description={t('meta.home.description')}
+        keywords={t('meta.home.keywords')}
+        ogImage="/images/home-og.png"
+      />
+
     <div className="relative">
       {/* Hero section with full viewport height */}
       <section
@@ -745,6 +755,7 @@ const handleSuggestionClick = (suggestion) => {
         <FAQ />
       </section>
     </div>
+    </>
   );
 };
 

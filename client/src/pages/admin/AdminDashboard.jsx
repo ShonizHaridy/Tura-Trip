@@ -264,7 +264,7 @@ const AdminDashboard = () => {
                       className="text-2xl font-medium leading-normal"
                       style={{ color: "#124645" }}
                     >
-                      Most Viewed Tours
+                      Recent Tours
                     </h2>
                   </div>
                 </div>

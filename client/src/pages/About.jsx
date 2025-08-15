@@ -1,6 +1,6 @@
 // src/pages/About.jsx
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { default as Link } from '../components/SmartLink';
 import { useTranslation } from 'react-i18next';
 import {
   WalletRemove,

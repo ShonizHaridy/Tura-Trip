@@ -1,6 +1,7 @@
 // src/pages/City.jsx
 import { useState, useEffect, useRef } from "react";
-import { useParams, Link, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
+import { default as Link } from '../components/SmartLink';
 import { useTranslation } from "react-i18next";
 import ExcursionCard from "../components/ExcursionCard";
 import PriceList from "../components/PriceList";
@@ -66,6 +67,7 @@ const City = () => {
       fetchCityData(1, getSelectedCategoryId());
     }
   }, [selectedCategory]);
+
 
   const fetchCityData = async (page = 1, categoryId = null, loadAll = false) => {
     try {
@@ -232,7 +234,7 @@ const handleShowPricing = async () => {
   return (
     <div className="min-h-screen pt-[80px] lg:pt-[100px]">
       {/* Category Tabs - Fixed position */}
-      <div className="w-full flex flex-col items-start border-b-2 border-[#E6E6E8] shadow-[0px_2px_12px_0px_rgba(20,20,43,0.08)] bg-white fixed top-[85px] left-0 right-0 z-40">
+      <div className="w-full flex flex-col items-start border-b-2 border-[#E6E6E8] shadow-[0px_2px_12px_0px_rgba(20,20,43,0.08)] bg-white fixed top-[85px] lg:top-[100px] left-0 right-0 z-40">
         <div className="w-full px-2 lg:px-[70px] h-12">
           <div className="flex h-12 items-center overflow-x-auto">
             {categories.map((category) => (
@@ -318,7 +320,11 @@ const handleShowPricing = async () => {
           </svg>
           <div className="flex justify-center items-center">
             <span className="text-sm font-bold text-[#555A64] font-roboto">
-              {selectedCategory}
+                  {/* ✅ FIXED: Use translated name for display */}
+                  {selectedCategory === (t('common.allTrips') || "All Trips") 
+                    ? t('common.allTrips') || "All Trips"  // Always show current translation
+                    : selectedCategory  // For other categories, show as-is
+                  }
             </span>
           </div>
         </div>

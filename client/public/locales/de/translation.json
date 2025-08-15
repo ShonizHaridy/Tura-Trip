@@ -443,5 +443,17 @@
     "allTours": "Alle verfügbaren Touren",
     "viewAllInCity": "{{count}} weitere Touren anzeigen",
     "from": "Ab"
+  },
+  "meta": {
+    "home": {
+      "title": "Tura Trip - Beste Touren in Ägypten | Buchen Sie Ihr Abenteuer",
+      "description": "Entdecken Sie erstaunliche Touren und Erlebnisse in Ägypten mit Tura Trip. Buchen Sie Ihren perfekten Urlaub nach Hurghada, Sharm El Sheikh und mehr! Keine Vorauszahlung erforderlich, deutschsprachige Guides.",
+      "keywords": "ägypten touren, ägypten reisen, urlaubspakete, hurghada touren, sharm el sheikh, rotes meer, kairo touren, luxor touren, tauchen ägypten, wüstensafari"
+    },
+    "default": {
+      "title": "Tura Trip - Ägypten Touren & Reiseerlebnisse",
+      "description": "Entdecken Sie die besten Touren und Reiseerlebnisse in Ägypten mit Tura Trip. Professioneller Reiseveranstalter.",
+      "keywords": "ägypten, touren, reisen, urlaub, reisen, rotes meer, kairo, luxor"
+    }
   }
 }

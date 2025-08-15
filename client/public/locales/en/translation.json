@@ -446,5 +446,17 @@
     "allTours": "All Available Tours",
     "viewAllInCity": "View {{count}} more tours",
     "from": "Starting from"
+  },
+  "meta": {
+    "home": {
+      "title": "Tura Trip - Best Tours in Egypt | Book Your Adventure",
+      "description": "Discover amazing tours and experiences in Egypt with Tura Trip. Book your perfect vacation to Hurghada, Sharm El Sheikh, and more! No prepayment required, English-speaking guides.",
+      "keywords": "egypt tours, travel egypt, vacation packages, hurghada tours, sharm el sheikh, red sea tours, cairo tours, luxor tours, diving egypt, desert safari"
+    },
+    "default": {
+      "title": "Tura Trip - Egypt Tours & Travel Experiences",
+      "description": "Discover the best tours and travel experiences in Egypt with Tura Trip. Professional tour operator.",
+      "keywords": "egypt, tours, travel, vacation, trips, red sea, cairo, luxor"
+    }
   }
 }

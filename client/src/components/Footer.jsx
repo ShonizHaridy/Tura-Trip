@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from '../hooks/useSmartNavigation';
+import { default as Link } from './SmartLink';
 import { useTranslation } from 'react-i18next';
 import Logo from '../assets/logo-icon.svg?react';
 import TripAdvisor from '../assets/trip_advisor.svg?react'

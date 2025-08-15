@@ -1,9 +1,11 @@
 // src/components/Header.jsx
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { IoLogoWhatsapp } from "react-icons/io";
 import { SearchNormal1 } from 'iconsax-react';
-import { Link, useNavigate, useLocation } from "react-router-dom";
+// import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "../hooks/useSmartNavigation";
+import { default as Link } from './SmartLink'
 import TripAdvisor from "../assets/trip_advisor.svg?react";
 import Logo from "../assets/logo-icon.svg?react";
 
@@ -13,6 +15,7 @@ import itFlag from "../assets/flags/it.png";
 import deFlag from "../assets/flags/de.png";
 
 import { useLocalizedText } from "../utils/helpers";
+import { useLanguageContext } from '../contexts/LanguageContext'; 
 import publicService from "../services/publicService";
 import "./Header.css";
 
@@ -26,6 +29,7 @@ const Header = () => {
   const [destinations, setDestinations] = useState([]);
   const [loading, setLoading] = useState(false);
   const { t, i18n } = useTranslation();
+  const { changeLanguage, currentLanguage, isChangingLanguage, DEFAULT_LANGUAGE } = useLanguageContext();
   const navigate = useNavigate();
   const location = useLocation();
   const languageRef = useRef(null);
@@ -41,7 +45,18 @@ const Header = () => {
   const { getLocalizedText } = useLocalizedText();
 
   // Only home page should start transparent, all others start with white header
-  const isHomePage = location.pathname === "/";
+  const isHomePage = React.useMemo(() => {
+    const pathname = location.pathname;
+    
+    // ✅ CHANGED: For Russian (default)
+    if (currentLanguage === DEFAULT_LANGUAGE) {
+      return pathname === '/';
+    }
+    
+    // ✅ CHANGED: For other languages (including English)
+    return pathname === `/${currentLanguage}` || pathname === `/${currentLanguage}/`;
+  }, [location.pathname, currentLanguage, DEFAULT_LANGUAGE]);
+
 
   // Determine header background and colors
   const headerBg =
@@ -75,8 +90,10 @@ const Header = () => {
     { code: "de", name: "Deutsch", flag: deFlag },  // German in German
   ];
 
-  const currentLanguage =
-    languages.find((lang) => lang.code === i18n.language) || languages[0];
+  // const currentLanguage =
+  //   languages.find((lang) => lang.code === i18n.language) || languages[0];
+  const currentLanguageObj = languages.find((lang) => lang.code === currentLanguage) || languages[0];
+    
 
   // ✅ FIXED: Fetch cities immediately on component mount
   useEffect(() => {
@@ -149,13 +166,39 @@ const Header = () => {
   //   return () => document.removeEventListener("mousedown", handleClickOutside);
   // }, []);
 
+// In your Header.jsx - Replace the handleLanguageChange function
+// In Header.jsx - ONLY change the handleLanguageChange function
+// const handleLanguageChange = (langCode) => {
+//   console.log(`🌐 Changing language from ${i18n.language} to ${langCode}`);
+  
+//   const currentPath = location.pathname;
+//   let newPath;
+  
+//   // Remove any existing language prefix first
+//   const pathWithoutLang = currentPath.replace(/^\/[a-z]{2}(\/|$)/, '/');
+  
+//   if (langCode === 'en') {
+//     newPath = pathWithoutLang === '/' ? '/' : pathWithoutLang;
+//   } else {
+//     newPath = pathWithoutLang === '/' ? `/${langCode}` : `/${langCode}${pathWithoutLang}`;
+//   }
+  
+//   console.log(`🔄 Language switching from ${currentPath} to ${newPath}`);
+  
+//   // ✅ ONLY FOR LANGUAGE SWITCHING - use replaceState to avoid React state issues
+//   window.history.replaceState(null, '', newPath);
+//   i18n.changeLanguage(langCode);
+//   setIsLanguageOpen(false);
+// };
+
   const handleLanguageChange = (langCode) => {
-    console.log(`🌐 Changing language from ${i18n.language} to ${langCode}`);
-    i18n.changeLanguage(langCode);
+    if (isChangingLanguage) return; // Prevent multiple clicks
+    
+    console.log(`🌐 Changing language from ${currentLanguage} to ${langCode}`);
+    changeLanguage(langCode);
     setIsLanguageOpen(false);
-    // ✅ Data will be refetched automatically by useEffect above
-    // ✅ Explore dropdown stays open and updates smoothly
   };
+
 
 // Simple, reliable click outside handler
 useEffect(() => {
@@ -618,12 +661,12 @@ const getDropdownButtonClasses = () => {
                 onClick={() => setIsLanguageOpen(!isLanguageOpen)}
               >
                 <img
-                  src={currentLanguage.flag}
-                  alt={currentLanguage.name}
+                  src={currentLanguageObj.flag}
+                  alt={currentLanguageObj.name}
                   className="w-4 h-3 xl:w-5 xl:h-4 object-contain rounded-sm flex-shrink-0"
                 />
                 <span className="text-xs font-normal">
-                  {currentLanguage.code.toUpperCase()}
+                  {currentLanguageObj.code.toUpperCase()}
                 </span>
                 <svg
                   className="w-3 h-3 xl:w-4 xl:h-4 flex-shrink-0"
@@ -646,6 +689,7 @@ const getDropdownButtonClasses = () => {
                       key={language.code}
                       onClick={() => handleLanguageChange(language.code)}
                       className="w-full px-3 xl:px-4 py-2 xl:py-3 text-left hover:bg-gray-50 flex items-center space-x-2 xl:space-x-3 text-gray-800 transition-colors text-sm xl:text-base"
+                      disabled={isChangingLanguage && currentLanguage.code === language.code}
                     >
                       <img
                         src={language.flag}
@@ -987,18 +1031,18 @@ const getDropdownButtonClasses = () => {
                 data-language-trigger="true" 
                 className="flex items-center gap-2 px-2 py-2"
                 onClick={(e) => {
-    e.stopPropagation();
-    console.log("[🌐 TOGGLE] Language dropdown toggled");
-    setIsLanguageOpen(!isLanguageOpen);
+                e.stopPropagation();
+                console.log("[🌐 TOGGLE] Language dropdown toggled");
+                setIsLanguageOpen(!isLanguageOpen);
                 }}
               >
                 <img
-                  src={currentLanguage.flag}
-                  alt={currentLanguage.name}
+                  src={currentLanguageObj.flag}
+                  alt={currentLanguageObj.name}
                   className="w-6 h-5 object-contain rounded-sm flex-shrink-0"
                 />
                 <span className="text-[#090127] font-roboto text-sm font-normal leading-[18px]">
-                  {currentLanguage.code.toUpperCase()}
+                  {currentLanguageObj.code.toUpperCase()}
                 </span>
                 <svg 
                   className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${

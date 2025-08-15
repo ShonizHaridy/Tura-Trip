@@ -1,6 +1,7 @@
 // src/pages/TripDetail.jsx
 import { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "../hooks/useSmartNavigation";
+import { default as Link } from '../components/SmartLink';
 import { useTranslation } from "react-i18next";
 import ExcursionCard from "../components/ExcursionCard";
 import { Message, Car, Buildings, Bus, Shield, Image, Location, Timer1, Calendar2, UserTag, TickCircle, ArrowLeft2, ArrowRight2, ArrowDown2 } from 'iconsax-react';

@@ -442,5 +442,17 @@
   "allTours": "Tutti i tour disponibili",
   "viewAllInCity": "Visualizza altri {{count}} tour",
   "from": "A partire da"
+  },
+  "meta": {
+    "home": {
+      "title": "Tura Trip - I Migliori Tour in Egitto | Prenota la Tua Avventura",
+      "description": "Scopri tour ed esperienze straordinarie in Egitto con Tura Trip. Prenota la tua vacanza perfetta a Hurghada, Sharm El Sheikh e altro ancora! Nessun pagamento anticipato richiesto, guide che parlano italiano.",
+      "keywords": "tour egitto, viaggi egitto, pacchetti vacanza, tour hurghada, sharm el sheikh, mar rosso, tour cairo, tour luxor, immersioni egitto, safari nel deserto"
+    },
+    "default": {
+      "title": "Tura Trip - Tour e Viaggi in Egitto",
+      "description": "Scopri i migliori tour ed esperienze di viaggio in Egitto con Tura Trip. Tour operator professionale.",
+      "keywords": "egitto, tour, viaggi, vacanze, viaggi, mar rosso, cairo, luxor"
+    }
   }
 }
