@@ -130,12 +130,11 @@ const TripDetail = () => {
     try {
       setSubmittingReview(true);
       
-      // Prepare review data with images
       const reviewData = {
         client_name: reviewForm.name,
         comment: reviewForm.comment,
         language: i18n.language,
-        ...reviewImages // Include any selected images
+        ...reviewImages
       };
       
       const response = await publicService.submitReview(tripId, reviewData);
@@ -144,12 +143,19 @@ const TripDetail = () => {
         alert(t('tripDetail.review.success') || 'Review submitted successfully!');
         setReviewForm({ name: '', comment: '' });
         setReviewImages({ client_image: null, profile_image: null });
-        // Optionally refresh the trip data to show the new review
         fetchTripData();
       }
     } catch (error) {
       console.error('Error submitting review:', error);
-      alert(t('tripDetail.review.error') || 'Error submitting review. Please try again.');
+      
+      // ✅ Handle specific validation errors from backend
+      if (error.response?.data?.message) {
+        // Show the specific error message from backend
+        alert(error.response.data.message);
+      } else {
+        // Fallback to generic error
+        alert(t('tripDetail.review.error') || 'Error submitting review. Please try again.');
+      }
     } finally {
       setSubmittingReview(false);
     }

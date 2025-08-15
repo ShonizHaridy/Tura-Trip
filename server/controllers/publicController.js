@@ -1349,10 +1349,10 @@ async getBrowseToursData(req, res) {
           });
       }
 
-      if (comment.trim().length < 10) {
+      if (comment.trim().length < 3) {
           return res.status(400).json({
               success: false,
-              message: 'Comment must be at least 10 characters long'
+              message: 'Comment must be at least 3 characters long'
           });
       }
 
