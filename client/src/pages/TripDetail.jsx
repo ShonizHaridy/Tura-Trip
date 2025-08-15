@@ -523,12 +523,25 @@ const TripDetail = () => {
             {/* Pricing */}
             <div className="flex justify-between items-start">
               <div className="space-y-1">
-                <div className="text-3xl font-bold text-[#3F62AE]">${formatPrice(tour.price_adult)}</div>
+                <div className="text-3xl font-bold text-[#3F62AE]">
+                  ${formatPrice(
+                    tour.discount_percentage > 0 
+                      ? Math.round(parseFloat(tour.price_adult) * (1 - tour.discount_percentage / 100))
+                      : tour.price_adult
+                  )}
+                </div>
                 <div className="text-xs font-semibold text-[#778088]">
                   {t('tripDetail.pricing.adult') || 'Adult (above 12)'}
                 </div>
+                {/* Show original adult price if there's a discount */}
+                {tour.discount_percentage > 0 && (
+                  <div className="text-sm text-gray-500 line-through">
+                    ${formatPrice(tour.price_adult)}
+                  </div>
+                )}
               </div>
               <div className="space-y-1">
+                {/* Child price - NO DISCOUNT APPLIED */}
                 <div className="text-3xl font-bold text-[#3F62AE]">${formatPrice(tour.price_child)}</div>
                 <div className="text-xs font-semibold text-[#778088]">
                   {t('tripDetail.pricing.child') || 'Child (5-11 years)'}
@@ -688,7 +701,7 @@ const TripDetail = () => {
                   {shouldShowReadMore && content.trip_program && content.trip_program.length > 5 && (
                     <button
                       onClick={() => setShowMoreTripProgram(!showMoreTripProgram)}
-                      className="flex items-center gap-2 text-[#222E50]"
+                      className="flex items-center gap-2 text-[#222E50] cursor-pointer"
                     >
                       <span>{showMoreTripProgram ? (t('common.readLess') || 'Read Less') : (t('common.readMore') || 'Read More')}</span>
                       <ArrowDown2 

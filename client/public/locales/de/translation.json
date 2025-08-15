@@ -102,13 +102,17 @@
   },
   "priceList": {
     "titleWithCity": "{{city}} Ausflüge Preise heute",
+    "citySummary": "{{total}} Touren verfügbar. Preise von ${{min}} bis ${{max}}. Durchschnittspreis: ${{avg}}",
     "historical": "Historisch",
     "excursion": "AUSFLUG",
     "priceAdults": "PREIS (Erwachsene)",
     "priceChildren": "PREIS (Kinder)",
-    "adults": "ERWACHSENE",
+    "adults": "ERWACHSENE", 
     "children": "KINDER",
-    "citySummary": "{{total}} Touren verfügbar. Preise von ${{min}} bis ${{max}}. Durchschnittspreis: ${{avg}}"
+    "noDataTitle": "Keine Preisdaten verfügbar",
+    "noDataMessage": "Entschuldigung, aber Preisinformationen sind derzeit nicht verfügbar. Bitte schauen Sie später noch einmal vorbei oder kontaktieren Sie uns für Hilfe.",
+    "allCities": "Alle Städte",
+    "noToursInCategory": "Keine Touren in der Kategorie"
   },
   "homepage": {
     "hero": {
@@ -131,7 +135,7 @@
     },
     "payment": {
       "title": "Wir akzeptieren Zahlungen in Rubel, Tenge oder Griwna per Überweisung auf eine Karte:",
-      "rates": "$1 = Zentralbankkurs + {{rub}} <0>₽</0> ; oder {{tenge}} <1>₸</1> ; oder {{uah}} <2>₴</2> ; auch Überweisung USD T auf eine Krypto-Wallet",
+      "rates": "$1 = Zentralbankkurs + {{rub}} <0>₽</0> ; oder {{tenge}} <1>₸</1> ; oder {{uah}} <2>₴</2>",
       "converterButton": "Online-Währungsumrechner öffnen"
     },
     "PricesSection": {
@@ -446,7 +450,7 @@
   },
   "meta": {
     "home": {
-      "title": "Tura Trip - Beste Touren in Ägypten | Buchen Sie Ihr Abenteuer",
+      "title": "Tura Trip",
       "description": "Entdecken Sie erstaunliche Touren und Erlebnisse in Ägypten mit Tura Trip. Buchen Sie Ihren perfekten Urlaub nach Hurghada, Sharm El Sheikh und mehr! Keine Vorauszahlung erforderlich, deutschsprachige Guides.",
       "keywords": "ägypten touren, ägypten reisen, urlaubspakete, hurghada touren, sharm el sheikh, rotes meer, kairo touren, luxor touren, tauchen ägypten, wüstensafari"
     },

@@ -690,6 +690,7 @@ const ContentManagement = () => {
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const tab = searchParams.get('tab');
+    const search = searchParams.get('search');
     
     if (tab === 'reviews') {
       setActiveTab('Reviews');
@@ -697,6 +698,11 @@ const ContentManagement = () => {
       setActiveTab('Comments');
     } else {
       setActiveTab('FAQs');
+    }
+
+    if (search) {
+      setSearchTerm(search);
+      setDebouncedSearchTerm(search);
     }
   }, [location.search]);
 

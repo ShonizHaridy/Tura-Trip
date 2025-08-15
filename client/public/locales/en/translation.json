@@ -109,7 +109,9 @@
     "adults": "ADULTS",
     "children": "CHILDREN",
     "noDataTitle": "No Pricing Data Available",
-    "noDataMessage": "We apologize, but pricing information is not currently available. Please check back soon or contact us for assistance."
+    "noDataMessage": "We apologize, but pricing information is not currently available. Please check back soon or contact us for assistance.",
+    "allCities": "All Cities",
+    "noToursInCategory": "No tours in category"
   },
   "homepage": {
     "hero": {
@@ -132,7 +134,7 @@
     },
     "payment": {
       "title": "We can accept payment in rubles, tenge or hryvnia by transfer to a card:",
-      "rates": "$1 = Central Bank exchange rate + {{rub}} <0>₽</0> ; or {{tenge}} <1>₸</1> ; or {{uah}} <2>₴</2> ; also transfer USD T to a crypto wallet",
+      "rates": "$1 = Central Bank exchange rate + {{rub}} <0>₽</0> ; or {{tenge}} <1>₸</1> ; or {{uah}} <2>₴</2>",
       "converterButton": "Open Online Currency Converter"
     },
     "pricesSection": {
@@ -449,7 +451,7 @@
   },
   "meta": {
     "home": {
-      "title": "Tura Trip - Best Tours in Egypt | Book Your Adventure",
+      "title": "Tura Trip",
       "description": "Discover amazing tours and experiences in Egypt with Tura Trip. Book your perfect vacation to Hurghada, Sharm El Sheikh, and more! No prepayment required, English-speaking guides.",
       "keywords": "egypt tours, travel egypt, vacation packages, hurghada tours, sharm el sheikh, red sea tours, cairo tours, luxor tours, diving egypt, desert safari"
     },

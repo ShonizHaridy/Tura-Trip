@@ -1,7 +1,7 @@
 // ToursTable.jsx - FIXED VERSION
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Edit2, Trash, Image } from "iconsax-react";
+import { Eye, Edit2, Trash, Image } from "iconsax-react";
 import DynamicPagination from './DynamicPagination';
 import adminService from "../../services/adminService";
 
@@ -13,6 +13,7 @@ const ToursTable = ({ searchTerm = "", appliedFilters = {} }) => {
   const [error, setError] = useState("");
   const itemsPerPage = 6;
   const navigate = useNavigate();
+
 
   // ✅ FIXED: Reset page when search or filters change
   useEffect(() => {
@@ -61,12 +62,32 @@ const ToursTable = ({ searchTerm = "", appliedFilters = {} }) => {
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  const StatusBadge = ({ status }) => {
+  const toggleTourStatus = async (tourId, currentStatus) => {
+    try {
+      const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+      const response = await adminService.updateTourStatus(tourId, newStatus);
+      
+      if (response.success) {
+        fetchTours(); // Refresh the list
+      } else {
+        alert(response.message || "Failed to update tour status");
+      }
+    } catch (error) {
+      console.error('Toggle tour status error:', error);
+      alert("Failed to update tour status");
+    }
+  };
+
+  const StatusBadge = ({ status, tourId, onClick }) => {
     const isActive = status === "active";
     return (
-      <div
-        className={`flex justify-center items-center rounded-full px-2.5 py-0.5 ${
-          isActive ? "bg-green-100" : "bg-gray-100"
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick(tourId, status);
+        }}
+        className={`flex justify-center items-center rounded-full px-2.5 py-0.5 cursor-pointer transition-colors hover:opacity-80 ${
+          isActive ? "bg-green-100 hover:bg-green-200" : "bg-gray-100 hover:bg-gray-200"
         }`}
       >
         <span
@@ -76,9 +97,10 @@ const ToursTable = ({ searchTerm = "", appliedFilters = {} }) => {
         >
           {isActive ? "Active" : "Inactive"}
         </span>
-      </div>
+      </button>
     );
   };
+
 
   const handleDelete = async (tourId) => {
     if (window.confirm("Are you sure you want to delete this tour?")) {
@@ -96,21 +118,32 @@ const ToursTable = ({ searchTerm = "", appliedFilters = {} }) => {
     }
   };
 
+  const handleViewTour = (tourId) => {
+    navigate(`/admin/tours/view/${tourId}`);
+  };
+
   const ActionButtons = ({ tourId }) => (
-    <div className="flex items-center gap-4">
+  <div className="flex items-center gap-4">
+      <button
+        onClick={() => handleViewTour(tourId)}
+        className="text-gray-400 hover:text-blue-600 transition-colors"
+        title="View Tour"
+      >
+        <Eye size="20" color="currentColor" />
+      </button>
       <button
         onClick={() => navigate(`/admin/tours/edit/${tourId}`)}
         className="text-gray-400 hover:text-gray-600 transition-colors"
         title="Edit Tour"
       >
-        <Edit2 size="24" color="currentColor" />
+        <Edit2 size="20" color="currentColor" />
       </button>
       <button
         onClick={() => handleDelete(tourId)}
         className="text-gray-400 hover:text-red-600 transition-colors"
         title="Delete Tour"
       >
-        <Trash size="24" color="currentColor" />
+        <Trash size="20" color="currentColor" />
       </button>
     </div>
   );
@@ -236,7 +269,11 @@ const ToursTable = ({ searchTerm = "", appliedFilters = {} }) => {
 
             {/* Status */}
             <div className="w-24 flex justify-center">
-              <StatusBadge status={tour.status} />
+              <StatusBadge 
+                status={tour.status} 
+                tourId={tour.id}
+                onClick={toggleTourStatus}
+              />
             </div>
 
             {/* Actions */}

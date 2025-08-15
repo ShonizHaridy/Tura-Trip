@@ -276,7 +276,7 @@ const handleSuggestionClick = (suggestion) => {
     <div className="relative">
       {/* Hero section with full viewport height */}
       <section
-        className="relative min-h-screen w-full bg-[url('/src/assets/hero-bg.png')] bg-cover bg-center flex flex-col justify-center text-white"
+        className="relative min-h-screen w-full bg-[url('/images/hero-bg.png')] bg-cover bg-center flex flex-col justify-center text-white"
       >
         <div className="container mx-auto px-4 lg:px-8 pt-18 lg:pt-24">
           <div className="relative mt-8 -mb-11 w-full lg:w-4/5 xl:w-3/4 max-md:mt-10 max-md:mb-2.5 justify-start">

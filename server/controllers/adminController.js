@@ -83,13 +83,12 @@ async login(req, res) {
 async forgotPassword(req, res) {
   try {
     console.log('🔍 Forgot password request:', req.body);
-    const { admin_id, email } = req.body;
-    console.log('🔍 Forgot password attempt:', { admin_id, email });
+    const { email } = req.body;
     
     // Query using admin_id (which exists in database)
     const [rows] = await pool.execute(
-      'SELECT id, name, email FROM admin_users WHERE admin_id = ? AND email = ? AND is_active = true',
-      [admin_id, email]
+      'SELECT id, name, email FROM admin_users WHERE email = ? AND is_active = true',
+      [email]
     );
     
     console.log('🔍 Found admin users:', rows.length);
@@ -174,14 +173,13 @@ async forgotPassword(req, res) {
 
 async resetPassword(req, res) {
   try {
-    const { admin_id, email, verification_code, new_password } = req.body; // ✅ Changed from admin_code to admin_id
+    const { email, verification_code, new_password } = req.body; // ✅ Changed from admin_code to admin_id
 
-    console.log('🔍 Reset password attempt:', { admin_id, email, verification_code });
 
     // ✅ Query using admin_id (which exists in database)
     const [adminRows] = await pool.execute(
-      'SELECT id FROM admin_users WHERE admin_id = ? AND email = ? AND is_active = true',
-      [admin_id, email]
+      'SELECT id FROM admin_users WHERE email = ? AND is_active = true',
+      [email]
     );
 
     if (adminRows.length === 0) {

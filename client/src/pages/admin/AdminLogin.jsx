@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import loginImage from "../../assets/login.png";
@@ -7,14 +7,12 @@ import resetPasswordImage from "../../assets/hand-point-form-with-password-red-p
 import successImage from "../../assets/resetsuccess.png";
 
 import { useAuth } from "../../contexts/AuthContext";
-
 import adminService from "../../services/adminService";
-
 
 const AdminLogin = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, isAuthenticated, loading } = useAuth(); // ✅ Add isAuthenticated and loading
   const [currentState, setCurrentState] = useState("login"); // login, forgot, reset, success
   const [formData, setFormData] = useState({
     adminId: "",
@@ -30,7 +28,39 @@ const AdminLogin = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false); // ✅ Renamed from loading to submitLoading
+
+  // ✅ Redirect if already authenticated
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      console.log('🔄 User already authenticated, redirecting...');
+      const from = location.state?.from?.pathname || '/admin/dashboard';
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, loading, navigate, location.state]);
+
+  // ✅ Show loading spinner while checking authentication
+  if (loading) {
+    return (
+      <div 
+        className="min-h-screen w-full flex items-center justify-center"
+        style={{
+          background:
+            "linear-gradient(172deg, rgba(45, 70, 124, 0.70) 11.32%, rgba(42, 221, 231, 0.70) 123.47%), #FFF",
+        }}
+      >
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-3 border-white border-t-transparent"></div>
+          <p className="text-white text-lg font-medium">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ✅ Don't render login form if authenticated (extra safety)
+  if (isAuthenticated) {
+    return null;
+  }
 
   const handleChange = (e) => {
     setFormData({
@@ -44,25 +74,27 @@ const AdminLogin = () => {
     e.preventDefault();
     e.stopPropagation();
     
-    if (loading) return;
+    if (submitLoading) return;
     
-    setLoading(true);
+    setSubmitLoading(true);
     setError("");
 
     try {
+      console.log('🚀 Attempting login...');
       const result = await login({
         admin_id: formData.adminId,
         password: formData.password,
       });
 
       if (result.success) {
+        console.log('✅ Login successful, redirecting...');
         const from = location.state?.from?.pathname || '/admin/dashboard';
         navigate(from, { replace: true });
       } else {
         setError(result.message || 'Login failed');
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('❌ Login error:', error);
       if (error.response?.data?.message) {
         setError(error.response.data.message);
       } else if (error.message) {
@@ -71,19 +103,18 @@ const AdminLogin = () => {
         setError('An error occurred during login');
       }
     } finally {
-      setLoading(false);
+      setSubmitLoading(false);
     }
   };
 
   const handleForgotPassword = async (e) => {
     e.preventDefault();
-    if (formData.adminCode && formData.email) {
-      setLoading(true);
+    if (formData.email) {
+      setSubmitLoading(true);
       setError("");
       
       try {
         const response = await adminService.forgotPassword({
-          admin_id: formData.adminCode,
           email: formData.email,
         });
 
@@ -96,7 +127,7 @@ const AdminLogin = () => {
       } catch (error) {
         setError(error.response?.data?.message || 'An error occurred. Please try again.');
       } finally {
-        setLoading(false);
+        setSubmitLoading(false);
       }
     } else {
       setError("Please fill in all fields.");
@@ -117,12 +148,11 @@ const AdminLogin = () => {
           return;
         }
 
-        setLoading(true);
+        setSubmitLoading(true);
         setError("");
 
         try {
           const response = await adminService.resetPassword({
-            admin_id: formData.adminCode,
             email: formData.email,
             // id_number: formData.idNumber,
             verification_code: formData.verificationCode,
@@ -138,7 +168,7 @@ const AdminLogin = () => {
         } catch (error) {
           setError(error.response?.data?.message || 'An error occurred. Please try again.');
         } finally {
-          setLoading(false);
+          setSubmitLoading(false);
         }
       } else {
         setError("Passwords do not match.");
@@ -309,7 +339,7 @@ const renderLoginForm = () => (
             fontFamily: "Roboto, -apple-system, Helvetica, sans-serif",
           }}
           required
-          disabled={loading}
+          disabled={submitLoading}
         />
       </div>
     </div>
@@ -375,13 +405,13 @@ const renderLoginForm = () => (
             fontFamily: "Roboto, -apple-system, Helvetica, sans-serif",
           }}
           required
-          disabled={loading}
+          disabled={submitLoading}
         />
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
           className="flex w-6 h-6 justify-center items-center flex-shrink-0"
-          disabled={loading}
+          disabled={submitLoading}
         >
           <svg
             width="24"
@@ -412,7 +442,7 @@ const renderLoginForm = () => (
         onClick={() => setCurrentState("forgot")}
         className="self-stretch text-[#555A64] text-base font-normal leading-normal cursor-pointer hover:text-[#222E50] transition-colors text-left"
         style={{ fontFamily: "Roboto, -apple-system, Helvetica, sans-serif" }}
-        disabled={loading}
+        disabled={submitLoading}
       >
         Forgot Password?
       </button>
@@ -421,9 +451,9 @@ const renderLoginForm = () => (
     {/* Login Button */}
     <button
       type="submit"
-      disabled={loading}
-      className={`flex p-[14px_24px] justify-center items-center self-stretch rounded-md transition-colors cursor-pointer ${
-        loading 
+      disabled={submitLoading}
+      className={`flex p-[8px_16px] justify-center items-center self-stretch rounded-md transition-colors cursor-pointer ${
+        submitLoading 
           ? "bg-gray-400 cursor-not-allowed" 
           : "bg-[#1F7674] hover:bg-[#1a6562]"
       }`}
@@ -432,7 +462,7 @@ const renderLoginForm = () => (
         className="text-[#EAF6F6] text-xl lg:text-[24px] font-bold leading-normal"
         style={{ fontFamily: "Roboto, -apple-system, Helvetica, sans-serif" }}
       >
-        {loading ? "Logging in..." : "Log in"}
+        {submitLoading ? "Logging in..." : "Log in"}
       </span>
     </button>
   </form>
@@ -450,7 +480,7 @@ const renderLoginForm = () => (
       )}
 
       {/* Admin Code Field */}
-      <div className="flex w-full max-w-[380px] lg:max-w-[440px] xl:max-w-[531px] flex-col items-end gap-1">
+      {/* <div className="flex w-full max-w-[380px] lg:max-w-[440px] xl:max-w-[531px] flex-col items-end gap-1">
         <label
           className="self-stretch text-[#222E50] text-lg lg:text-[20px] font-normal leading-[1.2]"
           style={{
@@ -474,7 +504,7 @@ const renderLoginForm = () => (
             required
           />
         </div>
-      </div>
+      </div> */}
 
       {/* Email Field */}
       <div className="flex w-full max-w-[380px] lg:max-w-[440px] xl:max-w-[531px] flex-col items-end gap-1">
@@ -538,13 +568,18 @@ const renderLoginForm = () => (
       {/* Submit Button */}
       <button
         type="submit"
-        className="flex p-[14px_24px] justify-center items-center self-stretch rounded-md bg-[#1F7674] hover:bg-[#1a6562] transition-colors"
+        disabled={submitLoading}
+        className={`flex p-[14px_24px] cursor-pointer justify-center items-center self-stretch rounded-md transition-colors ${
+          submitLoading 
+            ? "bg-gray-400 cursor-not-allowed" 
+            : "bg-[#1F7674] hover:bg-[#1a6562]"
+        }`}
       >
         <span
           className="text-[#EAF6F6] text-xl lg:text-[24px] font-bold leading-normal"
           style={{ fontFamily: "Roboto, -apple-system, Helvetica, sans-serif" }}
         >
-          Send Code
+          {submitLoading ? "Sending Code..." : "Send Code"}
         </span>
       </button>
 
@@ -721,13 +756,18 @@ const renderLoginForm = () => (
       {/* Submit Button */}
       <button
         type="submit"
-        className="flex p-[14px_24px] justify-center items-center self-stretch rounded-md bg-[#1F7674] hover:bg-[#1a6562] transition-colors"
+        disabled={submitLoading}
+        className={`flex p-[14px_24px] cursor-pointer justify-center items-center self-stretch rounded-md transition-colors ${
+          submitLoading 
+            ? "bg-gray-400 cursor-not-allowed" 
+            : "bg-[#1F7674] hover:bg-[#1a6562]"
+        }`}
       >
         <span
           className="text-[#EAF6F6] text-xl lg:text-[24px] font-bold leading-normal"
           style={{ fontFamily: "Roboto, -apple-system, Helvetica, sans-serif" }}
         >
-          Reset Password
+          {submitLoading ? "Resetting Password..." : "Reset Password"}
         </span>
       </button>
 
@@ -787,7 +827,7 @@ const renderLoginForm = () => (
         className="flex p-[14px_24px] justify-center items-center self-stretch rounded-md bg-[#1F7674] hover:bg-[#1a6562] transition-colors"
       >
         <span
-          className="text-[#EAF6F6] text-xl lg:text-[24px] font-bold leading-normal"
+          className="text-[#EAF6F6] hover:text-red-600 text-xl lg:text-[24px] font-bold leading-normal"
           style={{ fontFamily: "Roboto, -apple-system, Helvetica, sans-serif" }}
         >
           Back to Login
@@ -821,16 +861,16 @@ const renderLoginForm = () => (
           "linear-gradient(172deg, rgba(45, 70, 124, 0.70) 11.32%, rgba(42, 221, 231, 0.70) 123.47%), #FFF",
       }}
     >
-    <div className="flex w-full px-4 py-8 lg:px-[60px] lg:py-[110px] justify-center items-center gap-6 max-w-screen-2xl mx-auto">
+    <div className="flex w-full px-4 py-2 lg:px-[60px] lg:py-[20px] xl:py-[60px] justify-center items-center gap-6 max-w-screen-2xl mx-auto">
   
       <div className="flex flex-col lg:flex-row justify-center items-center gap-6 max-w-7xl w-full">
         {/* Left Side - Text and Form Stacked */}
-        <div className="flex flex-col justify-center items-center gap-6 flex-1 max-w-4xl order-1">
+        <div className="flex flex-col justify-center items-center gap-4 lg:gap-6 flex-1 max-w-4xl order-1">
           {/* Welcome Text - Above Form */}
           <div className="flex flex-col items-center gap-6 w-full max-w-[420px] lg:max-w-[480px] xl:max-w-[580px]">
             <div className="flex flex-col items-center gap-5 text-center">
               <h1
-                className="text-white text-xl lg:text-[28px] xl:text-[34px] font-bold leading-[1.378] max-w-[420px] lg:max-w-[480px] xl:max-w-[579px]"
+                className="text-white text-lg lg:text-xl xl:text-[28px] 2xl:text-[34px] font-bold leading-[1.378] max-w-[420px] lg:max-w-[480px] xl:max-w-[579px]"
                 style={{
                   fontFamily:
                     "'Zen Kaku Gothic Antique', -apple-system, Roboto, Helvetica, sans-serif",
@@ -904,7 +944,7 @@ const renderLoginForm = () => (
 
             {/* Form Title */}
             <h2
-              className="text-[#222E50] text-2xl lg:text-[36px] xl:text-[44px] font-normal leading-[1.2]"
+                className="text-[#222E50] text-xl lg:text-2xl xl:text-[36px] 2xl:text-[44px] font-normal leading-[1.2]"
               style={{
                 fontFamily:
                   "'Tai Heritage Pro', -apple-system, Roboto, Helvetica, sans-serif",

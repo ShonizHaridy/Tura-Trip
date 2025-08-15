@@ -451,7 +451,8 @@ async getAllReviews(req, res) {
       LEFT JOIN tour_content tc ON t.id = tc.tour_id AND tc.language_code = 'en'
       LEFT JOIN cities c ON t.city_id = c.id
       ${whereClause}
-      ORDER BY r.review_date DESC
+      -- ORDER BY r.review_date DESC
+      ORDER BY r.created_at DESC
       LIMIT ${safeLimit} OFFSET ${safeOffset}
     `;
 
@@ -659,6 +660,12 @@ async getAllReviews(req, res) {
     try {
       const { id } = req.params;
 
+      // ✅ Get tour_id before deletion for notification cleanup
+      const [reviewData] = await pool.execute(
+        'SELECT tour_id FROM reviews WHERE id = ?', 
+        [id]
+      );
+
       const [result] = await pool.execute('DELETE FROM reviews WHERE id = ?', [id]);
 
       if (result.affectedRows === 0) {
@@ -666,6 +673,14 @@ async getAllReviews(req, res) {
           success: false,
           message: 'Review not found'
         });
+      }
+
+      // ✅ Delete related notifications
+      if (reviewData.length > 0) {
+        await notificationController.deleteNotificationsByRelatedId(
+          reviewData[0].tour_id, 
+          'tour'
+        );
       }
 
       res.json({

@@ -177,26 +177,14 @@ const handleShowPricing = async () => {
   console.log("=== PRICE LIST DEBUG START ===");
   console.log("cityData:", cityData);
   console.log("cityData.todaysPrices:", cityData?.todaysPrices);
-  console.log("allTours length:", allTours.length);
   
   if (allTours.length === 0) {
     console.log("📋 Fetching all tours because allTours is empty...");
     await fetchCityData(1, null, true);
   }
   
-  // Debug the data being prepared for PriceList
-  const pricesDataToSend = cityData?.todaysPrices ? [{
-    city_name: cityData.name,
-    tours: (cityData.todaysPrices.tours || []).map(tour => {
-      console.log("Processing tour:", tour);
-      return {
-        ...tour,
-        title: tour.title || `${t('common.tourTitle')} #${tour.id}`,
-        price_adult: parseFloat(tour.price_adult),
-        price_child: parseFloat(tour.price_child)
-      };
-    })
-  }] : [];
+  // Pass the new structure - single city with categories
+  const pricesDataToSend = cityData?.todaysPrices ? [cityData.todaysPrices] : [];
   
   console.log("📤 Data being sent to PriceList:", pricesDataToSend);
   console.log("=== PRICE LIST DEBUG END ===");
@@ -505,15 +493,7 @@ const handleShowPricing = async () => {
           <PriceList
             isOpen={isPriceListOpen}
             onClose={() => setIsPriceListOpen(false)}
-            pricesData={cityData?.todaysPrices ? [{
-              city_name: cityData.name,
-              tours: (cityData.todaysPrices.tours || []).map(tour => ({
-                ...tour,
-                title: tour.title || `${t('common.tourTitle')} #${tour.id}`,
-                price_adult: parseFloat(tour.price_adult),
-                price_child: parseFloat(tour.price_child)
-              }))
-            }] : []}
+            pricesData={cityData?.todaysPrices ? [cityData.todaysPrices] : []}
           />
           </div>
         </div>

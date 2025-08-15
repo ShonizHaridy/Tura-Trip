@@ -803,13 +803,13 @@ const TourImagesUpload = () => {
             Edit Tour
           </div>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1 border border-gray-300 rounded">
+        {/* <div className="flex items-center gap-2 px-3 py-1 border border-gray-300 rounded">
           <span className={`text-xs px-2 py-1 rounded-full ${
             tourData?.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
           }`}>
             {tourData?.status || 'Active'}
           </span>
-        </div>
+        </div> */}
       </div>
 
       <div className="flex flex-col gap-8">

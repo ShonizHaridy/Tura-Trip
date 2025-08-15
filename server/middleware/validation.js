@@ -65,12 +65,10 @@ const adminValidation = {
     handleValidationErrors
   ],
   forgotPasswordValidation : [
-    body('admin_id').notEmpty().withMessage('Admin ID is required'),
     body('email').isEmail().withMessage('Valid email is required'),
     handleValidationErrors
   ],
   resetPasswordValidation : [
-    body('admin_id').notEmpty().withMessage('Admin ID is required'),
     body('email').isEmail().withMessage('Valid email is required'),
     body('verification_code').notEmpty().withMessage('Verification code is required'),
     body('new_password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),

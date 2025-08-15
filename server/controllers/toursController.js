@@ -213,7 +213,8 @@ async getTourById(req, res) {
     const [reviewRows] = await pool.execute(`
       SELECT * FROM reviews
       WHERE tour_id = ? AND is_active = true
-      ORDER BY review_date DESC
+      -- ORDER BY review_date DESC
+      ORDER BY created_at DESC
     `, [id]);
 
     const processedReviews = imageHelper.processArrayImages(reviewRows, 'review');

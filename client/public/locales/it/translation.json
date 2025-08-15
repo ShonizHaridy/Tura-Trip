@@ -105,9 +105,13 @@
     "historical": "Storico",
     "excursion": "ESCURSIONE",
     "priceAdults": "PREZZO (adulti)",
-    "priceChildren": "PREZZO (bambini)",
+    "priceChildren": "PREZZO (bambini)", 
     "adults": "ADULTI",
-    "children": "BAMBINI"
+    "children": "BAMBINI",
+    "noDataTitle": "Dati sui prezzi non disponibili",
+    "noDataMessage": "Ci scusiamo, ma le informazioni sui prezzi non sono attualmente disponibili. Ricontrolla più tardi o contattaci per assistenza.",
+    "allCities": "Tutte le città",
+    "noToursInCategory": "Nessun tour nella categoria"
   },
   "homepage": {
     "hero": {
@@ -130,7 +134,7 @@
     },
     "payment": {
       "title": "Accettiamo pagamenti in rubli, tenge o grivnie tramite bonifico su carta:",
-      "rates": "$1 = tasso della Banca Centrale + {{rub}} <0>₽</0> ; o {{tenge}} <1>₸</1> ; o {{uah}} <2>₴</2> ; anche trasferimento USD T su wallet crypto",
+      "rates": "$1 = tasso della Banca Centrale + {{rub}} <0>₽</0> ; o {{tenge}} <1>₸</1> ; o {{uah}} <2>₴</2>",
       "converterButton": "Apri il convertitore di valuta online"
     },
     "pricesSection": {
@@ -445,7 +449,7 @@
   },
   "meta": {
     "home": {
-      "title": "Tura Trip - I Migliori Tour in Egitto | Prenota la Tua Avventura",
+      "title": "Tura Trip",
       "description": "Scopri tour ed esperienze straordinarie in Egitto con Tura Trip. Prenota la tua vacanza perfetta a Hurghada, Sharm El Sheikh e altro ancora! Nessun pagamento anticipato richiesto, guide che parlano italiano.",
       "keywords": "tour egitto, viaggi egitto, pacchetti vacanza, tour hurghada, sharm el sheikh, mar rosso, tour cairo, tour luxor, immersioni egitto, safari nel deserto"
     },

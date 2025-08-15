@@ -14,7 +14,7 @@ const AdminLayout = ({ children, activeItem = "Dashboard" }) => {
         <AdminTopBar />
 
         {/* Content Area */}
-        <main className="flex-1 p-6 lg:p-8 pt-[calc(68px+1.5rem)] lg:pt-[calc(68px+2rem)]">
+        <main className="flex-1 p-4 lg:p-6 pt-[calc(68px+1rem)] lg:pt-[calc(68px+1.5rem)]">
           {children}
         </main>
       </div>

@@ -1,11 +1,14 @@
+// src/components/admin/AdminTopBar.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { mockAdminUser } from "../../data/adminMockData";
+// import { mockAdminUser } from "../../data/adminMockData";
+import { useAuth } from "../../contexts/AuthContext";
 import logoHorizontal from "../../assets/logo_horizontal.svg";
 import notificationService from "../../services/notificationService";
 
 const AdminTopBar = () => {
   const navigate = useNavigate();
+  const { admin } = useAuth()
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -49,6 +52,25 @@ const AdminTopBar = () => {
     setShowNotifications(!showNotifications);
   };
 
+  // ✅ NEW: Handle individual notification click to navigate and search
+  const handleIndividualNotificationClick = async (notification) => {
+    // Mark as read if unread
+    if (!notification.is_read) {
+      await markAsRead([notification.id]);
+    }
+
+    // Navigate based on notification type
+    if (notification.type === 'review' && notification.related_type === 'tour') {
+      // Navigate to comments tab with search for the tour
+      navigate(`/admin/content?tab=comments&search=${encodeURIComponent(notification.tour_title || '')}`);
+    } else {
+      // Default navigation to content page
+      navigate('/admin/content?tab=comments');
+    }
+
+    setShowNotifications(false);
+  };
+
   const markAsRead = async (notificationIds) => {
     try {
       await notificationService.markAsRead(notificationIds);
@@ -75,45 +97,6 @@ const AdminTopBar = () => {
           />
         </div>
       </div>
-
-      {/* Search Bar */}
-      {/* <div className="flex-1 max-w-[540px] mx-auto">
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <svg
-              className="h-5 w-5 text-[#555A64]"
-              width="17"
-              height="16"
-              viewBox="0 0 17 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M8.16634 14.0002C11.6641 14.0002 14.4997 11.1646 14.4997 7.66683C14.4997 4.16903 11.6641 1.3335 8.16634 1.3335C4.66854 1.3335 1.83301 4.16903 1.83301 7.66683C1.83301 11.1646 4.66854 14.0002 8.16634 14.0002Z"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M15.1663 14.6668L13.833 13.3335"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-          <input
-            type="text"
-            placeholder="Search"
-            className="block w-full h-[44px] pl-12 pr-4 py-2 border-0 rounded-lg text-base placeholder-[#555A64] focus:outline-none focus:ring-0 bg-[#EDEDE8] font-cairo"
-            style={{
-              fontFamily: "Cairo, -apple-system, Roboto, Helvetica, sans-serif",
-            }}
-          />
-        </div>
-      </div> */}
 
       {/* Right Section */}
       <div className="flex items-center gap-6 px-4">
@@ -162,7 +145,7 @@ const AdminTopBar = () => {
             </div>
           </button>
 
-          {/* Notification Dropdown */}
+          {/* ✅ ENHANCED Notification Dropdown */}
           {showNotifications && (
             <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
               <div className="p-4 border-b border-gray-200">
@@ -186,11 +169,7 @@ const AdminTopBar = () => {
                       className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
                         !notification.is_read ? 'bg-blue-50' : ''
                       }`}
-                      onClick={() => {
-                        if (!notification.is_read) {
-                          markAsRead([notification.id]);
-                        }
-                      }}
+                      onClick={() => handleIndividualNotificationClick(notification)}
                     >
                       <div className="flex items-start gap-3">
                         <div className={`w-2 h-2 rounded-full mt-2 ${
@@ -203,6 +182,12 @@ const AdminTopBar = () => {
                           <p className="text-gray-600 text-sm mt-1">
                             {notification.message}
                           </p>
+                          {/* ✅ Show tour context if available */}
+                          {notification.tour_title && (
+                            <p className="text-xs text-blue-600 mt-1">
+                              Tour: {notification.tour_title} ({notification.city_name})
+                            </p>
+                          )}
                           <p className="text-xs text-gray-400 mt-2">
                             {new Date(notification.created_at).toLocaleString()}
                           </p>
@@ -225,21 +210,22 @@ const AdminTopBar = () => {
 
         {/* Admin Profile */}
         <button
-          onClick={handleProfileClick}
-          className="flex items-center gap-2 hover:bg-gray-100 transition-colors rounded-lg p-1"
-        >
-          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-400 to-teal-400 flex items-center justify-center text-white font-semibold">
-            {mockAdminUser.name
-              .split(" ")
-              .map((n) => n[0])
-              .join("")}
-          </div>
-          <div className="text-left">
-            <div className="text-sm font-normal text-[#0B101A] font-roboto">
-              {mockAdminUser.name}
+            onClick={handleProfileClick}
+            className="flex items-center gap-2 hover:bg-gray-100 transition-colors rounded-lg p-1"
+          >
+            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-400 to-teal-400 flex items-center justify-center text-white font-semibold">
+              {/* ✅ Use admin from context instead of mockAdminUser */}
+              {admin?.name 
+                ? admin.name.split(" ").map((n) => n[0]).join("")
+                : "AD"}
             </div>
-          </div>
-        </button>
+            <div className="text-left">
+              <div className="text-sm font-normal text-[#0B101A] font-roboto">
+                {/* ✅ Use admin from context instead of mockAdminUser */}
+                {admin?.name || "Admin"}
+              </div>
+            </div>
+          </button>
       </div>
     </div>
   );

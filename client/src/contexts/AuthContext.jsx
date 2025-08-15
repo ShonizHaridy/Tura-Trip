@@ -1,4 +1,4 @@
-// src/contexts/AuthContext.jsx - CLEAN VERSION
+// src/contexts/AuthContext.jsx - UPDATED VERSION
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import adminService from '../services/adminService';
 
@@ -19,12 +19,12 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     let ignore = false;
-
+    
     const checkAuthStatus = async () => {
       try {
         const token = localStorage.getItem('admin_token');
         const storedAdmin = localStorage.getItem('admin_user');
-
+        
         if (token && storedAdmin) {
           const response = await adminService.verifyToken();
           
@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     checkAuthStatus();
-
+    
     return () => {
       ignore = true;
     };
@@ -87,12 +87,21 @@ export const AuthProvider = ({ children }) => {
     setAdmin(null);
   };
 
+  const updateAdmin = (updatedAdminData) => {
+    console.log('🔄 AuthContext: Updating admin data:', updatedAdminData);
+    setAdmin(updatedAdminData);
+    // ✅ Ensure localStorage is updated
+    localStorage.setItem('admin_user', JSON.stringify(updatedAdminData));
+    console.log('💾 AuthContext: Updated localStorage');
+  };
+
   const value = {
     isAuthenticated,
     admin,
     loading,
     login,
     logout,
+    updateAdmin, // ✅ ADD: Expose updateAdmin function
   };
 
   return (

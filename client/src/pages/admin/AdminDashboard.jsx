@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import DynamicPagination from "../../components/admin/DynamicPagination"; // ✅ Import DynamicPagination
 import adminService from "../../services/adminService";
-import { GlobalRefresh, Category2, TickCircle, Add, SearchNormal1, Filter, Image, Edit2, Trash } from 'iconsax-react'
+import { GlobalRefresh, Category2, TickCircle, Add, SearchNormal1, Filter, Image, Eye, Edit2, Trash } from 'iconsax-react'
 import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
@@ -168,6 +168,28 @@ const AdminDashboard = () => {
     setCurrentPage(1); // ✅ Reset to first page when clearing filters
   };
 
+  const toggleTourStatus = async (tourId, currentStatus) => {
+    try {
+      const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+      const response = await adminService.updateTourStatus(tourId, newStatus);
+      
+      if (response.success) {
+        // ✅ Refresh dashboard data
+        fetchDashboardStats();
+      } else {
+        alert(response.message || "Failed to update tour status");
+      }
+    } catch (error) {
+      console.error('Toggle tour status error:', error);
+      alert("Failed to update tour status");
+    }
+  };
+
+  const handleViewTour = (tourId) => {
+    navigate(`/admin/tours/view/${tourId}`);
+  };
+
+
   const StatCard = ({ title, value, icon, link }) => (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <div className="flex items-center gap-5 p-6">
@@ -203,6 +225,30 @@ const AdminDashboard = () => {
 
   // ✅ Calculate total pages
   const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+
+  const StatusBadge = ({ status, tourId, onClick }) => {
+    const isActive = status === "active";
+    return (
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick(tourId, status);
+        }}
+        className={`flex justify-center items-center rounded-full px-2.5 py-0.5 cursor-pointer transition-colors hover:opacity-80 ${
+          isActive ? "bg-green-100 hover:bg-green-200" : "bg-gray-100 hover:bg-gray-200"
+        }`}
+      >
+        <span
+          className={`text-center text-xs font-normal ${
+            isActive ? "text-green-800" : "text-gray-800"
+          }`}
+        >
+          {isActive ? "Active" : "Inactive"}
+        </span>
+      </button>
+    );
+  };
 
   return (
     <AdminLayout activeItem="Dashboard">
@@ -372,18 +418,21 @@ const AdminDashboard = () => {
                           {tour.price_child} $
                         </td>
                         <td className="px-4 py-4">
-                          <span
-                            className="px-2.5 py-0.5 rounded-lg text-xs"
-                            style={{
-                              backgroundColor: "#D1FAE5",
-                              color: "#065F46",
-                            }}
-                          >
-                            Active
-                          </span>
+                          <StatusBadge 
+                            status={tour.status} 
+                            tourId={tour.id}
+                            onClick={toggleTourStatus}
+                          />
                         </td>
                         <td className="px-4 py-4">
                           <div className="flex items-center gap-4">
+                            <button
+                              onClick={() => handleViewTour(tour.id)}
+                              className="text-gray-400 hover:text-blue-600 transition-colors"
+                              title="View Tour"
+                            >
+                              <Eye size="20" color="currentColor" />
+                            </button>
                             <button 
                               onClick={() => navigate(`/admin/tours/edit/${tour.id}`)}
                               className="p-1"
