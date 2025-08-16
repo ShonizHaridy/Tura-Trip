@@ -33,6 +33,26 @@ const BrowseTours = () => {
     fetchInitialData();
   }, [i18n.language]);
 
+  useEffect(() => {
+  const handleLanguageChange = async () => {
+    // console.log('🌐 Language changed to:', i18n.language, 'View mode:', viewMode);
+    
+    if (viewMode === 'cities') {
+      // In cities view: fetch limited tours per city
+      setLoading(true);
+      await fetchInitialData();
+      setLoading(false);
+    } else if (viewMode === 'tours') {
+      // In tours view: fetch all tours data only
+      setLoadingViewChange(true);
+      await fetchAllToursData();
+      setLoadingViewChange(false);
+    }
+  };
+  
+  handleLanguageChange();
+}, [i18n.language, viewMode]);
+
   const fetchInitialData = async () => {
     try {
       setLoading(true);

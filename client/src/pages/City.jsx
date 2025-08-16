@@ -309,10 +309,10 @@ const handleShowPricing = async () => {
           <div className="flex justify-center items-center">
             <span className="text-sm font-bold text-[#555A64] font-roboto">
                   {/* ✅ FIXED: Use translated name for display */}
-                  {selectedCategory === (t('common.allTrips') || "All Trips") 
-                    ? t('common.allTrips') || "All Trips"  // Always show current translation
-                    : selectedCategory  // For other categories, show as-is
-                  }
+                    {selectedCategory === "All Trips" || selectedCategory === t('common.allTrips')
+                      ? t('common.allTrips') || "All Trips"
+                      : selectedCategory
+                    }
             </span>
           </div>
         </div>
@@ -423,7 +423,10 @@ const handleShowPricing = async () => {
         <div className="flex flex-col gap-5 mb-20">
           <div className="w-full">
             <h2 className="text-4xl md:text-[60px] font-normal text-[#3F62AE] leading-[44px] tracking-[-1.2px] font-['Bebas_Neue']">
-              {selectedCategory.toUpperCase()}
+                {(selectedCategory === "All Trips" || selectedCategory === t('common.allTrips')
+                  ? t('common.allTrips') || "All Trips"
+                  : selectedCategory
+                ).toUpperCase()}
             </h2>
           </div>
           <div className="w-full h-px bg-[#B3B3B3]"></div>
