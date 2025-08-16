@@ -849,10 +849,15 @@ async getBrowseToursData(req, res) {
     const safeLimit = Math.min(parseInt(limit), 100);
     const includeAllTours = include_all_tours === 'true';
 
-    // Determine how many tours to show per city
-    const toursPerCity = includeAllTours ? 50 : 6; // Show up to 50 tours per city if all tours requested
+    // ✅ Fix GROUP_CONCAT limit ONLY when requesting all tours
+    if (includeAllTours) {
+      await pool.execute('SET SESSION group_concat_max_len = 1000000');
+    }
 
-    // Get all active cities with their tours
+    // ✅ Remove artificial tour limit when requesting all tours
+    const toursPerCity = includeAllTours ? 1000 : 6; // Keep 6 for city view, unlimited for all tours
+
+    // Your existing query stays the same...
     const [citiesWithTours] = await pool.execute(`
       SELECT
         c.id as city_id,
@@ -866,7 +871,7 @@ async getBrowseToursData(req, res) {
         MAX(t.price_adult) as max_price,
         AVG(t.price_adult) as avg_price,
         GROUP_CONCAT(
-          DISTINCT CONCAT(
+          CONCAT(
             t.id, '|',
             COALESCE(tc.title, 'Tour'), '|',
             t.price_adult, '|',
@@ -881,7 +886,6 @@ async getBrowseToursData(req, res) {
           )
           ORDER BY 
             CASE WHEN t.featured_tag IS NOT NULL THEN 0 ELSE 1 END,
-            -- t.views DESC
             RAND()
           SEPARATOR ';;'
         ) as tours_data
@@ -937,23 +941,21 @@ async getBrowseToursData(req, res) {
         min_price: parseFloat(city.min_price),
         max_price: parseFloat(city.max_price),
         avg_price: parseFloat(city.avg_price),
-        tours: tours.slice(0, toursPerCity), // Limit tours per city based on request
-        all_tours_count: tours.length,
+        tours: tours.slice(0, toursPerCity), // ✅ This will now be 1000 for "all tours" mode
+        all_tours_count: tours.length, // ✅ Real count of tours
         slug: SlugHelper.generateCitySlug(city.city_id, city.original_name)
       };
     });
 
-    // Process images
+    // Rest of your existing processing code...
     const citiesWithImages = imageHelper.processArrayImages(processedCities, 'city');
     
-    // Process tour images
     citiesWithImages.forEach(city => {
       city.tours = imageHelper.processArrayImages(city.tours, 'tour');
     });
 
-    // Get some statistics
     const totalCities = citiesWithImages.length;
-    const totalTours = citiesWithImages.reduce((sum, city) => sum + city.all_tours_count, 0); // Use all_tours_count for accurate total
+    const totalTours = citiesWithImages.reduce((sum, city) => sum + city.all_tours_count, 0); // ✅ Use real count
     const overallMinPrice = Math.min(...citiesWithImages.map(city => city.min_price));
     const overallMaxPrice = Math.max(...citiesWithImages.map(city => city.max_price));
 

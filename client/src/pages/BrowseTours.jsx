@@ -23,6 +23,8 @@ const BrowseTours = () => {
   const [browseData, setBrowseData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState(location.state?.viewMode || 'cities'); // 'cities' or 'tours'
+  const [allToursLoaded, setAllToursLoaded] = useState(false);
+  const [loadingAllTours, setLoadingAllTours] = useState(false);
 
 const getTranslatedFeaturedLabel = useTranslatedFeaturedLabel();
 
@@ -155,7 +157,7 @@ const getTranslatedFeaturedLabel = useTranslatedFeaturedLabel();
           <div className="flex justify-center">
             <div className="bg-white-secondary rounded-xl p-1 shadow-soft">
               <button
-                onClick={() => setViewMode('cities')}
+                onClick={() => handleViewModeChange('cities')}
                 className={`px-6 lg:px-8 py-3 rounded-lg font-family-primary font-semibold transition-all duration-200 ${
                   viewMode === 'cities'
                     ? 'bg-danim text-white shadow-soft'
@@ -165,7 +167,7 @@ const getTranslatedFeaturedLabel = useTranslatedFeaturedLabel();
                 {t('browseTours.viewByCities') || 'View by Cities'}
               </button>
               <button
-                onClick={() => setViewMode('tours')}
+                onClick={() => handleViewModeChange('tours')}
                 className={`px-6 lg:px-8 py-3 rounded-lg font-family-primary font-semibold transition-all duration-200 ${
                   viewMode === 'tours'
                     ? 'bg-danim text-white shadow-soft'
