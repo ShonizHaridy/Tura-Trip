@@ -350,4 +350,4 @@ const BrowseTours = () => {
   );
 };
 
-export default BrowseTours;yy
+export default BrowseTours;
