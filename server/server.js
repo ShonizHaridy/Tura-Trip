@@ -10,6 +10,7 @@ const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 const morgan = require('morgan');
 const path = require('path');
+const cron = require('node-cron');
 const { testConnection } = require('./config/database');
 const currencyService = require('./services/currencyService');
 require('dotenv').config();
@@ -26,6 +27,9 @@ const publicRoutes = require('./routes/public');
 // Create Express app
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Declare server variable in proper scope
+let server = null;
 
 // =============================================
 // MIDDLEWARE CONFIGURATION
@@ -56,7 +60,7 @@ if (process.env.NODE_ENV !== 'test') {
 // Rate limiting - protect against brute force attacks
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // limit each IP to 100 requests per windowMs // will be limited on production to 100
+  max: 1000, // limit each IP to 1000 requests per windowMs
   message: {
     success: false,
     message: 'Too many requests from this IP, please try again later.'
@@ -64,25 +68,22 @@ const generalLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => {
-    // Skip rate limiting for health checks
     return req.path === '/api/health' || req.path === '/';
   }
 });
 
-// Apply rate limiting to all API routes
 app.use('/api/', generalLimiter);
 
 // Stricter rate limiting for auth endpoints
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 5 login attempts per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: {
     success: false,
     message: 'Too many login attempts, please try again later.'
   },
   standardHeaders: true,
   legacyHeaders: false,
-  // Skip OPTIONS requests (CORS preflight)
   skip: (req) => {
     return req.method === 'OPTIONS';
   }
@@ -97,7 +98,6 @@ const corsOptions = {
       ? ['https://turatrip.com', 'https://api.turatrip.com']
       : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:3001', 'http://127.0.0.1:3000'];
     
-    // Allow requests with no origin (mobile apps, curl, etc.)
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.indexOf(origin) !== -1) {
@@ -109,12 +109,10 @@ const corsOptions = {
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
-
-// Handle preflight requests
 app.options('/{*any}', cors(corsOptions));
 
 // Body parsing middleware
@@ -141,7 +139,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
   }
 }));
 
-// Trust proxy (important for production behind reverse proxy)
 if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
@@ -150,27 +147,20 @@ if (process.env.NODE_ENV === 'production') {
 // API ROUTES
 // =============================================
 
-// Admin authentication and profile routes
 app.use('/api/admin', adminRoutes);
-
-// Admin management routes (protected)
 app.use('/api/admin/tours', tourRoutes);
 app.use('/api/admin/cities', cityRoutes);
 app.use('/api/admin/categories', categoryRoutes);
 app.use('/api/admin/content', contentRoutes);
 app.use('/api/admin/currency', currencyRoutes);
-
-// Public API routes (for frontend)
 app.use('/api/public', publicRoutes);
 
 // =============================================
 // HEALTH CHECK & ROOT ENDPOINTS
 // =============================================
 
-// Health check endpoint
 app.get('/api/health', async (req, res) => {
   try {
-    // Test database connection
     const { pool } = require('./config/database');
     await pool.execute('SELECT 1');
     
@@ -193,7 +183,6 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// Root endpoint
 app.get('/', (req, res) => {
   res.json({
     success: true,
@@ -209,14 +198,12 @@ app.get('/', (req, res) => {
   });
 });
 
-// API documentation endpoint
 app.get('/api', (req, res) => {
   res.json({
     success: true,
     message: 'Tura Trip API Documentation',
     version: '1.0.0',
     endpoints: {
-      // Admin endpoints
       admin: {
         login: 'POST /api/admin/login',
         profile: 'GET /api/admin/profile',
@@ -227,7 +214,6 @@ app.get('/api', (req, res) => {
         content: 'CRUD /api/admin/content/{faqs,reviews}',
         currency: 'CRUD /api/admin/currency'
       },
-      // Public endpoints
       public: {
         homepage: 'GET /api/public/homepage',
         cities: 'GET /api/public/cities/header',
@@ -241,6 +227,54 @@ app.get('/api', (req, res) => {
     }
   });
 });
+
+// =============================================
+// CRON JOBS SETUP
+// =============================================
+
+const setupCronJobs = () => {
+  console.log('⏰ Setting up cron jobs...');
+
+  // Notification cleanup job - runs daily at 2 AM
+  cron.schedule('0 2 * * *', async () => {
+    try {
+      console.log('🧹 Running notification cleanup job...');
+      const { pool } = require('./config/database');
+      
+      // Delete notifications older than 30 days
+      const [result] = await pool.execute(`
+        DELETE FROM notifications 
+        WHERE created_at < DATE_SUB(NOW(), INTERVAL 30 DAY)
+      `);
+      
+      console.log(`✅ Cleaned up ${result.affectedRows} old notifications`);
+    } catch (error) {
+      console.error('❌ Notification cleanup job failed:', error);
+    }
+  });
+
+  // Mark old notifications as read - runs every 6 hours
+  cron.schedule('0 */6 * * *', async () => {
+    try {
+      console.log('📖 Running notification read status update...');
+      const { pool } = require('./config/database');
+      
+      // Mark notifications older than 7 days as read
+      const [result] = await pool.execute(`
+        UPDATE notifications 
+        SET is_read = true 
+        WHERE is_read = false 
+        AND created_at < DATE_SUB(NOW(), INTERVAL 7 DAY)
+      `);
+      
+      console.log(`✅ Marked ${result.affectedRows} old notifications as read`);
+    } catch (error) {
+      console.error('❌ Notification read status job failed:', error);
+    }
+  });
+
+  console.log('✅ Cron jobs setup complete');
+};
 
 // =============================================
 // ERROR HANDLING MIDDLEWARE
@@ -259,7 +293,6 @@ app.use((err, req, res, next) => {
 
 // General error handling middleware
 app.use((error, req, res, next) => {
-  // Log error details
   console.error('Error Details:', {
     message: error.message,
     stack: error.stack,
@@ -271,8 +304,6 @@ app.use((error, req, res, next) => {
   });
   
   // Handle specific error types
-  
-  // Multer file upload errors
   if (error.code === 'LIMIT_FILE_SIZE') {
     return res.status(400).json({
       success: false,
@@ -294,7 +325,6 @@ app.use((error, req, res, next) => {
     });
   }
 
-  // JWT errors
   if (error.name === 'JsonWebTokenError') {
     return res.status(401).json({
       success: false,
@@ -309,7 +339,6 @@ app.use((error, req, res, next) => {
     });
   }
 
-  // Database errors
   if (error.code === 'ER_DUP_ENTRY') {
     return res.status(400).json({
       success: false,
@@ -331,7 +360,17 @@ app.use((error, req, res, next) => {
     });
   }
 
-  // Validation errors
+  if (error.code === 'ER_WRONG_ARGUMENTS' || error.sqlMessage === 'Incorrect arguments to mysqld_stmt_execute') {
+    console.error('❌ SQL Parameter Error:', {
+      sql: error.sql,
+      sqlMessage: error.sqlMessage
+    });
+    return res.status(500).json({
+      success: false,
+      message: 'Database query error. Please try again.'
+    });
+  }
+
   if (error.name === 'ValidationError') {
     return res.status(400).json({
       success: false,
@@ -340,7 +379,6 @@ app.use((error, req, res, next) => {
     });
   }
 
-  // Syntax errors
   if (error instanceof SyntaxError && error.status === 400 && 'body' in error) {
     return res.status(400).json({
       success: false,
@@ -348,7 +386,6 @@ app.use((error, req, res, next) => {
     });
   }
 
-  // Connection errors
   if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
     return res.status(503).json({
       success: false,
@@ -356,7 +393,6 @@ app.use((error, req, res, next) => {
     });
   }
 
-  // Default server error
   const statusCode = error.statusCode || error.status || 500;
   
   res.status(statusCode).json({
@@ -389,37 +425,66 @@ app.use('/*catchall', (req, res) => {
 // =============================================
 // GRACEFUL SHUTDOWN HANDLING
 // =============================================
+// =============================================
+// PM2-COMPATIBLE GRACEFUL SHUTDOWN HANDLING
+// =============================================
 
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully...');
-  server.close(() => {
-    console.log('Process terminated');
-    process.exit(0);
-  });
-});
+let isShuttingDown = false;
 
-process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully...');
-  server.close(() => {
-    console.log('Process terminated');
+const gracefulShutdown = (signal) => {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+
+  console.log(`${signal} received, shutting down gracefully...`);
+  
+  // PM2 gives us 1600ms to shutdown, so we need to be fast
+  const shutdownTimeout = setTimeout(() => {
+    console.log('❌ Shutdown timeout, forcing exit');
+    process.exit(1);
+  }, 1500);
+
+  if (server && server.listening) {
+    server.close((err) => {
+      clearTimeout(shutdownTimeout);
+      if (err) {
+        console.error('❌ Error during server close:', err);
+        process.exit(1);
+      } else {
+        console.log('✅ Server closed successfully');
+        process.exit(0);
+      }
+    });
+  } else {
+    clearTimeout(shutdownTimeout);
+    console.log('✅ No server to close');
     process.exit(0);
-  });
+  }
+};
+
+// PM2 sends SIGINT for graceful shutdown
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+
+// PM2-specific process events
+process.on('message', (msg) => {
+  if (msg === 'shutdown') {
+    gracefulShutdown('PM2_SHUTDOWN');
+  }
 });
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  // Close server & exit process in production
   if (process.env.NODE_ENV === 'production') {
-    server.close(() => {
-      process.exit(1);
-    });
+    gracefulShutdown('UNHANDLED_REJECTION');
   }
 });
 
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
-  process.exit(1);
+  gracefulShutdown('UNCAUGHT_EXCEPTION');
 });
+
+
 
 // =============================================
 // SERVER STARTUP
@@ -439,8 +504,11 @@ const startServer = async () => {
     console.log('💱 Starting currency rate updater...');
     currencyService.startCurrencyUpdater();
     
-    // Start server
-    const server = app.listen(PORT, () => {
+    // Setup cron jobs
+    setupCronJobs();
+    
+    // Start server and assign to global variable
+    server = app.listen(PORT, () => {
       console.log('');
       console.log('✅ SERVER RUNNING SUCCESSFULLY!');
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
